@@ -169,7 +169,7 @@
     <svg class="loader-logo h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" />
     </svg>
-    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg">Loading Time Space...</p>
+    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="loading_analyzer">Loading Time Space...</p>
 </div>
 
 <!-- File Processing Loader -->
@@ -177,7 +177,7 @@
      <svg class="loader-logo h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" />
     </svg>
-    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg">Making magic behind the scenes...</p>
+    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="analyzing">Making magic behind the scenes...</p>
 </div>
 
 <!-- Header -->
@@ -189,15 +189,17 @@
                 <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" role="img" aria-label="Timetable Icon">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" />
                 </svg>
-                <span class="font-bold text-lg sm:text-xl text-slate-900 dark:text-white">Time Space</span>
+                <span class="font-bold text-lg sm:text-xl text-slate-900 dark:text-white" data-translate-key="site_name">Time Space</span>
             </a>
             <!-- Navigation Links & Theme Toggle -->
             <div class="flex items-center space-x-2 sm:space-x-4">
                 <nav class="hidden md:flex items-center space-x-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <a href="#features" class="hover:text-blue-600 transition-colors">Features</a>
-                    <a href="#portfolio" class="hover:text-blue-600 transition-colors">Portfolio</a>
+                    <a href="#features" class="hover:text-blue-600 transition-colors" data-translate-key="nav_features">Features</a>
+                    <a href="#portfolio" class="hover:text-blue-600 transition-colors" data-translate-key="nav_portfolio">Portfolio</a>
                 </nav>
                 <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+                <!-- Language Toggle Button -->
+                <button id="lang-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate font-semibold text-xs"></button>
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate">
                     <svg class="h-5 w-5 block dark:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" role="img" aria-label="Moon Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
@@ -211,10 +213,10 @@
 <main>
     <!-- Hero Section -->
     <section class="text-center py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white" data-translate-key="hero_title">
             Intelligent Time Space Analysis
         </h1>
-        <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400">
+        <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400" data-translate-key="hero_subtitle">
             Automatically extract, organize, and interact with your schedule. Just upload your timetable file to begin.
         </p>
         
@@ -222,11 +224,11 @@
         <div id="timetable-app" class="max-w-4xl mx-auto mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-left">
             <!-- Upload Area -->
             <div id="upload-section" class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col items-center">
-                 <button id="upload-button" class="btn-animate w-full max-w-xs px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                 <button id="upload-button" class="btn-animate w-full max-w-xs px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800" data-translate-key="upload_button">
                     Upload Your Timetable
                 </button>
                 <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="hidden"/>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2" data-translate-key="upload_caption">Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.</p>
                 <div id="status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden w-full" role="alert"></div>
             </div>
             
@@ -234,13 +236,13 @@
             <div id="controls-area" class="hidden">
                  <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                         <label class="text-base font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">✨The Magic Worked — Here’s Your Interactive Schedule!</label>
+                         <label class="text-base font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap" data-translate-key="controls_title">✨The Magic Worked — Here’s Your Interactive Schedule!</label>
                         <div class="flex items-center gap-2">
                              <div class="flex-shrink-0 flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
-                                <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate">Card View</button>
-                                <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate">Table View</button>
+                                <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
+                                <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
                             </div>
-                            <button id="clear-schedule" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900">Clear</button>
+                            <button id="clear-schedule" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900" data-translate-key="clear_button">Clear</button>
                         </div>
                     </div>
                 </div>
@@ -256,10 +258,10 @@
                     </table>
                 </div>
                  <div id="download-options" class="mt-6 flex flex-wrap gap-3 hidden">
-                    <button id="download-pdf" class="btn-animate px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">Download PDF</button>
-                    <button id="download-png" class="btn-animate px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600">Download PNG</button>
-                    <button id="download-csv" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600">Download CSV</button>
-                    <button id="download-xlsx" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600">Download XLSX</button>
+                    <button id="download-pdf" class="btn-animate px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600" data-translate-key="download_pdf">Download PDF</button>
+                    <button id="download-png" class="btn-animate px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600" data-translate-key="download_png">Download PNG</button>
+                    <button id="download-csv" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600" data-translate-key="download_csv">Download CSV</button>
+                    <button id="download-xlsx" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600" data-translate-key="download_xlsx">Download XLSX</button>
                 </div>
             </div>
         </div>
@@ -269,8 +271,8 @@
     <section id="features" class="py-16 sm:py-24 bg-white dark:bg-slate-800">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Powerful Features, Simple Interface</h2>
-                <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">Everything you need to manage your schedule efficiently.</p>
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl" data-translate-key="features_title">Powerful Features, Simple Interface</h2>
+                <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-translate-key="features_subtitle">Everything you need to manage your schedule efficiently.</p>
             </div>
             <div class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="flex items-start space-x-4">
@@ -278,8 +280,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Cloud Upload Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Dynamic Data Extraction</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400">Intelligently analyzes any timetable structure from images, PDFs, CSV, and Excel files.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature1_title">Dynamic Data Extraction</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature1_desc">Intelligently analyzes any timetable structure from images, PDFs, CSV, and Excel files.</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
@@ -287,8 +289,8 @@
                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Edit Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Live Editing</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400">Easily reorder and edit your schedule entries after uploading.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature2_title">Live Editing</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature2_desc">Easily reorder and edit your schedule entries after uploading.</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
@@ -296,8 +298,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Download Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Multiple Export Options</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400">Download your timetable as a PDF, PNG, CSV, or XLSX file.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature3_title">Multiple Export Options</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature3_desc">Download your timetable as a PDF, PNG, CSV, or XLSX file.</p>
                     </div>
                 </div>
             </div>
@@ -307,11 +309,11 @@
     <!-- Portfolio Section -->
     <section id="portfolio" class="py-16 sm:py-24">
         <div class="max-w-3xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Have a Look</h2>
-            <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">Interested in seeing more of my work? Visit my portfolio to explore other projects.</p>
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl" data-translate-key="portfolio_title">Have a Look</h2>
+            <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-translate-key="portfolio_desc">Interested in seeing more of my work? Visit my portfolio to explore other projects.</p>
             <div class="mt-8">
                 <!-- ✏️ EDIT: Change the link to your portfolio -->
-                <a href="https://muhammad-owias.github.io/portfolio/" target="_blank" rel="noopener noreferrer" class="btn-animate inline-block px-8 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <a href="https://muhammad-owias.github.io/portfolio/" target="_blank" rel="noopener noreferrer" class="btn-animate inline-block px-8 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800" data-translate-key="portfolio_button">
                     Check Out What I’ve Built
                 </a>
             </div>
@@ -323,14 +325,14 @@
 <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500 dark:text-slate-400">
         <!-- ✏️ EDIT: Change copyright year/text -->
-        <p>&copy; 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.</p>
+        <p data-translate-key="footer_text">&copy; 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.</p>
     </div>
 </footer>
 
 <!-- 📧 EDIT: Change your email address in the link below -->
 <!-- Floating "Report an Issue" Button -->
 <a id="report-issue-button" 
-   href="https://mail.google.com/mail/?view=cm&fs=1&to=nadeemowias267@gmail.com&su=Issue%20Report:%20AI%20Timetable%20Analyzer&body=Hello,%20I%20encountered%20an%20issue...%0D%0A%0D%0A[Please%20describe%20the%20issue%20and,%20if%20possible,%20attach%20the%20file%20you%20used.]%0D%0A" 
+   href="https://mail.google.com/mail/?view=cm&fs=1&to=professional.OTS@Gmail.com&su=Issue%20Report:%20AI%20Timetable%20Analyzer&body=Hello,%20I%20encountered%20an%20issue...%0D%0A%0D%0A[Please%20describe%20the%20issue%20and,%20if%20possible,%20attach%20the%20file%20you%20used.]%0D%0A" 
    target="_blank" rel="noopener noreferrer"
    class="btn-animate" 
    title="Report an Issue">
@@ -368,16 +370,134 @@
         localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
 
+    // --- LANGUAGE MANAGEMENT ---
+    // ✏️ To add a new language, copy the 'en' block, change the key (e.g., 'fr'), and translate the values.
+    const langToggle = document.getElementById('lang-toggle');
+    const translations = {
+        en: {
+            site_name: "Time Space",
+            nav_features: "Features",
+            nav_portfolio: "Portfolio",
+            hero_title: "Intelligent Time Space Analysis",
+            hero_subtitle: "Automatically extract, organize, and interact with your schedule. Just upload your timetable file to begin.",
+            upload_button: "Upload Your Timetable",
+            upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.",
+            controls_title: "✨The Magic Worked — Here’s Your Interactive Schedule!",
+            card_view: "Card View",
+            table_view: "Table View",
+            clear_button: "Clear",
+            download_pdf: "Download PDF",
+            download_png: "Download PNG",
+            download_csv: "Download CSV",
+            download_xlsx: "Download XLSX",
+            features_title: "Powerful Features, Simple Interface",
+            features_subtitle: "Everything you need to manage your schedule efficiently.",
+            feature1_title: "Dynamic Data Extraction",
+            feature1_desc: "Intelligently analyzes any timetable structure from images, PDFs, CSV, and Excel files.",
+            feature2_title: "Live Editing",
+            feature2_desc: "Easily reorder and edit your schedule entries after uploading.",
+            feature3_title: "Multiple Export Options",
+            feature3_desc: "Download your timetable as a PDF, PNG, CSV, or XLSX file.",
+            portfolio_title: "Have a Look",
+            portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.",
+            portfolio_button: "Check Out What I’ve Built",
+            footer_text: "&copy; 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.",
+            loading_analyzer: "Loading Time Space...",
+            analyzing: "Making magic behind the scenes...",
+            // Dynamic Status Messages
+            welcome_message: "Hey B.B.I.S. Semester 4! 👋 I’m Owais — made this site so everyone can easily check our class timetable. No more searching through PDFs or messages — your schedule’s right here! 📅. Upload a file to see the magic.",
+            default_loaded: "Default schedule loaded. Upload a file to see the magic.",
+            schedule_cleared: "Schedule cleared. Showing default timetable.",
+            file_uploaded: "File uploaded. Processing...",
+            preparing_pdf: "Preparing PDF...",
+            preparing_png: "Preparing PNG...",
+            changes_saved: "Changes saved!",
+        },
+        ur: {
+            site_name: "Time Space",
+            nav_features: "Khususiyat",
+            nav_portfolio: "Portfolio",
+            hero_title: "Aqalmand Time Space ka Tajzia",
+            hero_subtitle: "Apne schedule ko khud bakhud extract, munazzam, aur interact karein. Shuru karne ke liye bas apni timetable file upload karein.",
+            upload_button: "Apna Timetable Upload Karein",
+            upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.",
+            controls_title: "✨ Jadu Chal Gaya — Aapka Interactive Schedule Hazir Hai!",
+            card_view: "Card View",
+            table_view: "Table View",
+            clear_button: "Saaf Karein",
+            download_pdf: "PDF Download Karein",
+            download_png: "PNG Download Karein",
+            download_csv: "CSV Download Karein",
+            download_xlsx: "XLSX Download Karein",
+            features_title: "Zabardast Khususiyat, Asan Interface",
+            features_subtitle: "Apne schedule ko muassar tareeqe se manage karne ke liye har cheez.",
+            feature1_title: "Dynamic Data Nikalna",
+            feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi timetable structure ka aqalmandana tajzia karta hai.",
+            feature2_title: "Live Editing",
+            feature2_desc: "Upload karne ke baad apne schedule entries ko asani se tarteeb dein aur edit karein.",
+            feature3_title: "Kayi Export Options",
+            feature3_desc: "Apna timetable PDF, PNG, CSV, ya XLSX file ke tor par download karein.",
+            portfolio_title: "Mera Kaam Dekhein",
+            portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.",
+            portfolio_button: "Mera Kaam Dekhein",
+            footer_text: "&copy; 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.",
+            loading_analyzer: "Time Space Load ho raha hai...",
+            analyzing: "Parde ke peeche jadu ho raha hai...",
+            // Dynamic Status Messages
+            welcome_message: "Hey B.B.I.S. Semester 4! 👋 Main Owais hun — yeh site banai hai taake hum sab aasani se apni class ka timetable dekh sakein. Ab PDFs ya messages dhundne ki zaroorat nahi — aapka schedule yahin hai! 📅. Jadu dekhne ke liye file upload karein.",
+            default_loaded: "Default schedule load ho gaya. Jadu dekhne ke liye file upload karein.",
+            schedule_cleared: "Schedule saaf ho gaya. Default timetable dikhaya ja raha hai.",
+            file_uploaded: "File upload ho gayi. Processing ho rahi hai...",
+            preparing_pdf: "PDF tayar ho raha hai...",
+            preparing_png: "PNG tayar ho raha hai...",
+            changes_saved: "Tabdiliyan mehfooz ho gayin!",
+        }
+    };
+    let currentLang = 'en';
+
+    function getText(key, lang = currentLang) {
+        return translations[lang][key] || key;
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        langToggle.textContent = lang === 'en' ? 'UR' : 'EN';
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.dataset.translateKey;
+            el.textContent = getText(key);
+        });
+        localStorage.setItem('language', lang);
+    }
+
+    langToggle.addEventListener('click', () => {
+        const newLang = document.documentElement.lang === 'en' ? 'ur' : 'en';
+        setLanguage(newLang);
+    });
+    
     // --- GLOBAL CONSTANTS AND STATE VARIABLES ---
-    const GEMINI_API_KEY = "AIzaSyDjlcBaKGpKs03YoQn-tlZex5F9Wt9tFwQ"; // Placeholder for Gemini API Key
+    const GEMINI_API_KEY = "AIzaSyBX7j31bvSDIZx0p38FNZ0tfWAd3z0Esvs"; // ✏️ IMPORTANT: Replace with your actual Gemini API Key
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     const DAY_CLASSES = {
-        'Monday': 'day-mon', 'Mon': 'day-mon', 'Tuesday': 'day-tue', 'Tue': 'day-tue', 'Wednesday': 'day-wed', 'Wed': 'day-wed',
-        'Thursday': 'day-thu', 'Thu': 'day-thu', 'Friday': 'day-fri', 'Fri': 'day-fri', 'Saturday': 'day-sat', 'Sat': 'day-sat', 'Sunday': 'day-sun', 'Sun': 'day-sun'
+        'Monday': 'day-mon', 'Mon': 'day-mon', 'Peer': 'day-mon', 'Somwar': 'day-mon',
+        'Tuesday': 'day-tue', 'Tue': 'day-tue', 'Mangal': 'day-tue',
+        'Wednesday': 'day-wed', 'Wed': 'day-wed', 'Budh': 'day-wed',
+        'Thursday': 'day-thu', 'Thu': 'day-thu', 'Jumerat': 'day-thu',
+        'Friday': 'day-fri', 'Fri': 'day-fri', 'Juma': 'day-fri',
+        'Saturday': 'day-sat', 'Sat': 'day-sat', 'Hafta': 'day-sat', 'Sanichar': 'day-sat',
+        'Sunday': 'day-sun', 'Sun': 'day-sun', 'Itwar': 'day-sun'
     };
-    const DAY_ORDER = ['Monday', 'Mon', 'Tuesday', 'Tue', 'Wednesday', 'Wed', 'Thursday', 'Thu', 'Friday', 'Fri', 'Saturday', 'Sat', 'Sunday', 'Sun'];
+    const DAY_ORDER = [
+        'Monday', 'Mon', 'Peer', 'Somwar', 
+        'Tuesday', 'Tue', 'Mangal', 
+        'Wednesday', 'Wed', 'Budh',
+        'Thursday', 'Thu', 'Jumerat',
+        'Friday', 'Fri', 'Juma',
+        'Saturday', 'Sat', 'Hafta', 'Sanichar',
+        'Sunday', 'Sun', 'Itwar'
+    ];
 
     const defaultTimetableData = [
         { day: "Monday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Anusha Gilani", room: "SST-101" },
@@ -420,25 +540,29 @@
     viewCard.addEventListener('click', () => switchView('card'));
     viewTable.addEventListener('click', () => switchView('table'));
     clearScheduleBtn.addEventListener('click', clearSchedule);
-    document.getElementById('download-pdf').addEventListener('click', downloadAsPDF);
-    document.getElementById('download-png').addEventListener('click', downloadAsPNG);
+    document.getElementById('download-pdf').addEventListener('click', () => downloadAsPDF());
+    document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
     document.getElementById('download-csv').addEventListener('click', downloadAsCSV);
     document.getElementById('download-xlsx').addEventListener('click', downloadAsXLSX);
 
     // --- INITIALIZATION ---
     window.addEventListener('load', () => {
+        // Set initial language
+        const savedLang = localStorage.getItem('language') || 'en';
+        setLanguage(savedLang);
+        
         // Hide initial loader
         setTimeout(() => pageLoader.classList.add('hidden'), 250);
 
         renderTimetable(timetableData);
         controlsArea.classList.remove('hidden');
         downloadOptions.classList.remove('hidden');
-        showStatus('Hey B.B.I.S. Semester 4! 👋 I’m Owais — made this site so everyone can easily check our class timetable. No more searching through PDFs or messages — your schedule’s right here! 📅. Upload a file to see the magic.', 'success');
+        showStatus('welcome_message', 'success');
     });
 
     // --- CORE FUNCTIONS ---
-    function showStatus(message, type) {
-        statusMessage.textContent = message;
+    function showStatus(messageKey, type) {
+        statusMessage.textContent = getText(messageKey);
         statusMessage.className = `mt-4 p-3 rounded-md text-sm text-center w-full ${type === 'error' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'}`;
         statusMessage.classList.remove('hidden');
     }
@@ -455,7 +579,7 @@
     function getDayIndex(day) { return DAY_ORDER.indexOf(day) === -1 ? Infinity : DAY_ORDER.indexOf(day); }
     
     function findDayColumnKey(headers) {
-        const dayKeywords = ['day', 'weekday', 'jour'];
+        const dayKeywords = ['day', 'weekday', 'jour', 'din'];
         return headers.find(header => dayKeywords.includes(header.toLowerCase())) || '';
     }
 
@@ -464,7 +588,7 @@
         source = 'default';
         fileUpload.value = '';
         renderTimetable(timetableData);
-        showStatus('Schedule cleared. Showing default timetable.', 'success');
+        showStatus('schedule_cleared', 'success');
     }
     
     // --- FILE PARSING AND HANDLING ---
@@ -515,7 +639,7 @@
         if (!allowedTypes.includes(file.type) && !file.name.endsWith('.csv')) return showStatus('Invalid file type! Supported: PDF, PNG, JPG, CSV, XLSX.', 'error');
 
         processingLoader.classList.remove('hidden');
-        showStatus('File uploaded. Processing...', 'success');
+        showStatus('file_uploaded', 'success');
         scheduleContainer.innerHTML = '';
         scheduleTable.querySelector('tbody').innerHTML = '';
         controlsArea.classList.add('hidden');
@@ -536,9 +660,8 @@
             renderTimetable(timetableData);
         } catch (error) {
             console.error('Processing error:', error);
-            showStatus(`Error: ${error.message}. Please check the file format.`, 'error');
+            showStatus(error.message, 'error');
         } finally {
-            // Only hide loader if not handled by Gemini
             if (!['pdf', 'png', 'jpg', 'jpeg'].includes(file.name.split('.').pop().toLowerCase())) {
                  processingLoader.classList.add('hidden');
             }
@@ -546,7 +669,7 @@
     }
 
     async function callGeminiAPI(mimeType, fileData) {
-        const systemPrompt = `Analyze the provided timetable image or document. Identify all distinct columns and their headers. Extract the schedule information into a JSON array of objects. Each object should represent a single row from the timetable. The keys of the objects must be the column headers you identified (e.g., "Time", "Course Name", "Room", etc.). Ensure data is clean and accurately structured. If a row is empty or a header, ignore it.`;
+        const systemPrompt = `Analyze the provided timetable. It may be in English or a Romanized language (like Roman English/Urdu, using words like 'Peer', 'Mangal', 'Juma'). Identify all distinct columns and their headers (e.g., "Time", "Course Name", "Din"). Extract the schedule information into a JSON array of objects, where each object is a row. Use the identified headers as keys. Be accurate. Ignore empty rows or section titles.`;
         const payload = {
             contents: [{ parts: [{ text: "Extract the data from this timetable." }, { inlineData: { mimeType: mimeType, data: fileData } }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -569,7 +692,7 @@
             renderTimetable(timetableData);
         } catch (error) {
             console.error('Gemini API Error:', error);
-            showStatus(`AI analysis failed: ${error.message}`, 'error');
+            showStatus(error.message, 'error');
         } finally {
              processingLoader.classList.add('hidden');
         }
@@ -581,7 +704,7 @@
         downloadOptions.classList.remove('hidden');
         
         if (!data || data.length === 0) {
-            scheduleContainer.innerHTML = '<p class="text-center text-slate-500 p-8">No schedule data to display.</p>';
+            scheduleContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
             scheduleTable.parentElement.classList.add('hidden');
             scheduleContainer.classList.remove('hidden');
             return;
@@ -690,7 +813,7 @@
             });
         });
         timetableData = newData;
-        showStatus('Changes saved!', 'success');
+        showStatus('changes_saved', 'success');
     }
 
     // --- EXPORT AND DOWNLOAD FUNCTIONS ---
@@ -730,7 +853,7 @@
         const { jsPDF } = window.jspdf;
         const element = currentView === 'card' ? scheduleContainer : scheduleTable.parentElement;
         if (!element) return;
-        showStatus('Preparing PDF...', 'success');
+        showStatus('preparing_pdf', 'success');
         try {
             const canvas = await captureFullElement(element);
             const imgData = canvas.toDataURL('image/png');
@@ -740,14 +863,14 @@
             pdf.save('timetable.pdf');
         } catch (error) {
             console.error("PDF Export failed:", error);
-            showStatus('Failed to export PDF. Please try again.', 'error');
+            showStatus(error.message, 'error');
         }
     }
 
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable.parentElement;
         if (!element) return;
-        showStatus('Preparing PNG...', 'success');
+        showStatus('preparing_png', 'success');
         try {
             const canvas = await captureFullElement(element);
             const link = document.createElement('a');
@@ -756,7 +879,7 @@
             link.click();
         } catch (error) {
             console.error("PNG Export failed:", error);
-            showStatus('Failed to export PNG. Please try again.', 'error');
+            showStatus(error.message, 'error');
         }
     }
 
