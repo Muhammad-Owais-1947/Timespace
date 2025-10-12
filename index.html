@@ -747,19 +747,43 @@
     async function downloadAsPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageWidth = doc.internal.pageSize.getWidth();
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const canvas = await html2canvas(element, { 
+            scale: 2, 
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            useCORS: true,
+            logging: true,
+            scrollY: -window.scrollY // Ensure full capture if scrolled
+        });
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = doc.internal.pageSize.getWidth();
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        const imgProps = doc.getImageProperties(imgData);
+        const imgWidth = pageWidth;
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+        let heightLeft = imgHeight;
+        let positionY = 0;
+        doc.addImage(imgData, 'PNG', 0, positionY, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+            doc.addPage();
+            positionY = heightLeft - imgHeight;
+            doc.addImage(imgData, 'PNG', 0, positionY, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
         doc.save('timetable.pdf');
     }
 
     // Download as PNG
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const canvas = await html2canvas(element, { 
+            scale: 2, 
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            useCORS: true,
+            logging: true,
+            scrollY: -window.scrollY
+        });
         const link = document.createElement('a');
         link.download = 'timetable.png';
         link.href = canvas.toDataURL('image/png');
