@@ -164,9 +164,9 @@
         <div id="status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden" role="alert"></div>
     </div>
 
-    <!-- New Section: Upload Default Schedule Image (Hidden by default) -->
+    <!-- Admin Section: Upload Default Schedule Image (Hidden by default) -->
     <div id="default-upload-section" class="px-6 py-6 border-b border-gray-200 dark:border-gray-700 hidden">
-        <label for="default-file-upload" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Image to Set as Default Schedule (Generates Code Snippet)</label>
+        <label for="default-file-upload" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Image/PDF to Set as Default Schedule (Generates Code Snippet and Updates Default)</label>
         <input type="file" id="default-file-upload" accept="image/*,application/pdf" class="w-full text-sm text-gray-500 dark:text-gray-400
             file:mr-4 file:py-2 file:px-4
             file:rounded-md file:border-0
@@ -271,7 +271,7 @@
 
     const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // Default schedule (hardcoded, can only be changed in code)
+    // Default schedule (hardcoded, used only if no saved data in localStorage)
     const defaultTimetableData = [
         { day: "Monday", time: "09:00 AM - 10:30 AM", code: "CS101", name: "Introduction to Computer Science", faculty: "Prof. Alice", room: "Room 101" },
         { day: "Monday", time: "11:00 AM - 12:30 PM", code: "MATH201", name: "Calculus I", faculty: "Prof. Bob", room: "Room 202" },
@@ -284,8 +284,9 @@
         { day: "Sunday", time: "02:00 PM - 03:30 PM", code: "MUS901", name: "Music Theory", faculty: "Prof. Ivy", room: "Room 909" }
     ];
 
+    // Load timetable data from localStorage or use hardcoded default
+    let timetableData = JSON.parse(localStorage.getItem('defaultTimetableData')) || defaultTimetableData.slice();
     let fileData = null;
-    let timetableData = defaultTimetableData.slice(); // Start with default
     let currentView = 'card'; // Default view
 
     const statusMessage = document.getElementById('status-message');
@@ -537,7 +538,7 @@
         }
     }
 
-    // --- New Logic for Default Upload (Generates Code Snippet) ---
+    // --- Logic for Default Upload (Updates Default Timetable and Saves to localStorage) ---
 
     async function handleDefaultFileUpload(event) {
         const file = event.target.files[0];
@@ -554,7 +555,7 @@
             return;
         }
 
-        showDefaultStatus('File uploaded. Processing for default code...', 'success');
+        showDefaultStatus('File uploaded. Processing for default schedule...', 'success');
         defaultCodeSnippet.classList.add('hidden');
         fileData = null;
 
@@ -574,8 +575,8 @@
             console.error('Gemini detailed error:', geminiError);
             try {
                 const data = await fallbackOCR(file, mimeType, true);
-                generateDefaultCode(data);
-                showDefaultStatus('Fallback OCR complete! Code snippet generated below.', 'success');
+                updateDefaultTimetable(data);
+                showDefaultStatus('Fallback OCR complete! Default schedule updated and displayed below.', 'success');
             } catch (ocrError) {
                 console.error('OCR detailed error:', ocrError);
                 showDefaultStatus('Both Gemini and OCR failed. Check console for details.', 'error');
@@ -657,8 +658,8 @@
                 }
 
                 const data = JSON.parse(jsonText);
-                generateDefaultCode(data);
-                showDefaultStatus('Analysis complete! Code snippet generated below. Copy and paste it into defaultTimetableData in the code.', 'success');
+                updateDefaultTimetable(data);
+                showDefaultStatus('Analysis complete! Default schedule updated and displayed below. Code snippet generated for reference.', 'success');
                 return;
             } catch (error) {
                 attempt++;
@@ -672,12 +673,20 @@
         }
     }
 
-    function generateDefaultCode(data) {
+    function updateDefaultTimetable(data) {
         if (!data || data.length === 0) {
-            showDefaultStatus('No data extracted. Cannot generate code.', 'error');
+            showDefaultStatus('No data extracted. Cannot update default schedule.', 'error');
             return;
         }
 
+        // Save to localStorage
+        localStorage.setItem('defaultTimetableData', JSON.stringify(data));
+        
+        // Update timetableData and render
+        timetableData = data;
+        renderTimetable(timetableData);
+
+        // Generate code snippet for reference
         const code = `const defaultTimetableData = ${JSON.stringify(data, null, 4)};`;
         defaultCodeSnippet.textContent = code;
         defaultCodeSnippet.classList.remove('hidden');
