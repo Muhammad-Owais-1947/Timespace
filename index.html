@@ -37,6 +37,10 @@
         .dark .bg-thu { background-color: #164E63; border-left: 4px solid #06B6D4; }
         .bg-fri { background-color: #FAF5FF; border-left: 4px solid #8B5CF6; } /* Violet */
         .dark .bg-fri { background-color: #4C1D95; border-left: 4px solid #8B5CF6; }
+        .bg-sat { background-color: #FFF7ED; border-left: 4px solid #F97316; } /* Orange */
+        .dark .bg-sat { background-color: #431407; border-left: 4px solid #F97316; }
+        .bg-sun { background-color: #FDF4FF; border-left: 4px solid #D946EF; } /* Pink */
+        .dark .bg-sun { background-color: #500724; border-left: 4px solid #D946EF; }
         
         .class-card {
             transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
@@ -95,6 +99,21 @@
         .dark #schedule-table th {
             background-color: #1f2937;
         }
+        /* Row colors for table */
+        #schedule-table tr.bg-mon { background-color: #F0FDF4; }
+        .dark #schedule-table tr.bg-mon { background-color: #052E16; }
+        #schedule-table tr.bg-tue { background-color: #EFF6FF; }
+        .dark #schedule-table tr.bg-tue { background-color: #1E3A8A; }
+        #schedule-table tr.bg-wed { background-color: #FEF2F2; }
+        .dark #schedule-table tr.bg-wed { background-color: #7F1D1D; }
+        #schedule-table tr.bg-thu { background-color: #ECFEFF; }
+        .dark #schedule-table tr.bg-thu { background-color: #164E63; }
+        #schedule-table tr.bg-fri { background-color: #FAF5FF; }
+        .dark #schedule-table tr.bg-fri { background-color: #4C1D95; }
+        #schedule-table tr.bg-sat { background-color: #FFF7ED; }
+        .dark #schedule-table tr.bg-sat { background-color: #431407; }
+        #schedule-table tr.bg-sun { background-color: #FDF4FF; }
+        .dark #schedule-table tr.bg-sun { background-color: #500724; }
     </style>
 </head>
 <body class="p-4 sm:p-6 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -192,7 +211,11 @@
         'Wednesday': 'bg-wed',
         'Thursday': 'bg-thu',
         'Friday': 'bg-fri',
+        'Saturday': 'bg-sat',
+        'Sunday': 'bg-sun'
     };
+
+    const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     let fileData = null;
     let timetableData = []; // Stored for download and editing
@@ -239,6 +262,10 @@
             reader.onerror = error => reject(error);
             reader.readAsDataURL(file);
         });
+    }
+
+    function getDayIndex(day) {
+        return DAY_ORDER.indexOf(day);
     }
 
     // --- Parsing Functions for Tabular Files ---
@@ -385,38 +412,37 @@
         let mimeType = file.type;
 
         try {
+            let data;
             if (['csv'].includes(fileType)) {
-                const data = await parseCSV(file);
+                data = await parseCSV(file);
                 if (data.length === 0) throw new Error('No data found in CSV.');
-                timetableData = data;
                 showStatus('CSV parsed successfully.', 'success');
-                renderTimetable(timetableData);
             } else if (['xlsx'].includes(fileType)) {
-                const data = await parseXLSX(file);
+                data = await parseXLSX(file);
                 if (data.length === 0) throw new Error('No data found in XLSX.');
-                timetableData = data;
                 showStatus('XLSX parsed successfully.', 'success');
-                renderTimetable(timetableData);
             } else if (['pdf', 'png', 'jpg', 'jpeg'].includes(fileType)) {
                 fileData = await fileToBase64(file);
                 showStatus('File converted. Analyzing with Gemini...', 'success');
                 try {
                     await callGeminiAPI(mimeType, fileType);
+                    return; // Since callGeminiAPI sets timetableData and renders
                 } catch (geminiError) {
                     console.error('Gemini detailed error:', geminiError);
                     try {
-                        const data = await fallbackOCR(file, mimeType);
-                        timetableData = data;
+                        data = await fallbackOCR(file, mimeType);
                         showStatus('Fallback OCR complete! Schedule rendered below. Note: Parsing may not be perfect; edit as needed.', 'success');
-                        renderTimetable(timetableData);
                     } catch (ocrError) {
                         console.error('OCR detailed error:', ocrError);
                         showStatus('Both Gemini and OCR failed. Check console for details, ensure API keys are set, and try a different file.', 'error');
+                        return;
                     }
                 }
             } else {
                 throw new Error('Unsupported file type.');
             }
+            timetableData = data;
+            renderTimetable(timetableData);
         } catch (error) {
             console.error("File processing error:", error);
             showStatus(`Error processing file: ${error.message}. Check console for more details.`, 'error');
@@ -530,15 +556,23 @@
             return;
         }
 
+        // Sort timetableData by day order and then by time (assuming time is sortable as string)
+        timetableData.sort((a, b) => {
+            const dayA = getDayIndex(a.day);
+            const dayB = getDayIndex(b.day);
+            if (dayA !== dayB) return dayA - dayB;
+            return a.time.localeCompare(b.time);
+        });
+
         switchView(currentView);
     }
 
-    function renderCardView(data) {
+    function renderCardView() {
         scheduleContainer.innerHTML = '';
         scheduleContainer.classList.remove('hidden');
         scheduleTable.classList.add('hidden');
 
-        const groupedData = data.reduce((acc, item) => {
+        const groupedData = timetableData.reduce((acc, item) => {
             const dayKey = item.day.trim().charAt(0).toUpperCase() + item.day.trim().slice(1).toLowerCase();
             if (!acc[dayKey]) {
                 acc[dayKey] = [];
@@ -547,7 +581,10 @@
             return acc;
         }, {});
 
-        Object.keys(groupedData).sort().forEach((day, index) => {
+        // Sort days according to DAY_ORDER
+        const sortedDays = Object.keys(groupedData).sort((a, b) => getDayIndex(a) - getDayIndex(b));
+
+        sortedDays.forEach((day, index) => {
             const dayClasses = groupedData[day];
             const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
 
@@ -614,14 +651,17 @@
         });
     }
 
-    function renderTableView(data) {
+    function renderTableView() {
         const tbody = scheduleTable.querySelector('tbody');
         tbody.innerHTML = '';
         scheduleTable.classList.remove('hidden');
         scheduleContainer.classList.add('hidden');
 
-        data.forEach((c) => {
+        timetableData.forEach((c) => {
+            const dayKey = c.day.trim().charAt(0).toUpperCase() + c.day.trim().slice(1).toLowerCase();
+            const colorClass = DAY_COLORS[dayKey] || '';
             const row = document.createElement('tr');
+            row.className = colorClass;
             row.innerHTML = `
                 <td>${c.day || 'N/A'}</td>
                 <td>${c.time || 'N/A'}</td>
@@ -637,13 +677,13 @@
     function switchView(view) {
         currentView = view;
         if (view === 'card') {
-            renderCardView(timetableData);
+            renderCardView();
             viewCard.classList.add('bg-blue-600', 'text-white');
             viewCard.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
             viewTable.classList.remove('bg-blue-600', 'text-white');
             viewTable.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
         } else if (view === 'table') {
-            renderTableView(timetableData);
+            renderTableView();
             viewTable.classList.add('bg-blue-600', 'text-white');
             viewTable.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
             viewCard.classList.remove('bg-blue-600', 'text-white');
@@ -669,28 +709,61 @@
                 });
             });
         });
+        // Resort after update
+        timetableData.sort((a, b) => {
+            const dayA = getDayIndex(a.day);
+            const dayB = getDayIndex(b.day);
+            if (dayA !== dayB) return dayA - dayB;
+            return a.time.localeCompare(b.time);
+        });
         showStatus('Changes saved! Feel free to download.', 'success');
-        // Re-render table view if active
-        if (currentView === 'table') {
-            renderTableView(timetableData);
+        // Re-render current view
+        if (currentView === 'card') {
+            renderCardView();
+        } else if (currentView === 'table') {
+            renderTableView();
         }
     }
 
     async function downloadAsPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+        const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const canvas = await html2canvas(element, { 
+            scale: 2, 
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            scrollY: -window.scrollY,
+            windowHeight: element.scrollHeight
+        });
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = doc.internal.pageSize.getWidth();
+        const imgWidth = pageWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
         doc.save('timetable.pdf');
     }
 
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const canvas = await html2canvas(element, { 
+            scale: 2, 
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            scrollY: -window.scrollY,
+            windowHeight: element.scrollHeight
+        });
         const link = document.createElement('a');
         link.download = 'timetable.png';
         link.href = canvas.toDataURL('image/png');
