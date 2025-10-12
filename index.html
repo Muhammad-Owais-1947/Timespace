@@ -276,6 +276,7 @@
     const downloadPng = document.getElementById('download-png');
     const downloadCsv = document.getElementById('download-csv');
     const downloadXlsx = document.getElementById('download-xlsx');
+    const timetableApp = document.getElementById('timetable-app');
 
     // Event listeners
     fileUpload.addEventListener('change', handleFileUpload);
@@ -750,25 +751,31 @@
         const pageHeight = doc.internal.pageSize.getHeight();
         const pageWidth = doc.internal.pageSize.getWidth();
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
+        const originalOverflow = timetableApp.style.overflow;
+        timetableApp.style.overflow = 'visible';
         const canvas = await html2canvas(element, { 
             scale: 2, 
             backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
             useCORS: true,
             logging: true,
-            scrollY: -window.scrollY // Ensure full capture if scrolled
+            scrollX: -window.scrollX,
+            scrollY: -window.scrollY,
+            windowWidth: document.documentElement.offsetWidth,
+            windowHeight: document.documentElement.offsetHeight
         });
+        timetableApp.style.overflow = originalOverflow;
         const imgData = canvas.toDataURL('image/png');
         const imgProps = doc.getImageProperties(imgData);
         const imgWidth = pageWidth;
         const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
         let heightLeft = imgHeight;
-        let positionY = 0;
-        doc.addImage(imgData, 'PNG', 0, positionY, imgWidth, imgHeight);
+        let position = 0;
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
         while (heightLeft > 0) {
+            position = -pageHeight;
             doc.addPage();
-            positionY = heightLeft - imgHeight;
-            doc.addImage(imgData, 'PNG', 0, positionY, imgWidth, imgHeight);
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
         }
         doc.save('timetable.pdf');
@@ -777,13 +784,19 @@
     // Download as PNG
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
+        const originalOverflow = timetableApp.style.overflow;
+        timetableApp.style.overflow = 'visible';
         const canvas = await html2canvas(element, { 
             scale: 2, 
             backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
             useCORS: true,
             logging: true,
-            scrollY: -window.scrollY
+            scrollX: -window.scrollX,
+            scrollY: -window.scrollY,
+            windowWidth: document.documentElement.offsetWidth,
+            windowHeight: document.documentElement.offsetHeight
         });
+        timetableApp.style.overflow = originalOverflow;
         const link = document.createElement('a');
         link.download = 'timetable.png';
         link.href = canvas.toDataURL('image/png');
