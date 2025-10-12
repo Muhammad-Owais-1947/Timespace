@@ -13,6 +13,8 @@
     </script>
     <!-- jsPDF for PDF download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for accurate PDF and PNG downloads -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <!-- PapaParse for CSV -->
     <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
     <!-- SheetJS for XLSX -->
@@ -20,31 +22,32 @@
     <!-- SortableJS for drag-and-drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
         /* Custom styles for color-coded backgrounds based on the day */
-        .bg-mon { background-color: #ECFDF5; border-left: 6px solid #10B981; } /* Green - Light */
-        .dark .bg-mon { background-color: #064E3B; border-left: 6px solid #10B981; } /* Green - Dark */
-        .bg-tue { background-color: #EFF6FF; border-left: 6px solid #3B82F6; } /* Blue */
-        .dark .bg-tue { background-color: #1E3A8A; border-left: 6px solid #3B82F6; }
-        .bg-wed { background-color: #FEF3F2; border-left: 6px solid #EF4444; } /* Red */
-        .dark .bg-wed { background-color: #7F1D1D; border-left: 6px solid #EF4444; }
-        .bg-thu { background-color: #F0F9FF; border-left: 6px solid #06B6D4; } /* Cyan */
-        .dark .bg-thu { background-color: #164E63; border-left: 6px solid #06B6D4; }
-        .bg-fri { background-color: #F5F3FF; border-left: 6px solid #8B5CF6; } /* Violet */
-        .dark .bg-fri { background-color: #4C1D95; border-left: 6px solid #8B5CF6; }
+        .bg-mon { background-color: #F0FDF4; border-left: 4px solid #22C55E; } /* Green - Light */
+        .dark .bg-mon { background-color: #052E16; border-left: 4px solid #22C55E; } /* Green - Dark */
+        .bg-tue { background-color: #EFF6FF; border-left: 4px solid #3B82F6; } /* Blue */
+        .dark .bg-tue { background-color: #1E3A8A; border-left: 4px solid #3B82F6; }
+        .bg-wed { background-color: #FEF2F2; border-left: 4px solid #EF4444; } /* Red */
+        .dark .bg-wed { background-color: #7F1D1D; border-left: 4px solid #EF4444; }
+        .bg-thu { background-color: #ECFEFF; border-left: 4px solid #06B6D4; } /* Cyan */
+        .dark .bg-thu { background-color: #164E63; border-left: 4px solid #06B6D4; }
+        .bg-fri { background-color: #FAF5FF; border-left: 4px solid #8B5CF6; } /* Violet */
+        .dark .bg-fri { background-color: #4C1D95; border-left: 4px solid #8B5CF6; }
         
         .class-card {
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
             cursor: grab;
         }
         .class-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 20px -4px rgba(0, 0, 0, 0.15), 0 6px 8px -4px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .dark .class-card:hover {
-            box-shadow: 0 12px 20px -4px rgba(255, 255, 255, 0.15), 0 6px 8px -4px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
         }
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
@@ -57,50 +60,114 @@
             opacity: 0.8;
             transform: scale(1.05);
         }
+        /* Button animations */
+        .btn-animate {
+            transition: all 0.3s ease;
+        }
+        .btn-animate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-animate:active {
+            transform: scale(0.95);
+        }
+        .dark .btn-animate:hover {
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.15);
+        }
+        /* Table view styles */
+        #schedule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+        #schedule-table th, #schedule-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .dark #schedule-table th, .dark #schedule-table td {
+            border-bottom: 1px solid #374151;
+        }
+        #schedule-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+        }
+        .dark #schedule-table th {
+            background-color: #1f2937;
+        }
     </style>
 </head>
-<body class="p-4 sm:p-6 min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="p-4 sm:p-6 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-<div id="timetable-app" class="max-w-4xl mx-auto">
+<div id="timetable-app" class="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
     <!-- Theme Toggle -->
-    <div class="flex justify-end mb-4">
-        <button id="theme-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out">
+    <div class="flex justify-end p-4 border-b border-gray-200 dark:border-gray-700">
+        <button id="theme-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out btn-animate">
             Toggle Theme
         </button>
     </div>
 
     <!-- Header -->
-    <header class="mb-8 pb-4 border-b border-gray-300 dark:border-gray-600">
-        <h1 class="text-4xl font-extrabold text-gray-800 dark:text-gray-200 text-center animate-pulse">Timetable Analyzer</h1>
-        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download! If Gemini fails, it will fallback to OCR. Check console (F12) for detailed errors.</p>
+    <header class="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 text-center">Timetable Analyzer</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and export in various formats. If Gemini fails, it will fallback to OCR. Check console (F12) for detailed errors.</p>
     </header>
 
     <!-- Upload and Status Area -->
-    <div id="upload-section" class="mb-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
-        <label for="file-upload" class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">1. Upload Timetable File (Max 10MB)</label>
+    <div id="upload-section" class="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
+        <label for="file-upload" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Timetable File (Max 10MB)</label>
         <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="w-full text-sm text-gray-500 dark:text-gray-400
             file:mr-4 file:py-2 file:px-4
-            file:rounded-full file:border-0
-            file:text-sm file:font-semibold
-            file:bg-indigo-50 dark:file:bg-indigo-900 file:text-indigo-700 dark:file:text-indigo-300
-            hover:file:bg-indigo-100 dark:hover:file:bg-indigo-800 transition duration-200">
+            file:rounded-md file:border-0
+            file:text-sm file:font-medium
+            file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300
+            hover:file:bg-blue-100 dark:hover:file:bg-blue-800 transition duration-200">
         
-        <div id="status-message" class="mt-4 p-3 rounded-lg text-sm text-center hidden" role="alert"></div>
+        <div id="status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden" role="alert"></div>
     </div>
 
     <!-- Loading Spinner -->
     <div id="loading-indicator" class="text-center py-10 hidden">
-        <div class="animate-spin inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full" role="status"></div>
-        <p class="text-indigo-600 dark:text-indigo-400 font-medium mt-3 animate-bounce">Analyzing schedule...</p>
+        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" role="status"></div>
+        <p class="text-blue-600 dark:text-blue-400 font-medium mt-3 animate-bounce">Analyzing schedule...</p>
+    </div>
+
+    <!-- Viewing Options -->
+    <div id="view-options" class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 hidden">
+        <label class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Viewing Options</label>
+        <div class="flex space-x-4">
+            <button id="view-card" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 btn-animate">Card View</button>
+            <button id="view-table" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 btn-animate">Table View</button>
+        </div>
     </div>
 
     <!-- Results Area -->
-    <div id="results-area" class="mt-8 space-y-6">
-        <h2 id="results-title" class="text-2xl font-bold text-gray-800 dark:text-gray-200 hidden">2. Your Interactive Schedule</h2>
-        <div id="schedule-container" class="space-y-6">
+    <div id="results-area" class="px-6 py-6">
+        <h2 id="results-title" class="text-2xl font-bold text-gray-800 dark:text-gray-200 hidden mb-4">Your Interactive Schedule</h2>
+        <div id="schedule-container" class="space-y-6 hidden">
             <!-- Rendered timetable cards will go here -->
         </div>
-        <button id="download-pdf" class="hidden mt-6 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:scale-105 transition duration-300 ease-in-out">Download as PDF</button>
+        <table id="schedule-table" class="hidden">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Faculty</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will go here -->
+            </tbody>
+        </table>
+        <div id="download-options" class="mt-6 flex space-x-4 hidden">
+            <button id="download-pdf" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 btn-animate">Download as PDF</button>
+            <button id="download-png" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md shadow-sm hover:bg-green-700 btn-animate">Download as PNG</button>
+            <button id="download-csv" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 btn-animate">Download as CSV</button>
+            <button id="download-xlsx" class="px-6 py-3 bg-purple-600 text-white font-medium rounded-md shadow-sm hover:bg-purple-700 btn-animate">Download as XLSX</button>
+        </div>
     </div>
 </div>
 
@@ -129,21 +196,36 @@
 
     let fileData = null;
     let timetableData = []; // Stored for download and editing
+    let currentView = 'card'; // Default view
 
     const statusMessage = document.getElementById('status-message');
     const loadingIndicator = document.getElementById('loading-indicator');
     const scheduleContainer = document.getElementById('schedule-container');
+    const scheduleTable = document.getElementById('schedule-table');
     const resultsTitle = document.getElementById('results-title');
-    const downloadButton = document.getElementById('download-pdf');
-    downloadButton.addEventListener('click', downloadAsPDF);
+    const viewOptions = document.getElementById('view-options');
+    const downloadOptions = document.getElementById('download-options');
+    const downloadPdf = document.getElementById('download-pdf');
+    const downloadPng = document.getElementById('download-png');
+    const downloadCsv = document.getElementById('download-csv');
+    const downloadXlsx = document.getElementById('download-xlsx');
+    const viewCard = document.getElementById('view-card');
+    const viewTable = document.getElementById('view-table');
     const fileUpload = document.getElementById('file-upload');
+
     fileUpload.addEventListener('change', handleFileUpload);
+    downloadPdf.addEventListener('click', downloadAsPDF);
+    downloadPng.addEventListener('click', downloadAsPNG);
+    downloadCsv.addEventListener('click', downloadAsCSV);
+    downloadXlsx.addEventListener('click', downloadAsXLSX);
+    viewCard.addEventListener('click', () => switchView('card'));
+    viewTable.addEventListener('click', () => switchView('table'));
 
     // --- Utility Functions ---
 
     function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.className = `mt-4 p-3 rounded-lg text-sm text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
+        statusMessage.className = `mt-4 p-3 rounded-md text-sm text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
         statusMessage.classList.remove('hidden');
     }
 
@@ -293,7 +375,9 @@
         showStatus('File uploaded. Processing...', 'success');
         resultsTitle.classList.add('hidden');
         scheduleContainer.innerHTML = '';
-        downloadButton.classList.add('hidden');
+        scheduleTable.querySelector('tbody').innerHTML = '';
+        viewOptions.classList.add('hidden');
+        downloadOptions.classList.add('hidden');
         fileData = null;
         timetableData = [];
 
@@ -437,14 +521,22 @@
     }
 
     function renderTimetable(data) {
-        scheduleContainer.innerHTML = '';
         resultsTitle.classList.remove('hidden');
-        downloadButton.classList.remove('hidden');
+        viewOptions.classList.remove('hidden');
+        downloadOptions.classList.remove('hidden');
 
         if (!data || data.length === 0) {
-            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 bg-white dark:bg-gray-800 rounded-xl fade-in">No schedule data could be extracted. Please check the file quality or customize parsing.</p>';
+            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 rounded-md">No schedule data could be extracted. Please check the file quality or customize parsing.</p>';
             return;
         }
+
+        switchView(currentView);
+    }
+
+    function renderCardView(data) {
+        scheduleContainer.innerHTML = '';
+        scheduleContainer.classList.remove('hidden');
+        scheduleTable.classList.add('hidden');
 
         const groupedData = data.reduce((acc, item) => {
             const dayKey = item.day.trim().charAt(0).toUpperCase() + item.day.trim().slice(1).toLowerCase();
@@ -460,41 +552,41 @@
             const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
 
             const daySection = document.createElement('section');
-            daySection.className = `p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ${colorClass} fade-in`;
+            daySection.className = `p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 ${colorClass} fade-in`;
             daySection.style.animationDelay = `${index * 0.1}s`; // Staggered animation
 
             let htmlContent = `
-                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-300 dark:border-gray-600">${day}</h3>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-300 dark:border-gray-600">${day}</h3>
                 <div class="space-y-4 sortable" id="sortable-${day.replace(/\s/g, '-')}">
             `;
 
             dayClasses.forEach((c, cIndex) => {
                 htmlContent += `
-                    <div class="class-card bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-4 text-sm text-gray-900 dark:text-gray-100" data-index="${cIndex}">
+                    <div class="class-card bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-4 text-sm text-gray-900 dark:text-gray-100" data-index="${cIndex}">
                         <!-- Left Column (Time and Course) -->
                         <div class="border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 sm:pr-4 border-gray-300 dark:border-gray-600">
-                            <p class="text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400 mb-1">Time & Course</p>
-                            <input type="text" class="time-input w-full text-xl font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.time || 'N/A'}" />
-                            <input type="text" class="name-input w-full font-bold text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500 mt-1" value="${c.name || 'N/A'}" />
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.code || 'N/A'}" /></p>
+                            <p class="text-xs font-medium uppercase text-blue-600 dark:text-blue-400 mb-1">Time & Course</p>
+                            <input type="text" class="time-input w-full text-lg font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />
+                            <input type="text" class="name-input w-full font-medium text-base bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-1" value="${c.name || 'N/A'}" />
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>
                         </div>
 
                         <!-- Right Column (Faculty and Room) -->
                         <div class="pt-2 sm:pt-0 sm:pl-4">
-                            <p class="text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400 mb-1">Location & Teacher</p>
+                            <p class="text-xs font-medium uppercase text-blue-600 dark:text-blue-400 mb-1">Location & Teacher</p>
                             <div class="flex justify-between items-center mb-2">
-                                <p class="text-base text-gray-800 dark:text-gray-200 font-semibold flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill mr-1 text-red-500" viewBox="0 0 16 16">
+                                <p class="text-base text-gray-800 dark:text-gray-200 font-medium flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mr-1 text-red-500" viewBox="0 0 16 16">
                                       <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                                     </svg>
-                                    Room: <input type="text" class="room-input ml-1 font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.room || 'N/A'}" />
+                                    Room: <input type="text" class="room-input ml-1 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />
                                 </p>
                             </div>
                             <p class="text-base text-gray-600 dark:text-gray-400 font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill mr-1 text-green-600 inline-block" viewBox="0 0 16 16">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mr-1 text-green-600 inline-block" viewBox="0 0 16 16">
                                   <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                                 </svg>
-                                <input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.faculty || 'N/A'}" />
+                                <input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.faculty || 'N/A'}" />
                             </p>
                         </div>
                     </div>
@@ -522,6 +614,43 @@
         });
     }
 
+    function renderTableView(data) {
+        const tbody = scheduleTable.querySelector('tbody');
+        tbody.innerHTML = '';
+        scheduleTable.classList.remove('hidden');
+        scheduleContainer.classList.add('hidden');
+
+        data.forEach((c) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${c.day || 'N/A'}</td>
+                <td>${c.time || 'N/A'}</td>
+                <td>${c.code || 'N/A'}</td>
+                <td>${c.name || 'N/A'}</td>
+                <td>${c.faculty || 'N/A'}</td>
+                <td>${c.room || 'N/A'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function switchView(view) {
+        currentView = view;
+        if (view === 'card') {
+            renderCardView(timetableData);
+            viewCard.classList.add('bg-blue-600', 'text-white');
+            viewCard.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            viewTable.classList.remove('bg-blue-600', 'text-white');
+            viewTable.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+        } else if (view === 'table') {
+            renderTableView(timetableData);
+            viewTable.classList.add('bg-blue-600', 'text-white');
+            viewTable.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            viewCard.classList.remove('bg-blue-600', 'text-white');
+            viewCard.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+        }
+    }
+
     // Function to update timetableData based on edits/reorders
     function updateTimetableData() {
         timetableData = []; // Rebuild data
@@ -541,35 +670,49 @@
             });
         });
         showStatus('Changes saved! Feel free to download.', 'success');
+        // Re-render table view if active
+        if (currentView === 'table') {
+            renderTableView(timetableData);
+        }
     }
 
-    function downloadAsPDF() {
+    async function downloadAsPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        let y = 10;
-        doc.setFontSize(18);
-        doc.text('Your Timetable', 10, y);
-        y += 15;
-
-        const grouped = timetableData.reduce((acc, item) => {
-            if (!acc[item.day]) acc[item.day] = [];
-            acc[item.day].push(item);
-            return acc;
-        }, {});
-
-        Object.keys(grouped).forEach(day => {
-            doc.setFontSize(14);
-            doc.text(day, 10, y);
-            y += 10;
-            grouped[day].forEach(c => {
-                doc.setFontSize(10);
-                doc.text(`Time: ${c.time} | Code: ${c.code} | Name: ${c.name} | Faculty: ${c.faculty} | Room: ${c.room}`, 15, y);
-                y += 8;
-            });
-            y += 5;
-        });
-
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+        const element = currentView === 'card' ? scheduleContainer : scheduleTable;
+        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = doc.internal.pageSize.getWidth();
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         doc.save('timetable.pdf');
+    }
+
+    async function downloadAsPNG() {
+        const element = currentView === 'card' ? scheduleContainer : scheduleTable;
+        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
+        const link = document.createElement('a');
+        link.download = 'timetable.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function downloadAsCSV() {
+        const csvData = timetableData.map(row => [row.day, row.time, row.code, row.name, row.faculty, row.room]);
+        const csv = Papa.unparse({ data: csvData, fields: ['Day', 'Time', 'Code', 'Name', 'Faculty', 'Room'] });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.download = 'timetable.csv';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    }
+
+    function downloadAsXLSX() {
+        const wb = XLSX.utils.book_new();
+        const wsData = [['Day', 'Time', 'Code', 'Name', 'Faculty', 'Room'], ...timetableData.map(row => [row.day, row.time, row.code, row.name, row.faculty, row.room])];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Timetable');
+        XLSX.writeFile(wb, 'timetable.xlsx');
     }
 </script>
 </body>
