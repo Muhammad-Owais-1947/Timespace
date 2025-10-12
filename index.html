@@ -744,6 +744,34 @@
         switchView(currentView); // Re-render current view
     }
 
+    // Helper function to capture full content by cloning
+    async function captureFullElement(element) {
+        const clone = element.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.left = '-9999px';
+        clone.style.top = '0';
+        clone.style.width = element.offsetWidth + 'px';
+        clone.style.height = '';
+        clone.style.overflow = 'visible';
+        document.body.appendChild(clone);
+
+        // Calculate full height
+        const fullHeight = clone.scrollHeight;
+        clone.style.height = fullHeight + 'px';
+
+        const canvas = await html2canvas(clone, {
+            scale: 2,
+            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
+            useCORS: true,
+            logging: true,
+            width: clone.offsetWidth,
+            height: fullHeight
+        });
+
+        document.body.removeChild(clone);
+        return canvas;
+    }
+
     // Download as PDF
     async function downloadAsPDF() {
         const { jsPDF } = window.jspdf;
@@ -751,31 +779,19 @@
         const pageHeight = doc.internal.pageSize.getHeight();
         const pageWidth = doc.internal.pageSize.getWidth();
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const originalOverflow = timetableApp.style.overflow;
-        timetableApp.style.overflow = 'visible';
-        const canvas = await html2canvas(element, { 
-            scale: 2, 
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            useCORS: true,
-            logging: true,
-            scrollX: -window.scrollX,
-            scrollY: -window.scrollY,
-            windowWidth: document.documentElement.offsetWidth,
-            windowHeight: document.documentElement.offsetHeight
-        });
-        timetableApp.style.overflow = originalOverflow;
+        const canvas = await captureFullElement(element);
         const imgData = canvas.toDataURL('image/png');
         const imgProps = doc.getImageProperties(imgData);
-        const imgWidth = pageWidth;
+        const imgWidth = pageWidth - 20; // Margin
         const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
         let heightLeft = imgHeight;
         let position = 0;
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
         while (heightLeft > 0) {
-            position = -pageHeight;
+            position = heightLeft - imgHeight;
             doc.addPage();
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
         }
         doc.save('timetable.pdf');
@@ -784,19 +800,7 @@
     // Download as PNG
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const originalOverflow = timetableApp.style.overflow;
-        timetableApp.style.overflow = 'visible';
-        const canvas = await html2canvas(element, { 
-            scale: 2, 
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            useCORS: true,
-            logging: true,
-            scrollX: -window.scrollX,
-            scrollY: -window.scrollY,
-            windowWidth: document.documentElement.offsetWidth,
-            windowHeight: document.documentElement.offsetHeight
-        });
-        timetableApp.style.overflow = originalOverflow;
+        const canvas = await captureFullElement(element);
         const link = document.createElement('a');
         link.download = 'timetable.png';
         link.href = canvas.toDataURL('image/png');
