@@ -13,8 +13,8 @@
     </script>
     <!-- jsPDF for PDF download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- html2canvas for accurate PDF and PNG downloads -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- html2canvas-pro for accurate PDF and PNG downloads -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.6/dist/html2canvas.min.js"></script>
     <!-- PapaParse for CSV -->
     <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
     <!-- SheetJS for XLSX -->
@@ -26,33 +26,35 @@
         body {
             font-family: 'Roboto', sans-serif;
         }
-        /* Custom styles for color-coded backgrounds based on the day */
-        .bg-mon { background-color: #F0FDF4; border-left: 4px solid #22C55E; } /* Green - Light */
-        .dark .bg-mon { background-color: #052E16; border-left: 4px solid #22C55E; } /* Green - Dark */
-        .bg-tue { background-color: #EFF6FF; border-left: 4px solid #3B82F6; } /* Blue */
-        .dark .bg-tue { background-color: #1E3A8A; border-left: 4px solid #3B82F6; }
-        .bg-wed { background-color: #FEF2F2; border-left: 4px solid #EF4444; } /* Red */
-        .dark .bg-wed { background-color: #7F1D1D; border-left: 4px solid #EF4444; }
-        .bg-thu { background-color: #ECFEFF; border-left: 4px solid #06B6D4; } /* Cyan */
-        .dark .bg-thu { background-color: #164E63; border-left: 4px solid #06B6D4; }
-        .bg-fri { background-color: #FAF5FF; border-left: 4px solid #8B5CF6; } /* Violet */
-        .dark .bg-fri { background-color: #4C1D95; border-left: 4px solid #8B5CF6; }
-        .bg-sat { background-color: #FFF7ED; border-left: 4px solid #F97316; } /* Orange */
-        .dark .bg-sat { background-color: #431407; border-left: 4px solid #F97316; }
-        .bg-sun { background-color: #FDF4FF; border-left: 4px solid #D946EF; } /* Pink */
-        .dark .bg-sun { background-color: #500724; border-left: 4px solid #D946EF; }
+        /* Custom styles for color-coded backgrounds based on the day - premium feel */
+        .bg-mon { background-color: #F0FDF4; border-left: 4px solid #22C55E; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1); } /* Green - Light */
+        .dark .bg-mon { background-color: #052E16; border-left: 4px solid #22C55E; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2); } /* Green - Dark */
+        .bg-tue { background-color: #EFF6FF; border-left: 4px solid #3B82F6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); } /* Blue */
+        .dark .bg-tue { background-color: #1E3A8A; border-left: 4px solid #3B82F6; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2); }
+        .bg-wed { background-color: #FEF2F2; border-left: 4px solid #EF4444; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1); } /* Red */
+        .dark .bg-wed { background-color: #7F1D1D; border-left: 4px solid #EF4444; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2); }
+        .bg-thu { background-color: #ECFEFF; border-left: 4px solid #06B6D4; box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1); } /* Cyan */
+        .dark .bg-thu { background-color: #164E63; border-left: 4px solid #06B6D4; box-shadow: 0 4px 20px rgba(6, 182, 212, 0.2); }
+        .bg-fri { background-color: #FAF5FF; border-left: 4px solid #8B5CF6; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1); } /* Violet */
+        .dark .bg-fri { background-color: #4C1D95; border-left: 4px solid #8B5CF6; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2); }
+        .bg-sat { background-color: #FFF7ED; border-left: 4px solid #F97316; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1); } /* Orange */
+        .dark .bg-sat { background-color: #431407; border-left: 4px solid #F97316; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.2); }
+        .bg-sun { background-color: #FDF4FF; border-left: 4px solid #D946EF; box-shadow: 0 4px 20px rgba(217, 70, 239, 0.1); } /* Pink */
+        .dark .bg-sun { background-color: #500724; border-left: 4px solid #D946EF; box-shadow: 0 4px 20px rgba(217, 70, 239, 0.2); }
         
         .class-card {
             transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
             cursor: grab;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .class-card:hover {
             transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             background-color: #F9FAFB;
         }
         .dark .class-card:hover {
-            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.04);
             background-color: #4B5563;
         }
         .fade-in {
@@ -69,6 +71,7 @@
         /* Button animations */
         .btn-animate {
             transition: all 0.3s ease;
+            border-radius: 0.75rem;
         }
         .btn-animate:hover {
             transform: scale(1.05);
@@ -134,35 +137,50 @@
             word-break: break-word;
             hyphens: auto;
         }
+        /* Premium header gradient */
+        header {
+            background: linear-gradient(to right, #2563EB, #4F46E5);
+        }
+        /* Mobile responsiveness adjustments */
+        @media (max-width: 640px) {
+            .class-card {
+                grid-template-columns: 1fr;
+            }
+            #download-options {
+                flex-direction: column;
+                space-x-0;
+                space-y-4;
+            }
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-<div id="timetable-app" class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+<div id="timetable-app" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
     <!-- Enhanced Header -->
-    <header class="px-8 py-10 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <h1 class="text-4xl font-bold text-center">AI Timetable Analyzer</h1>
-        <p class="text-base text-center mt-3 opacity-90">Upload your schedule to generate an interactive, color-coded view. Edit, reorder, and export with ease.</p>
+    <header class="px-8 py-12 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <h1 class="text-5xl font-bold text-center tracking-tight">AI Timetable Analyzer</h1>
+        <p class="text-lg text-center mt-4 opacity-90 font-medium">Upload your schedule for a premium, interactive, color-coded experience. Edit, reorder, and export seamlessly.</p>
     </header>
 
     <!-- Theme Toggle -->
     <div class="flex justify-end p-6 border-b border-gray-200 dark:border-gray-700">
-        <button id="theme-toggle" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out btn-animate">
+        <button id="theme-toggle" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl shadow-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out btn-animate font-medium">
             Toggle Theme
         </button>
     </div>
 
     <!-- Upload and Status Area -->
     <div id="upload-section" class="px-8 py-8 border-b border-gray-200 dark:border-gray-700">
-        <label for="file-upload" class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Upload Timetable File (Max 10MB)</label>
+        <label for="file-upload" class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Upload Timetable File (Max 10MB)</label>
         <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="w-full text-base text-gray-500 dark:text-gray-400
-            file:mr-5 file:py-3 file:px-5
-            file:rounded-lg file:border-0
-            file:text-base file:font-medium
+            file:mr-5 file:py-3 file:px-6
+            file:rounded-xl file:border-0
+            file:text-base file:font-semibold
             file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300
-            hover:file:bg-blue-100 dark:hover:file:bg-blue-800 transition duration-200">
+            hover:file:bg-blue-100 dark:hover:file:bg-blue-800 transition duration-200 shadow-md">
         
-        <div id="status-message" class="mt-5 p-4 rounded-lg text-base text-center hidden" role="alert"></div>
+        <div id="status-message" class="mt-5 p-4 rounded-xl text-base text-center hidden" role="alert"></div>
     </div>
 
     <!-- Loading Spinner -->
@@ -173,16 +191,16 @@
 
     <!-- Viewing Options -->
     <div id="view-options" class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 hidden">
-        <label class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Viewing Options</label>
-        <div class="flex space-x-5">
-            <button id="view-card" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 btn-animate">Card View</button>
-            <button id="view-table" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 btn-animate">Table View</button>
+        <label class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Viewing Options</label>
+        <div class="flex space-x-5 sm:space-x-5 flex-wrap space-y-4 sm:space-y-0">
+            <button id="view-card" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 btn-animate font-medium">Card View</button>
+            <button id="view-table" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl shadow-lg hover:bg-gray-300 dark:hover:bg-gray-600 btn-animate font-medium">Table View</button>
         </div>
     </div>
 
     <!-- Results Area -->
     <div id="results-area" class="px-8 py-8 bg-white dark:bg-gray-800">
-        <h2 id="results-title" class="text-3xl font-bold text-gray-800 dark:text-gray-200 hidden mb-6">Your Interactive Schedule</h2>
+        <h2 id="results-title" class="text-4xl font-bold text-gray-800 dark:text-gray-200 hidden mb-8 tracking-tight">Your Interactive Schedule</h2>
         <div id="schedule-container" class="space-y-8 hidden">
             <!-- Rendered timetable cards will go here -->
         </div>
@@ -201,11 +219,11 @@
                 <!-- Table rows will go here -->
             </tbody>
         </table>
-        <div id="download-options" class="mt-8 flex space-x-5 hidden">
-            <button id="download-pdf" class="px-6 py-3.5 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 btn-animate">Download as PDF</button>
-            <button id="download-png" class="px-6 py-3.5 bg-green-600 text-white font-medium rounded-lg shadow-md hover:bg-green-700 btn-animate">Download as PNG</button>
-            <button id="download-csv" class="px-6 py-3.5 bg-indigo-600 text-white font-medium rounded-lg shadow-md hover:bg-indigo-700 btn-animate">Download as CSV</button>
-            <button id="download-xlsx" class="px-6 py-3.5 bg-purple-600 text-white font-medium rounded-lg shadow-md hover:bg-purple-700 btn-animate">Download as XLSX</button>
+        <div id="download-options" class="mt-8 flex space-x-5 sm:space-x-5 flex-wrap space-y-4 sm:space-y-0 hidden">
+            <button id="download-pdf" class="px-6 py-3.5 bg-blue-600 text-white font-medium rounded-xl shadow-lg hover:bg-blue-700 btn-animate">Download as PDF</button>
+            <button id="download-png" class="px-6 py-3.5 bg-green-600 text-white font-medium rounded-xl shadow-lg hover:bg-green-700 btn-animate">Download as PNG</button>
+            <button id="download-csv" class="px-6 py-3.5 bg-indigo-600 text-white font-medium rounded-xl shadow-lg hover:bg-indigo-700 btn-animate">Download as CSV</button>
+            <button id="download-xlsx" class="px-6 py-3.5 bg-purple-600 text-white font-medium rounded-xl shadow-lg hover:bg-purple-700 btn-animate">Download as XLSX</button>
         </div>
     </div>
 
@@ -303,7 +321,7 @@
     // Utility function to show status messages
     function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.className = `mt-5 p-4 rounded-lg text-base text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
+        statusMessage.className = `mt-5 p-4 rounded-xl text-base text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
         statusMessage.classList.remove('hidden');
     }
 
@@ -607,11 +625,11 @@
             const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
 
             const daySection = document.createElement('div');
-            daySection.className = `p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ${colorClass} fade-in mb-6`;
+            daySection.className = `p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 ${colorClass} fade-in mb-8`;
             daySection.style.animationDelay = `${index * 0.1}s`;
 
             let htmlContent = `
-                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-5 pb-3 border-b border-gray-300 dark:border-gray-600">${day}</h3>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6 pb-4 border-b border-gray-300 dark:border-gray-600 tracking-tight">${day}</h3>
                 <div class="space-y-6 sortable" id="sortable-${day.replace(/\s/g, '-')}">
             `;
 
@@ -620,30 +638,30 @@
 
                 if (source === 'default') {
                     // Non-editable for default
-                    timeElement = `<p class="w-full text-xl font-bold">${c.time || 'N/A'}</p>`;
-                    nameElement = `<p class="w-full font-medium text-lg mt-2">${c.name || 'N/A'}</p>`;
+                    timeElement = `<p class="w-full text-2xl font-bold">${c.time || 'N/A'}</p>`;
+                    nameElement = `<p class="w-full font-medium text-xl mt-2">${c.name || 'N/A'}</p>`;
                     codeElement = `<p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: ${c.code || 'N/A'}</p>`;
                     roomElement = `Room: ${c.room || 'N/A'}`;
                     facultyElement = `${c.faculty || 'N/A'}`;
                 } else {
                     // Editable for uploaded
-                    timeElement = `<input type="text" class="time-input w-full text-xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />`;
-                    nameElement = `<input type="text" class="name-input w-full font-medium text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-2" value="${c.name || 'N/A'}" />`;
+                    timeElement = `<input type="text" class="time-input w-full text-2xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />`;
+                    nameElement = `<input type="text" class="name-input w-full font-medium text-xl bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-2" value="${c.name || 'N/A'}" />`;
                     codeElement = `<p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>`;
                     roomElement = `Room: <input type="text" class="room-input ml-2 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />`;
                     facultyElement = `<input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.faculty || 'N/A'}" />`;
                 }
 
                 htmlContent += `
-                    <div class="class-card bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-6 text-base text-gray-900 dark:text-gray-100" data-index="${cIndex}">
+                    <div class="class-card bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-8 text-base text-gray-900 dark:text-gray-100 opacity-100" data-index="${cIndex}">
                         <div class="border-b sm:border-b-0 sm:border-r pb-4 sm:pb-0 sm:pr-6 border-gray-300 dark:border-gray-600">
-                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Time & Course</p>
+                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2 tracking-wide">Time & Course</p>
                             ${timeElement}
                             ${nameElement}
                             ${codeElement}
                         </div>
                         <div class="pt-4 sm:pt-0 sm:pl-6">
-                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Location & Teacher</p>
+                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2 tracking-wide">Location & Teacher</p>
                             <div class="flex justify-between items-center mb-3">
                                 <p class="text-lg text-gray-800 dark:text-gray-200 font-medium flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mr-2 text-red-500" viewBox="0 0 16 16">
@@ -735,7 +753,7 @@
             cards.forEach(card => {
                 timetableData.push({
                     day: day,
-                    time: card.querySelector('.time-input') ? card.querySelector('.time-input').value : card.querySelector('p.text-xl').textContent,
+                    time: card.querySelector('.time-input') ? card.querySelector('.time-input').value : card.querySelector('p.text-2xl').textContent,
                     code: card.querySelector('.code-input') ? card.querySelector('.code-input').value : card.querySelector('p.text-base').textContent.replace('Code: ', ''),
                     name: card.querySelector('.name-input') ? card.querySelector('.name-input').value : card.querySelector('p.font-medium').textContent,
                     faculty: card.querySelector('.faculty-input') ? card.querySelector('.faculty-input').value : card.querySelector('p.text-lg.font-medium').textContent.trim(),
@@ -757,6 +775,8 @@
         clone.style.width = '800px'; // Fixed width to ensure layout
         clone.style.height = '';
         clone.style.overflow = 'visible';
+        clone.style.opacity = '1'; // Ensure full opacity
+        clone.style.backgroundColor = document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff'; // Solid background
         if (document.documentElement.classList.contains('dark')) {
             clone.classList.add('dark');
         }
@@ -772,7 +792,8 @@
             useCORS: true,
             logging: true,
             width: clone.offsetWidth,
-            height: fullHeight
+            height: fullHeight,
+            ignoreElements: (el) => el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' // Ignore inputs if any
         });
 
         document.body.removeChild(clone);
