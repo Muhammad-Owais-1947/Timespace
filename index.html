@@ -1,89 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Timetable Analyzer</title>
-    <!-- Load Tailwind CSS with dark mode config -->
+    <title>AI Timetable Converter</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+    <!-- Firebase Imports for Auth Handling (Required Pattern) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        window.firebaseInit = async function() {
+            try {
+                // Initialize Firebase services using provided global variables
+                const firebaseConfig = typeof _firebase_config !== 'undefined' ? JSON.parse(_firebase_config) : {};
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                // Mandatory sign-in check
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                console.log("Firebase Auth initialized successfully.");
+            } catch (error) {
+                console.error("Firebase Initialization/Auth Error:", error);
+            }
+        };
+        window.firebaseInit();
     </script>
-    <!-- jsPDF for PDF download -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- PapaParse for CSV -->
-    <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
-    <!-- SheetJS for XLSX -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/xlsx.full.min.js"></script>
-    <!-- SortableJS for drag-and-drop -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
         /* Custom styles for color-coded backgrounds based on the day */
-        .bg-mon { background-color: #ECFDF5; border-left: 6px solid #10B981; } /* Green - Light */
-        .dark .bg-mon { background-color: #064E3B; border-left: 6px solid #10B981; } /* Green - Dark */
+        .bg-mon { background-color: #ECFDF5; border-left: 6px solid #10B981; } /* Green */
         .bg-tue { background-color: #EFF6FF; border-left: 6px solid #3B82F6; } /* Blue */
-        .dark .bg-tue { background-color: #1E3A8A; border-left: 6px solid #3B82F6; }
         .bg-wed { background-color: #FEF3F2; border-left: 6px solid #EF4444; } /* Red */
-        .dark .bg-wed { background-color: #7F1D1D; border-left: 6px solid #EF4444; }
         .bg-thu { background-color: #F0F9FF; border-left: 6px solid #06B6D4; } /* Cyan */
-        .dark .bg-thu { background-color: #164E63; border-left: 6px solid #06B6D4; }
         .bg-fri { background-color: #F5F3FF; border-left: 6px solid #8B5CF6; } /* Violet */
-        .dark .bg-fri { background-color: #4C1D95; border-left: 6px solid #8B5CF6; }
         
         .class-card {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            cursor: grab;
+            transition: transform 0.2s;
         }
         .class-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 20px -4px rgba(0, 0, 0, 0.15), 0 6px 8px -4px rgba(0, 0, 0, 0.1);
-        }
-        .dark .class-card:hover {
-            box-shadow: 0 12px 20px -4px rgba(255, 255, 255, 0.15), 0 6px 8px -4px rgba(255, 255, 255, 0.1);
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .sortable-chosen {
-            opacity: 0.8;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
-<body class="p-4 sm:p-6 min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="p-4 sm:p-6 min-h-screen">
 
 <div id="timetable-app" class="max-w-4xl mx-auto">
-    <!-- Theme Toggle -->
-    <div class="flex justify-end mb-4">
-        <button id="theme-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out">
-            Toggle Theme
-        </button>
-    </div>
-
     <!-- Header -->
-    <header class="mb-8 pb-4 border-b border-gray-300 dark:border-gray-600">
-        <h1 class="text-4xl font-extrabold text-gray-800 dark:text-gray-200 text-center animate-pulse">Timetable Analyzer</h1>
-        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download! If Gemini fails, it will fallback to OCR. Check console (F12) for detailed errors.</p>
+    <header class="mb-8 pb-4 border-b border-gray-300">
+        <h1 class="text-4xl font-extrabold text-gray-800 text-center">Timetable Analyzer</h1>
+        <p class="text-md text-gray-500 text-center mt-2">Upload your schedule image to instantly generate a readable, color-coded view.</p>
     </header>
 
     <!-- Upload and Status Area -->
-    <div id="upload-section" class="mb-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
-        <label for="file-upload" class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">1. Upload Timetable File (Max 10MB)</label>
-        <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="w-full text-sm text-gray-500 dark:text-gray-400
+    <div id="upload-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <label for="image-upload" class="block text-lg font-medium text-gray-700 mb-3">1. Upload Timetable Screenshot</label>
+        <input type="file" id="image-upload" accept="image/*" class="w-full text-sm text-gray-500
             file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
             file:text-sm file:font-semibold
-            file:bg-indigo-50 dark:file:bg-indigo-900 file:text-indigo-700 dark:file:text-indigo-300
-            hover:file:bg-indigo-100 dark:hover:file:bg-indigo-800 transition duration-200">
+            file:bg-indigo-50 file:text-indigo-700
+            hover:file:bg-indigo-100"
+            onchange="handleFileUpload(event)">
         
         <div id="status-message" class="mt-4 p-3 rounded-lg text-sm text-center hidden" role="alert"></div>
     </div>
@@ -91,32 +79,22 @@
     <!-- Loading Spinner -->
     <div id="loading-indicator" class="text-center py-10 hidden">
         <div class="animate-spin inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full" role="status"></div>
-        <p class="text-indigo-600 dark:text-indigo-400 font-medium mt-3 animate-bounce">Analyzing schedule...</p>
+        <p class="text-indigo-600 font-medium mt-3">Analyzing schedule image with Gemini...</p>
     </div>
 
     <!-- Results Area -->
     <div id="results-area" class="mt-8 space-y-6">
-        <h2 id="results-title" class="text-2xl font-bold text-gray-800 dark:text-gray-200 hidden">2. Your Interactive Schedule</h2>
+        <h2 id="results-title" class="text-2xl font-bold text-gray-800 hidden">2. Your Color-Coded Schedule</h2>
         <div id="schedule-container" class="space-y-6">
             <!-- Rendered timetable cards will go here -->
         </div>
-        <button id="download-pdf" class="hidden mt-6 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:scale-105 transition duration-300 ease-in-out">Download as PDF</button>
     </div>
 </div>
 
 <script>
-    // Theme Toggle Logic
-    const themeToggle = document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-    });
-
     // --- Global State and Constants ---
-    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your actual Google Gemini API key from https://aistudio.google.com/app/apikey
-    const OCR_API_KEY = 'K87730774188957'; // Free OCR.space key; signup at ocr.space for your own to avoid limits
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
-    const OCR_API_URL = 'https://api.ocr.space/parse/image';
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB constraint
+    const API_KEY = ""; // Placeholder for Canvas environment
+    const API_URL = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY};
     
     // Day-to-color mapping for rendering
     const DAY_COLORS = {
@@ -127,30 +105,36 @@
         'Friday': 'bg-fri',
     };
 
-    let fileData = null;
-    let timetableData = []; // Stored for download and editing
+    let base64Image = null;
 
     const statusMessage = document.getElementById('status-message');
     const loadingIndicator = document.getElementById('loading-indicator');
     const scheduleContainer = document.getElementById('schedule-container');
     const resultsTitle = document.getElementById('results-title');
-    const downloadButton = document.getElementById('download-pdf');
-    downloadButton.addEventListener('click', downloadAsPDF);
-    const fileUpload = document.getElementById('file-upload');
-    fileUpload.addEventListener('change', handleFileUpload);
 
     // --- Utility Functions ---
 
+    /**
+     * Shows a status message (success/error).
+     * @param {string} message The message to display.
+     * @param {string} type 'success' or 'error'.
+     */
     function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.className = `mt-4 p-3 rounded-lg text-sm text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
+        statusMessage.className = mt-4 p-3 rounded-lg text-sm text-center ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'};
         statusMessage.classList.remove('hidden');
     }
 
+    /**
+     * Converts a File object to a Base64 data URL string.
+     * @param {File} file The file to read.
+     * @returns {Promise<string>} Base64 data string (excluding the mime type prefix).
+     */
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
+                // Remove the 'data:image/jpeg;base64,' prefix
                 const base64String = reader.result.split(',')[1];
                 resolve(base64String);
             };
@@ -159,228 +143,73 @@
         });
     }
 
-    // --- Parsing Functions for Tabular Files ---
-
-    function parseCSV(file) {
-        return new Promise((resolve, reject) => {
-            Papa.parse(file, {
-                complete: (results) => {
-                    if (results.errors.length) reject(results.errors[0]);
-                    const data = results.data
-                        .filter(row => row.length >= 6)
-                        .map(row => ({
-                            day: row[0].trim(),
-                            time: row[1].trim(),
-                            code: row[2].trim(),
-                            name: row[3].trim(),
-                            faculty: row[4].trim() || 'N/A',
-                            room: row[5].trim()
-                        }));
-                    resolve(data);
-                },
-                error: reject,
-                skipEmptyLines: true
-            });
-        });
-    }
-
-    function parseXLSX(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const workbook = XLSX.read(e.target.result, { type: 'binary' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                    const data = rawData
-                        .filter(row => row.length >= 6)
-                        .map(row => ({
-                            day: (row[0] || '').toString().trim(),
-                            time: (row[1] || '').toString().trim(),
-                            code: (row[2] || '').toString().trim(),
-                            name: (row[3] || '').toString().trim(),
-                            faculty: (row[4] || 'N/A').toString().trim(),
-                            room: (row[5] || '').toString().trim()
-                        }));
-                    resolve(data);
-                } catch (err) {
-                    reject(err);
-                }
-            };
-            reader.onerror = reject;
-            reader.readAsBinaryString(file);
-        });
-    }
-
-    // --- Fallback OCR Parsing ---
-
-    async function fallbackOCR(file, mimeType) {
-        showStatus('Gemini failed. Trying fallback OCR...', 'success');
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('language', 'eng');
-        formData.append('isTable', 'true');
-        formData.append('OCREngine', '2');
-
-        try {
-            const response = await fetch(OCR_API_URL, {
-                method: 'POST',
-                headers: { 'apikey': OCR_API_KEY },
-                body: formData
-            });
-
-            const result = await response.json();
-            console.log('OCR Response:', result);
-            if (result.IsErroredOnProcessing) {
-                throw new Error(result.ErrorMessage || 'OCR error');
-            }
-
-            let text = '';
-            result.ParsedResults.forEach(pr => { text += pr.ParsedText + '\n'; });
-
-            // Basic parsing of OCR text into structured data
-            const data = parseOCRTextToData(text);
-            if (data.length === 0) throw new Error('No data extracted from OCR.');
-            return data;
-        } catch (error) {
-            console.error('OCR Error:', error);
-            throw error;
-        }
-    }
-
-    function parseOCRTextToData(text) {
-        const data = [];
-        const lines = text.split(/\r?\n/);
-        for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
-            // Assume format: Day Time Code Name Faculty Room (customize regex as needed for your timetables)
-            const match = line.match(/(\w+) ([\d: -]+[AP]M?) (\w+) ([\w\s]+) ([\w\s]+) ([\w-]+)/i);
-            if (match) {
-                data.push({
-                    day: match[1],
-                    time: match[2],
-                    code: match[3],
-                    name: match[4],
-                    faculty: match[5] || 'N/A',
-                    room: match[6]
-                });
-            }
-        }
-        return data;
-    }
-
     // --- Core Application Logic ---
 
+    /**
+     * Handles file selection, converts to Base64, and initiates API call.
+     */
     async function handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Constraint: File size limit
-        if (file.size > MAX_FILE_SIZE) {
-            showStatus('File too large! Max size is 10MB.', 'error');
-            return;
-        }
-
-        // Constraint: Validate file type
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        if (!allowedTypes.includes(file.type)) {
-            showStatus('Invalid file type! Supported: PDF, PNG, JPG, CSV, XLSX.', 'error');
-            return;
-        }
-
-        showStatus('File uploaded. Processing...', 'success');
+        showStatus('File uploaded. Converting image for AI analysis...', 'success');
         resultsTitle.classList.add('hidden');
         scheduleContainer.innerHTML = '';
-        downloadButton.classList.add('hidden');
-        fileData = null;
-        timetableData = [];
-
-        const fileType = file.name.split('.').pop().toLowerCase();
-        let mimeType = file.type;
+        base64Image = null;
 
         try {
-            if (['csv'].includes(fileType)) {
-                const data = await parseCSV(file);
-                if (data.length === 0) throw new Error('No data found in CSV.');
-                timetableData = data;
-                showStatus('CSV parsed successfully.', 'success');
-                renderTimetable(timetableData);
-            } else if (['xlsx'].includes(fileType)) {
-                const data = await parseXLSX(file);
-                if (data.length === 0) throw new Error('No data found in XLSX.');
-                timetableData = data;
-                showStatus('XLSX parsed successfully.', 'success');
-                renderTimetable(timetableData);
-            } else if (['pdf', 'png', 'jpg', 'jpeg'].includes(fileType)) {
-                fileData = await fileToBase64(file);
-                showStatus('File converted. Analyzing with Gemini...', 'success');
-                try {
-                    await callGeminiAPI(mimeType, fileType);
-                } catch (geminiError) {
-                    console.error('Gemini detailed error:', geminiError);
-                    try {
-                        const data = await fallbackOCR(file, mimeType);
-                        timetableData = data;
-                        showStatus('Fallback OCR complete! Schedule rendered below. Note: Parsing may not be perfect; edit as needed.', 'success');
-                        renderTimetable(timetableData);
-                    } catch (ocrError) {
-                        console.error('OCR detailed error:', ocrError);
-                        showStatus('Both Gemini and OCR failed. Check console for details, ensure API keys are set, and try a different file.', 'error');
-                    }
-                }
-            } else {
-                throw new Error('Unsupported file type.');
-            }
+            base64Image = await fileToBase64(file);
+            showStatus('Image converted. Analyzing timetable...', 'success');
+            await callGeminiAPI(file.type);
         } catch (error) {
-            console.error("File processing error:", error);
-            showStatus(`Error processing file: ${error.message}. Check console for more details.`, 'error');
+            console.error("File upload or conversion error:", error);
+            showStatus(Error processing file: ${error.message}, 'error');
             loadingIndicator.classList.add('hidden');
         }
     }
 
-    async function callGeminiAPI(mimeType, fileType) {
-        if (!fileData) {
-            return showStatus('No file data found.', 'error');
+    /**
+     * Calls the Gemini API to analyze the image and return structured JSON.
+     * @param {string} mimeType The MIME type of the uploaded image (e.g., 'image/jpeg').
+     */
+    async function callGeminiAPI(mimeType) {
+        if (!base64Image) {
+            return showStatus('No image data found.', 'error');
         }
 
         loadingIndicator.classList.remove('hidden');
         statusMessage.classList.add('hidden');
 
-        if (fileType === 'pdf') {
-            mimeType = 'application/pdf';
-        }
-
+        // Define the desired JSON output structure (schema)
         const responseSchema = {
             type: "ARRAY",
-            description: "An array of class objects extracted from the timetable.",
+            description: "An array of class objects extracted from the timetable image.",
             items: {
                 type: "OBJECT",
                 properties: {
-                    day: { type: "STRING", description: "The day of the week (e.g., Monday, Tuesday)." },
-                    time: { type: "STRING", description: "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
-                    code: { type: "STRING", description: "The course code (e.g., IS230)." },
-                    name: { type: "STRING", description: "The full course name." },
-                    faculty: { type: "STRING", description: "The instructor's name. Use 'N/A' if missing." },
-                    room: { type: "STRING", description: "The room number (e.g., SST1-101)." }
+                    "day": { "type": "STRING", "description": "The day of the week (e.g., Monday, Tuesday)." },
+                    "time": { "type": "STRING", "description": "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
+                    "code": { "type": "STRING", "description": "The course code (e.g., IS230)." },
+                    "name": { "type": "STRING", "description": "The full course name." },
+                    "faculty": { "type": "STRING", "description": "The instructor's name. Use 'N/A' if missing." },
+                    "room": { "type": "STRING", "description": "The room number (e.g., SST1-101)." }
                 },
                 required: ["day", "time", "code", "name", "faculty", "room"]
             }
         };
 
-        const systemPrompt = "You are a timetable data extractor. Your task is to accurately extract the course schedule from the provided file. Consolidate the Start Time and End Time into a single 'time' string. Return the output as a JSON array strictly following the provided schema. Do not include any explanatory text or markdown outside of the JSON object.";
+        const systemPrompt = "You are a timetable data extractor. Your task is to accurately extract the course schedule from the provided image. Consolidate the Start Time and End Time into a single 'time' string. Return the output as a JSON array strictly following the provided schema. Do not include any explanatory text or markdown outside of the JSON object.";
         
         const payload = {
             contents: [
                 {
                     role: "user",
                     parts: [
-                        { text: "Analyze this file and extract the academic timetable data. Ensure the time format is consistent and includes AM/PM if applicable." },
+                        { text: "Analyze this image and extract the academic timetable data. Ensure the time format is consistent and includes AM/PM." },
                         {
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: fileData
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Image
                             }
                         }
                     ]
@@ -398,56 +227,58 @@
 
         while (attempt < maxRetries) {
             try {
-                const response = await fetch(GEMINI_API_URL, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.log('Gemini API Error Response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    throw new Error(HTTP error! status: ${response.status});
                 }
 
                 const result = await response.json();
-                console.log('Gemini Response:', result);
                 
                 const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!jsonText) {
                     throw new Error("API returned no content.");
                 }
 
-                timetableData = JSON.parse(jsonText);
+                const timetableData = JSON.parse(jsonText);
                 loadingIndicator.classList.add('hidden');
                 showStatus('Analysis complete! Schedule rendered below.', 'success');
                 renderTimetable(timetableData);
-                return;
+                return; // Success, exit the loop
             } catch (error) {
                 attempt++;
                 if (attempt >= maxRetries) {
+                    console.error("Gemini API call failed after multiple retries:", error);
                     loadingIndicator.classList.add('hidden');
-                    throw error; // Let fallback handle it
+                    return showStatus('Failed to analyze the timetable. Please ensure the image is clear and try again.', 'error');
                 }
-                const delay = Math.pow(2, attempt) * 1000;
-                console.warn(`Attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
+                const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+                console.warn(Attempt ${attempt} failed. Retrying in ${delay / 1000}s...);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
     }
 
+    /**
+     * Renders the structured timetable data into the color-coded card layout.
+     * @param {Array<Object>} data The parsed JSON timetable data.
+     */
     function renderTimetable(data) {
         scheduleContainer.innerHTML = '';
         resultsTitle.classList.remove('hidden');
-        downloadButton.classList.remove('hidden');
 
         if (!data || data.length === 0) {
-            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 bg-white dark:bg-gray-800 rounded-xl fade-in">No schedule data could be extracted. Please check the file quality or customize parsing.</p>';
+            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 p-6 bg-white rounded-xl">No schedule data could be extracted. Please check the image quality.</p>';
             return;
         }
 
+        // Group the data by day and ensure consistent case for colors
         const groupedData = data.reduce((acc, item) => {
-            const dayKey = item.day.trim().charAt(0).toUpperCase() + item.day.trim().slice(1).toLowerCase();
+            const dayKey = item.day.trim();
             if (!acc[dayKey]) {
                 acc[dayKey] = [];
             }
@@ -455,121 +286,55 @@
             return acc;
         }, {});
 
-        Object.keys(groupedData).sort().forEach((day, index) => {
+        Object.keys(groupedData).forEach(day => {
             const dayClasses = groupedData[day];
-            const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
+            const colorClass = DAY_COLORS[day] || 'bg-gray-100 border-left: 6px solid #9CA3AF;'; // Default color
 
             const daySection = document.createElement('section');
-            daySection.className = `p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ${colorClass} fade-in`;
-            daySection.style.animationDelay = `${index * 0.1}s`; // Staggered animation
+            daySection.className = p-4 rounded-xl shadow-md border border-gray-200 ${colorClass};
 
             let htmlContent = `
-                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-300 dark:border-gray-600">${day}</h3>
-                <div class="space-y-4 sortable" id="sortable-${day.replace(/\s/g, '-')}">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">${day}</h3>
+                <div class="space-y-4">
             `;
 
-            dayClasses.forEach((c, cIndex) => {
+            dayClasses.forEach(c => {
                 htmlContent += `
-                    <div class="class-card bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-4 text-sm text-gray-900 dark:text-gray-100" data-index="${cIndex}">
+                    <div class="class-card bg-white p-4 rounded-lg shadow-sm border border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-x-4 text-sm">
                         <!-- Left Column (Time and Course) -->
-                        <div class="border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 sm:pr-4 border-gray-300 dark:border-gray-600">
-                            <p class="text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400 mb-1">Time & Course</p>
-                            <input type="text" class="time-input w-full text-xl font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.time || 'N/A'}" />
-                            <input type="text" class="name-input w-full font-bold text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500 mt-1" value="${c.name || 'N/A'}" />
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.code || 'N/A'}" /></p>
+                        <div class="border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 sm:pr-4">
+                            <p class="text-xs font-semibold uppercase text-indigo-600 mb-1">Time & Course</p>
+                            <p class="text-xl font-extrabold text-gray-900">${c.time}</p>
+                            <p class="font-bold text-lg text-gray-700 mt-1">${c.name}</p>
+                            <p class="text-sm text-gray-500">Code: ${c.code}</p>
                         </div>
 
                         <!-- Right Column (Faculty and Room) -->
                         <div class="pt-2 sm:pt-0 sm:pl-4">
-                            <p class="text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400 mb-1">Location & Teacher</p>
+                            <p class="text-xs font-semibold uppercase text-indigo-600 mb-1">Location & Teacher</p>
                             <div class="flex justify-between items-center mb-2">
-                                <p class="text-base text-gray-800 dark:text-gray-200 font-semibold flex items-center">
+                                <p class="text-base text-gray-800 font-semibold flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill mr-1 text-red-500" viewBox="0 0 16 16">
                                       <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                                     </svg>
-                                    Room: <input type="text" class="room-input ml-1 font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.room || 'N/A'}" />
+                                    Room: <span class="ml-1 font-extrabold">${c.room}</span>
                                 </p>
                             </div>
-                            <p class="text-base text-gray-600 dark:text-gray-400 font-medium">
+                            <p class="text-base text-gray-600 font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill mr-1 text-green-600 inline-block" viewBox="0 0 16 16">
                                   <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                                 </svg>
-                                <input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.faculty || 'N/A'}" />
+                                ${c.faculty || 'N/A'}
                             </p>
                         </div>
                     </div>
                 `;
             });
 
-            htmlContent += `</div>`;
+            htmlContent += </div>; // Close space-y-4
             daySection.innerHTML = htmlContent;
             scheduleContainer.appendChild(daySection);
-
-            // Make cards sortable (drag-and-drop)
-            const sortableContainer = daySection.querySelector('.sortable');
-            Sortable.create(sortableContainer, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                chosenClass: 'sortable-chosen',
-                onEnd: updateTimetableData // Update data on reorder
-            });
-
-            // Add edit listeners
-            const inputs = daySection.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('change', updateTimetableData);
-            });
         });
-    }
-
-    // Function to update timetableData based on edits/reorders
-    function updateTimetableData() {
-        timetableData = []; // Rebuild data
-        const daySections = scheduleContainer.querySelectorAll('section');
-        daySections.forEach(section => {
-            const day = section.querySelector('h3').textContent;
-            const cards = section.querySelectorAll('.class-card');
-            cards.forEach(card => {
-                timetableData.push({
-                    day: day,
-                    time: card.querySelector('.time-input').value,
-                    code: card.querySelector('.code-input').value,
-                    name: card.querySelector('.name-input').value,
-                    faculty: card.querySelector('.faculty-input').value,
-                    room: card.querySelector('.room-input').value
-                });
-            });
-        });
-        showStatus('Changes saved! Feel free to download.', 'success');
-    }
-
-    function downloadAsPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        let y = 10;
-        doc.setFontSize(18);
-        doc.text('Your Timetable', 10, y);
-        y += 15;
-
-        const grouped = timetableData.reduce((acc, item) => {
-            if (!acc[item.day]) acc[item.day] = [];
-            acc[item.day].push(item);
-            return acc;
-        }, {});
-
-        Object.keys(grouped).forEach(day => {
-            doc.setFontSize(14);
-            doc.text(day, 10, y);
-            y += 10;
-            grouped[day].forEach(c => {
-                doc.setFontSize(10);
-                doc.text(`Time: ${c.time} | Code: ${c.code} | Name: ${c.name} | Faculty: ${c.faculty} | Room: ${c.room}`, 15, y);
-                y += 8;
-            });
-            y += 5;
-        });
-
-        doc.save('timetable.pdf');
     }
 </script>
 </body>
