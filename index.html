@@ -47,13 +47,13 @@
             cursor: grab;
         }
         .class-card:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #F3F4F6;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background-color: #F9FAFB;
         }
         .dark .class-card:hover {
-            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
-            background-color: #374151;
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.15);
+            background-color: #4B5563;
         }
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
@@ -87,7 +87,7 @@
             border-spacing: 0 0.5rem;
         }
         #schedule-table th, #schedule-table td {
-            padding: 1rem;
+            padding: 1.25rem;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
             font-weight: 500;
@@ -132,70 +132,54 @@
         }
     </style>
 </head>
-<body class="p-4 sm:p-6 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="p-4 sm:p-8 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-<div id="timetable-app" class="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+<div id="timetable-app" class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
     <!-- Enhanced Header -->
-    <header class="px-6 py-8 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-        <h1 class="text-3xl font-bold text-center">AI Timetable Analyzer</h1>
-        <p class="text-sm text-center mt-2 opacity-90">Upload your schedule to generate an interactive, color-coded timetable. Edit, reorder, and export easily.</p>
+    <header class="px-8 py-10 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <h1 class="text-4xl font-bold text-center">AI Timetable Analyzer</h1>
+        <p class="text-base text-center mt-3 opacity-90">Upload your schedule to generate an interactive, color-coded view. Edit, reorder, and export with ease.</p>
     </header>
 
-    <!-- Theme Toggle and Admin Button -->
-    <div class="flex justify-end p-4 border-b border-gray-200 dark:border-gray-700 space-x-4">
-        <button id="admin-toggle" class="px-4 py-2 bg-red-200 dark:bg-red-700 text-red-800 dark:text-red-200 rounded-md shadow-sm hover:bg-red-300 dark:hover:bg-red-600 transition duration-300 ease-in-out btn-animate">
-            Enter Admin Mode
-        </button>
-        <button id="theme-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out btn-animate">
+    <!-- Theme Toggle -->
+    <div class="flex justify-end p-6 border-b border-gray-200 dark:border-gray-700">
+        <button id="theme-toggle" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 ease-in-out btn-animate">
             Toggle Theme
         </button>
     </div>
 
     <!-- Upload and Status Area -->
-    <div id="upload-section" class="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
-        <label for="file-upload" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Timetable File (Max 10MB)</label>
-        <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="w-full text-sm text-gray-500 dark:text-gray-400
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-medium
+    <div id="upload-section" class="px-8 py-8 border-b border-gray-200 dark:border-gray-700">
+        <label for="file-upload" class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Upload Timetable File (Max 10MB)</label>
+        <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="w-full text-base text-gray-500 dark:text-gray-400
+            file:mr-5 file:py-3 file:px-5
+            file:rounded-lg file:border-0
+            file:text-base file:font-medium
             file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300
             hover:file:bg-blue-100 dark:hover:file:bg-blue-800 transition duration-200">
         
-        <div id="status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden" role="alert"></div>
-    </div>
-
-    <!-- Admin Section: Upload Default Schedule Image (Hidden by default) -->
-    <div id="default-upload-section" class="px-6 py-6 border-b border-gray-200 dark:border-gray-700 hidden">
-        <label for="default-file-upload" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Image/PDF to Set as Default Schedule (Generates Code Snippet and Updates Default)</label>
-        <input type="file" id="default-file-upload" accept="image/*,application/pdf" class="w-full text-sm text-gray-500 dark:text-gray-400
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-medium
-            file:bg-green-50 dark:file:bg-green-900 file:text-green-700 dark:file:text-green-300
-            hover:file:bg-green-100 dark:hover:file:bg-green-800 transition duration-200">
-        <div id="default-status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden" role="alert"></div>
-        <pre id="default-code-snippet" class="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-md overflow-auto hidden"></pre>
+        <div id="status-message" class="mt-5 p-4 rounded-lg text-base text-center hidden" role="alert"></div>
     </div>
 
     <!-- Loading Spinner -->
-    <div id="loading-indicator" class="text-center py-10 hidden">
-        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" role="status"></div>
-        <p class="text-blue-600 dark:text-blue-400 font-medium mt-3 animate-bounce">Analyzing schedule...</p>
+    <div id="loading-indicator" class="text-center py-12 hidden">
+        <div class="animate-spin inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full" role="status"></div>
+        <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 animate-bounce">Analyzing schedule...</p>
     </div>
 
     <!-- Viewing Options -->
-    <div id="view-options" class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 hidden">
-        <label class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Viewing Options</label>
-        <div class="flex space-x-4">
-            <button id="view-card" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 btn-animate">Card View</button>
-            <button id="view-table" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 btn-animate">Table View</button>
+    <div id="view-options" class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 hidden">
+        <label class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Viewing Options</label>
+        <div class="flex space-x-5">
+            <button id="view-card" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 btn-animate">Card View</button>
+            <button id="view-table" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 btn-animate">Table View</button>
         </div>
     </div>
 
     <!-- Results Area -->
-    <div id="results-area" class="px-6 py-6 bg-white dark:bg-gray-800">
-        <h2 id="results-title" class="text-2xl font-bold text-gray-800 dark:text-gray-200 hidden mb-4">Your Interactive Schedule</h2>
-        <div id="schedule-container" class="space-y-6 hidden">
+    <div id="results-area" class="px-8 py-8 bg-white dark:bg-gray-800">
+        <h2 id="results-title" class="text-3xl font-bold text-gray-800 dark:text-gray-200 hidden mb-6">Your Interactive Schedule</h2>
+        <div id="schedule-container" class="space-y-8 hidden">
             <!-- Rendered timetable cards will go here -->
         </div>
         <table id="schedule-table" class="hidden">
@@ -213,52 +197,35 @@
                 <!-- Table rows will go here -->
             </tbody>
         </table>
-        <div id="download-options" class="mt-6 flex space-x-4 hidden">
-            <button id="download-pdf" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 btn-animate">Download as PDF</button>
-            <button id="download-png" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md shadow-sm hover:bg-green-700 btn-animate">Download as PNG</button>
-            <button id="download-csv" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 btn-animate">Download as CSV</button>
-            <button id="download-xlsx" class="px-6 py-3 bg-purple-600 text-white font-medium rounded-md shadow-sm hover:bg-purple-700 btn-animate">Download as XLSX</button>
+        <div id="download-options" class="mt-8 flex space-x-5 hidden">
+            <button id="download-pdf" class="px-6 py-3.5 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 btn-animate">Download as PDF</button>
+            <button id="download-png" class="px-6 py-3.5 bg-green-600 text-white font-medium rounded-lg shadow-md hover:bg-green-700 btn-animate">Download as PNG</button>
+            <button id="download-csv" class="px-6 py-3.5 bg-indigo-600 text-white font-medium rounded-lg shadow-md hover:bg-indigo-700 btn-animate">Download as CSV</button>
+            <button id="download-xlsx" class="px-6 py-3.5 bg-purple-600 text-white font-medium rounded-lg shadow-md hover:bg-purple-700 btn-animate">Download as XLSX</button>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+    <footer class="px-8 py-6 border-t border-gray-200 dark:border-gray-700 text-center text-base text-gray-500 dark:text-gray-400 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         &copy; 2025 Timetable Analyzer. All rights reserved. | Powered by AI
     </footer>
 </div>
 
 <script>
-    // Admin Password (hardcoded, change this to your preferred password)
-    const ADMIN_PASSWORD = 'admin123'; // Change this to your secure password
-
     // Theme Toggle Logic
     const themeToggle = document.getElementById('theme-toggle');
     themeToggle.addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
     });
 
-    // Admin Toggle Logic
-    const adminToggle = document.getElementById('admin-toggle');
-    const defaultUploadSection = document.getElementById('default-upload-section');
-    adminToggle.addEventListener('click', () => {
-        const password = prompt('Enter admin password:');
-        if (password === ADMIN_PASSWORD) {
-            defaultUploadSection.classList.remove('hidden');
-            adminToggle.classList.add('hidden'); // Hide button after successful login
-            showStatus('Admin mode activated. Default upload section visible.', 'success');
-        } else {
-            showStatus('Incorrect password. Admin access denied.', 'error');
-        }
-    });
-
-    // --- Global State and Constants ---
-    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your actual Google Gemini API key from https://aistudio.google.com/app/apikey
-    const OCR_API_KEY = 'K87730774188957'; // Free OCR.space key; signup at ocr.space for your own to avoid limits
+    // Global Constants
+    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your Google Gemini API key
+    const OCR_API_KEY = 'K87730774188957'; // Replace with your OCR.space API key
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     const OCR_API_URL = 'https://api.ocr.space/parse/image';
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB constraint
-    
-    // Day-to-color mapping for rendering
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+    // Day color mapping
     const DAY_COLORS = {
         'Monday': 'bg-mon',
         'Tuesday': 'bg-tue',
@@ -271,24 +238,19 @@
 
     const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // Default schedule (hardcoded, used only if no saved data in localStorage)
+    // Default timetable data (edit this array manually to set your default schedule)
     const defaultTimetableData = [
+        // Add your schedule here, for example:
         { day: "Monday", time: "09:00 AM - 10:30 AM", code: "CS101", name: "Introduction to Computer Science", faculty: "Prof. Alice", room: "Room 101" },
         { day: "Monday", time: "11:00 AM - 12:30 PM", code: "MATH201", name: "Calculus I", faculty: "Prof. Bob", room: "Room 202" },
-        { day: "Tuesday", time: "09:00 AM - 10:30 AM", code: "PHYS301", name: "Physics Mechanics", faculty: "Prof. Charlie", room: "Room 303" },
-        { day: "Tuesday", time: "11:00 AM - 12:30 PM", code: "ENG401", name: "English Literature", faculty: "Prof. David", room: "Room 404" },
-        { day: "Wednesday", time: "09:00 AM - 10:30 AM", code: "BIO501", name: "Biology Basics", faculty: "Prof. Eve", room: "Room 505" },
-        { day: "Thursday", time: "09:00 AM - 10:30 AM", code: "CHEM601", name: "Chemistry Fundamentals", faculty: "Prof. Frank", room: "Room 606" },
-        { day: "Friday", time: "09:00 AM - 10:30 AM", code: "HIST701", name: "World History", faculty: "Prof. Grace", room: "Room 707" },
-        { day: "Saturday", time: "10:00 AM - 11:30 AM", code: "ART801", name: "Art Appreciation", faculty: "Prof. Henry", room: "Room 808" },
-        { day: "Sunday", time: "02:00 PM - 03:30 PM", code: "MUS901", name: "Music Theory", faculty: "Prof. Ivy", room: "Room 909" }
+        // Add more entries as needed
     ];
 
-    // Load timetable data from localStorage or use hardcoded default
-    let timetableData = JSON.parse(localStorage.getItem('defaultTimetableData')) || defaultTimetableData.slice();
     let fileData = null;
-    let currentView = 'card'; // Default view
+    let timetableData = defaultTimetableData.slice(); // Start with default
+    let currentView = 'card'; // Default view: 'card' or 'table'
 
+    // DOM elements
     const statusMessage = document.getElementById('status-message');
     const loadingIndicator = document.getElementById('loading-indicator');
     const scheduleContainer = document.getElementById('schedule-container');
@@ -296,67 +258,55 @@
     const resultsTitle = document.getElementById('results-title');
     const viewOptions = document.getElementById('view-options');
     const downloadOptions = document.getElementById('download-options');
+    const fileUpload = document.getElementById('file-upload');
+    const viewCard = document.getElementById('view-card');
+    const viewTable = document.getElementById('view-table');
     const downloadPdf = document.getElementById('download-pdf');
     const downloadPng = document.getElementById('download-png');
     const downloadCsv = document.getElementById('download-csv');
     const downloadXlsx = document.getElementById('download-xlsx');
-    const viewCard = document.getElementById('view-card');
-    const viewTable = document.getElementById('view-table');
-    const fileUpload = document.getElementById('file-upload');
-    const defaultFileUpload = document.getElementById('default-file-upload');
-    const defaultStatusMessage = document.getElementById('default-status-message');
-    const defaultCodeSnippet = document.getElementById('default-code-snippet');
 
+    // Event listeners
     fileUpload.addEventListener('change', handleFileUpload);
-    defaultFileUpload.addEventListener('change', handleDefaultFileUpload);
+    viewCard.addEventListener('click', () => switchView('card'));
+    viewTable.addEventListener('click', () => switchView('table'));
     downloadPdf.addEventListener('click', downloadAsPDF);
     downloadPng.addEventListener('click', downloadAsPNG);
     downloadCsv.addEventListener('click', downloadAsCSV);
     downloadXlsx.addEventListener('click', downloadAsXLSX);
-    viewCard.addEventListener('click', () => switchView('card'));
-    viewTable.addEventListener('click', () => switchView('table'));
 
-    // Render default on load
+    // Render default timetable on load
     window.addEventListener('load', () => {
         renderTimetable(timetableData);
         resultsTitle.classList.remove('hidden');
         viewOptions.classList.remove('hidden');
         downloadOptions.classList.remove('hidden');
-        showStatus('Default schedule loaded. Upload your file to customize.', 'success');
+        showStatus('Default schedule loaded. Upload a file to customize.', 'success');
     });
 
-    // --- Utility Functions ---
-
+    // Utility function to show status messages
     function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.className = `mt-4 p-3 rounded-md text-sm text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
+        statusMessage.className = `mt-5 p-4 rounded-lg text-base text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
         statusMessage.classList.remove('hidden');
     }
 
-    function showDefaultStatus(message, type) {
-        defaultStatusMessage.textContent = message;
-        defaultStatusMessage.className = `mt-4 p-3 rounded-md text-sm text-center ${type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'} transition-opacity duration-300`;
-        defaultStatusMessage.classList.remove('hidden');
-    }
-
+    // Utility function to convert file to base64
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => {
-                const base64String = reader.result.split(',')[1];
-                resolve(base64String);
-            };
-            reader.onerror = error => reject(error);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
             reader.readAsDataURL(file);
         });
     }
 
+    // Utility function to get day index for sorting
     function getDayIndex(day) {
         return DAY_ORDER.indexOf(day);
     }
 
-    // --- Parsing Functions for Tabular Files ---
-
+    // Parse CSV file
     function parseCSV(file) {
         return new Promise((resolve, reject) => {
             Papa.parse(file, {
@@ -380,6 +330,7 @@
         });
     }
 
+    // Parse XLSX file
     function parseXLSX(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -409,11 +360,9 @@
         });
     }
 
-    // --- Fallback OCR Parsing ---
-
-    async function fallbackOCR(file, mimeType, isDefault = false) {
-        const statusFunc = isDefault ? showDefaultStatus : showStatus;
-        statusFunc('Gemini failed. Trying fallback OCR...', 'success');
+    // Fallback OCR parsing
+    async function fallbackOCR(file, mimeType) {
+        showStatus('Gemini failed. Trying fallback OCR...', 'success');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('language', 'eng');
@@ -436,7 +385,6 @@
             let text = '';
             result.ParsedResults.forEach(pr => { text += pr.ParsedText + '\n'; });
 
-            // Basic parsing of OCR text into structured data
             const data = parseOCRTextToData(text);
             if (data.length === 0) throw new Error('No data extracted from OCR.');
             return data;
@@ -446,13 +394,13 @@
         }
     }
 
+    // Parse OCR text to data
     function parseOCRTextToData(text) {
         const data = [];
         const lines = text.split(/\r?\n/);
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
-            // Assume format: Day Time Code Name Faculty Room (customize regex as needed for your timetables)
             const match = line.match(/(\w+) ([\d: -]+[AP]M?) (\w+) ([\w\s]+) ([\w\s]+) ([\w-]+)/i);
             if (match) {
                 data.push({
@@ -468,19 +416,16 @@
         return data;
     }
 
-    // --- Core Application Logic for Main Upload ---
-
+    // Handle file upload
     async function handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Constraint: File size limit
         if (file.size > MAX_FILE_SIZE) {
             showStatus('File too large! Max size is 10MB.', 'error');
             return;
         }
 
-        // Constraint: Validate file type
         const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
         if (!allowedTypes.includes(file.type)) {
             showStatus('Invalid file type! Supported: PDF, PNG, JPG, CSV, XLSX.', 'error');
@@ -501,11 +446,11 @@
 
         try {
             let data;
-            if (['csv'].includes(fileType)) {
+            if (fileType === 'csv') {
                 data = await parseCSV(file);
                 if (data.length === 0) throw new Error('No data found in CSV.');
                 showStatus('CSV parsed successfully.', 'success');
-            } else if (['xlsx'].includes(fileType)) {
+            } else if (fileType === 'xlsx') {
                 data = await parseXLSX(file);
                 if (data.length === 0) throw new Error('No data found in XLSX.');
                 showStatus('XLSX parsed successfully.', 'success');
@@ -514,17 +459,11 @@
                 showStatus('File converted. Analyzing with Gemini...', 'success');
                 try {
                     await callGeminiAPI(mimeType, fileType);
-                    return; // Since callGeminiAPI sets timetableData and renders
-                } catch (geminiError) {
-                    console.error('Gemini detailed error:', geminiError);
-                    try {
-                        data = await fallbackOCR(file, mimeType);
-                        showStatus('Fallback OCR complete! Schedule rendered below. Note: Parsing may not be perfect; edit as needed.', 'success');
-                    } catch (ocrError) {
-                        console.error('OCR detailed error:', ocrError);
-                        showStatus('Both Gemini and OCR failed. Check console for details, ensure API keys are set, and try a different file.', 'error');
-                        return;
-                    }
+                    return;
+                } catch (error) {
+                    console.error('Gemini error:', error);
+                    data = await fallbackOCR(file, mimeType);
+                    showStatus('Fallback OCR complete! Schedule rendered.', 'success');
                 }
             } else {
                 throw new Error('Unsupported file type.');
@@ -532,209 +471,46 @@
             timetableData = data;
             renderTimetable(timetableData);
         } catch (error) {
-            console.error("File processing error:", error);
-            showStatus(`Error processing file: ${error.message}. Check console for more details.`, 'error');
+            console.error('Processing error:', error);
+            showStatus(`Error: ${error.message}. Check console for details.`, 'error');
             loadingIndicator.classList.add('hidden');
         }
     }
 
-    // --- Logic for Default Upload (Updates Default Timetable and Saves to localStorage) ---
-
-    async function handleDefaultFileUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (file.size > MAX_FILE_SIZE) {
-            showDefaultStatus('File too large! Max size is 10MB.', 'error');
-            return;
-        }
-
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-        if (!allowedTypes.includes(file.type)) {
-            showDefaultStatus('Invalid file type! Supported: PDF, PNG, JPG.', 'error');
-            return;
-        }
-
-        showDefaultStatus('File uploaded. Processing for default schedule...', 'success');
-        defaultCodeSnippet.classList.add('hidden');
-        fileData = null;
-
-        const fileType = file.name.split('.').pop().toLowerCase();
-        let mimeType = file.type;
-
-        if (fileType === 'pdf') {
-            mimeType = 'application/pdf';
-        }
-
-        fileData = await fileToBase64(file);
-        loadingIndicator.classList.remove('hidden');
-
-        try {
-            await callGeminiAPIForDefault(mimeType, fileType);
-        } catch (geminiError) {
-            console.error('Gemini detailed error:', geminiError);
-            try {
-                const data = await fallbackOCR(file, mimeType, true);
-                updateDefaultTimetable(data);
-                showDefaultStatus('Fallback OCR complete! Default schedule updated and displayed below.', 'success');
-            } catch (ocrError) {
-                console.error('OCR detailed error:', ocrError);
-                showDefaultStatus('Both Gemini and OCR failed. Check console for details.', 'error');
-            }
-        } finally {
-            loadingIndicator.classList.add('hidden');
-        }
-    }
-
-    async function callGeminiAPIForDefault(mimeType, fileType) {
-        if (!fileData) {
-            return showDefaultStatus('No file data found.', 'error');
-        }
-
-        const response_schema = {
-            type: "ARRAY",
-            description: "An array of class objects extracted from the timetable.",
-            items: {
-                type: "OBJECT",
-                properties: {
-                    day: { type: "STRING", description: "The day of the week (e.g., Monday, Tuesday)." },
-                    time: { type: "STRING", description: "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
-                    code: { type: "STRING", description: "The course code (e.g., IS230)." },
-                    name: { type: "STRING", description: "The full course name." },
-                    faculty: { type: "STRING", description: "The instructor's name. Use 'N/A' if missing." },
-                    room: { type: "STRING", description: "The room number (e.g., SST1-101)." }
-                },
-                required: ["day", "time", "code", "name", "faculty", "room"]
-            }
-        };
-
-        const systemPrompt = "You are a timetable data extractor. Your task is to accurately extract the course schedule from the provided file. Consolidate the Start Time and End Time into a single 'time' string. Return the output as a JSON array strictly following the provided schema. Do not include any explanatory text or markdown outside of the JSON object.";
-        
-        const payload = {
-            contents: [
-                {
-                    role: "user",
-                    parts: [
-                        { text: "Analyze this file and extract the academic timetable data. Ensure the time format is consistent and includes AM/PM if applicable." },
-                        {
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: fileData
-                            }
-                        }
-                    ]
-                }
-            ],
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            generation_config: {
-                response_mime_type: "application/json",
-                response_schema: response_schema
-            }
-        };
-
-        const maxRetries = 3;
-        let attempt = 0;
-
-        while (attempt < maxRetries) {
-            try {
-                const response = await fetch(GEMINI_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.log('Gemini API Error Response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-                }
-
-                const result = await response.json();
-                console.log('Gemini Response:', result);
-                
-                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!jsonText) {
-                    throw new Error("API returned no content.");
-                }
-
-                const data = JSON.parse(jsonText);
-                updateDefaultTimetable(data);
-                showDefaultStatus('Analysis complete! Default schedule updated and displayed below. Code snippet generated for reference.', 'success');
-                return;
-            } catch (error) {
-                attempt++;
-                if (attempt >= maxRetries) {
-                    throw error; // Let fallback handle it
-                }
-                const delay = Math.pow(2, attempt) * 1000;
-                console.warn(`Attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
-        }
-    }
-
-    function updateDefaultTimetable(data) {
-        if (!data || data.length === 0) {
-            showDefaultStatus('No data extracted. Cannot update default schedule.', 'error');
-            return;
-        }
-
-        // Save to localStorage
-        localStorage.setItem('defaultTimetableData', JSON.stringify(data));
-        
-        // Update timetableData and render
-        timetableData = data;
-        renderTimetable(timetableData);
-
-        // Generate code snippet for reference
-        const code = `const defaultTimetableData = ${JSON.stringify(data, null, 4)};`;
-        defaultCodeSnippet.textContent = code;
-        defaultCodeSnippet.classList.remove('hidden');
-    }
-
+    // Call Gemini API for image/PDF processing
     async function callGeminiAPI(mimeType, fileType) {
-        if (!fileData) {
-            return showStatus('No file data found.', 'error');
-        }
+        if (!fileData) return showStatus('No file data.', 'error');
 
         loadingIndicator.classList.remove('hidden');
         statusMessage.classList.add('hidden');
 
-        if (fileType === 'pdf') {
-            mimeType = 'application/pdf';
-        }
+        if (fileType === 'pdf') mimeType = 'application/pdf';
 
         const response_schema = {
             type: "ARRAY",
-            description: "An array of class objects extracted from the timetable.",
             items: {
                 type: "OBJECT",
                 properties: {
-                    day: { type: "STRING", description: "The day of the week (e.g., Monday, Tuesday)." },
-                    time: { type: "STRING", description: "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
-                    code: { type: "STRING", description: "The course code (e.g., IS230)." },
-                    name: { type: "STRING", description: "The full course name." },
-                    faculty: { type: "STRING", description: "The instructor's name. Use 'N/A' if missing." },
-                    room: { type: "STRING", description: "The room number (e.g., SST1-101)." }
+                    day: { type: "STRING" },
+                    time: { type: "STRING" },
+                    code: { type: "STRING" },
+                    name: { type: "STRING" },
+                    faculty: { type: "STRING" },
+                    room: { type: "STRING" }
                 },
                 required: ["day", "time", "code", "name", "faculty", "room"]
             }
         };
 
-        const systemPrompt = "You are a timetable data extractor. Your task is to accurately extract the course schedule from the provided file. Consolidate the Start Time and End Time into a single 'time' string. Return the output as a JSON array strictly following the provided schema. Do not include any explanatory text or markdown outside of the JSON object.";
-        
+        const systemPrompt = "Extract timetable data as JSON array following the schema.";
+
         const payload = {
             contents: [
                 {
                     role: "user",
                     parts: [
-                        { text: "Analyze this file and extract the academic timetable data. Ensure the time format is consistent and includes AM/PM if applicable." },
-                        {
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: fileData
-                            }
-                        }
+                        { text: "Extract timetable data." },
+                        { inline_data: { mime_type: mimeType, data: fileData } }
                     ]
                 }
             ],
@@ -756,74 +532,56 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.log('Gemini API Error Response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
 
                 const result = await response.json();
-                console.log('Gemini Response:', result);
-                
                 const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!jsonText) {
-                    throw new Error("API returned no content.");
-                }
+                if (!jsonText) throw new Error("No content.");
 
                 timetableData = JSON.parse(jsonText);
                 loadingIndicator.classList.add('hidden');
-                showStatus('Analysis complete! Schedule rendered below.', 'success');
+                showStatus('Analysis complete! Schedule rendered.', 'success');
                 renderTimetable(timetableData);
                 return;
             } catch (error) {
                 attempt++;
                 if (attempt >= maxRetries) {
                     loadingIndicator.classList.add('hidden');
-                    throw error; // Let fallback handle it
+                    throw error;
                 }
-                const delay = Math.pow(2, attempt) * 1000;
-                console.warn(`Attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
             }
         }
     }
 
+    // Render timetable in current view
     function renderTimetable(data) {
         resultsTitle.classList.remove('hidden');
         viewOptions.classList.remove('hidden');
         downloadOptions.classList.remove('hidden');
 
         if (!data || data.length === 0) {
-            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 rounded-md">No schedule data could be extracted. Please check the file quality or customize parsing.</p>';
+            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-8 rounded-lg">No data extracted. Check file or parsing.</p>';
             return;
         }
 
-        // Sort timetableData by day order and then by time (assuming time is sortable as string)
-        timetableData.sort((a, b) => {
-            const dayA = getDayIndex(a.day);
-            const dayB = getDayIndex(b.day);
-            if (dayA !== dayB) return dayA - dayB;
-            return a.time.localeCompare(b.time);
-        });
-
+        timetableData.sort((a, b) => getDayIndex(a.day) - getDayIndex(b.day) || a.time.localeCompare(b.time));
         switchView(currentView);
     }
 
+    // Render card view
     function renderCardView() {
         scheduleContainer.innerHTML = '';
         scheduleContainer.classList.remove('hidden');
         scheduleTable.classList.add('hidden');
 
         const groupedData = timetableData.reduce((acc, item) => {
-            const dayKey = item.day.trim().charAt(0).toUpperCase() + item.day.trim().slice(1).toLowerCase();
-            if (!acc[dayKey]) {
-                acc[dayKey] = [];
-            }
+            const dayKey = item.day.charAt(0).toUpperCase() + item.day.slice(1).toLowerCase();
+            acc[dayKey] = acc[dayKey] || [];
             acc[dayKey].push(item);
             return acc;
         }, {});
 
-        // Sort days according to DAY_ORDER
         const sortedDays = Object.keys(groupedData).sort((a, b) => getDayIndex(a) - getDayIndex(b));
 
         sortedDays.forEach((day, index) => {
@@ -831,38 +589,35 @@
             const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
 
             const daySection = document.createElement('details');
-            daySection.className = `p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 ${colorClass} fade-in mb-4`;
-            daySection.style.animationDelay = `${index * 0.1}s`; // Staggered animation
+            daySection.className = `p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ${colorClass} fade-in mb-6`;
+            daySection.style.animationDelay = `${index * 0.1}s`;
 
             let htmlContent = `
-                <summary class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-300 dark:border-gray-600 cursor-pointer list-none">${day}</summary>
-                <div class="space-y-4 sortable" id="sortable-${day.replace(/\s/g, '-')}">
+                <summary class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-5 pb-3 border-b border-gray-300 dark:border-gray-600 cursor-pointer">${day}</summary>
+                <div class="space-y-6 sortable" id="sortable-${day.replace(/\s/g, '-')}">
             `;
 
             dayClasses.forEach((c, cIndex) => {
                 htmlContent += `
-                    <div class="class-card bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-4 text-sm text-gray-900 dark:text-gray-100" data-index="${cIndex}">
-                        <!-- Left Column (Time and Course) -->
-                        <div class="border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 sm:pr-4 border-gray-300 dark:border-gray-600">
-                            <p class="text-xs font-medium uppercase text-blue-600 dark:text-blue-400 mb-1">Time & Course</p>
-                            <input type="text" class="time-input w-full text-lg font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />
-                            <input type="text" class="name-input w-full font-medium text-base bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-1" value="${c.name || 'N/A'}" />
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>
+                    <div class="class-card bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-6 text-base text-gray-900 dark:text-gray-100" data-index="${cIndex}">
+                        <div class="border-b sm:border-b-0 sm:border-r pb-4 sm:pb-0 sm:pr-6 border-gray-300 dark:border-gray-600">
+                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Time & Course</p>
+                            <input type="text" class="time-input w-full text-xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />
+                            <input type="text" class="name-input w-full font-medium text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-2" value="${c.name || 'N/A'}" />
+                            <p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>
                         </div>
-
-                        <!-- Right Column (Faculty and Room) -->
-                        <div class="pt-2 sm:pt-0 sm:pl-4">
-                            <p class="text-xs font-medium uppercase text-blue-600 dark:text-blue-400 mb-1">Location & Teacher</p>
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="text-base text-gray-800 dark:text-gray-200 font-medium flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mr-1 text-red-500" viewBox="0 0 16 16">
+                        <div class="pt-4 sm:pt-0 sm:pl-6">
+                            <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Location & Teacher</p>
+                            <div class="flex justify-between items-center mb-3">
+                                <p class="text-lg text-gray-800 dark:text-gray-200 font-medium flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mr-2 text-red-500" viewBox="0 0 16 16">
                                       <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                                     </svg>
-                                    Room: <input type="text" class="room-input ml-1 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />
+                                    Room: <input type="text" class="room-input ml-2 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />
                                 </p>
                             </div>
-                            <p class="text-base text-gray-600 dark:text-gray-400 font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mr-1 text-green-600 inline-block" viewBox="0 0 16 16">
+                            <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mr-2 text-green-600 inline-block" viewBox="0 0 16 16">
                                   <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                                 </svg>
                                 <input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.faculty || 'N/A'}" />
@@ -876,31 +631,28 @@
             daySection.innerHTML = htmlContent;
             scheduleContainer.appendChild(daySection);
 
-            // Make cards sortable (drag-and-drop)
             const sortableContainer = daySection.querySelector('.sortable');
             Sortable.create(sortableContainer, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 chosenClass: 'sortable-chosen',
-                onEnd: updateTimetableData // Update data on reorder
+                onEnd: updateTimetableData
             });
 
-            // Add edit listeners
             const inputs = daySection.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('change', updateTimetableData);
-            });
+            inputs.forEach(input => input.addEventListener('change', updateTimetableData));
         });
     }
 
+    // Render table view
     function renderTableView() {
         const tbody = scheduleTable.querySelector('tbody');
         tbody.innerHTML = '';
         scheduleTable.classList.remove('hidden');
         scheduleContainer.classList.add('hidden');
 
-        timetableData.forEach((c) => {
-            const dayKey = c.day.trim().charAt(0).toUpperCase() + c.day.trim().slice(1).toLowerCase();
+        timetableData.forEach(c => {
+            const dayKey = c.day.charAt(0).toUpperCase() + c.day.slice(1).toLowerCase();
             const colorClass = DAY_COLORS[dayKey] || '';
             const row = document.createElement('tr');
             row.className = colorClass;
@@ -916,6 +668,7 @@
         });
     }
 
+    // Switch between card and table views
     function switchView(view) {
         currentView = view;
         if (view === 'card') {
@@ -933,9 +686,9 @@
         }
     }
 
-    // Function to update timetableData based on edits/reorders
+    // Update timetable data after edits or reorders
     function updateTimetableData() {
-        timetableData = []; // Rebuild data
+        timetableData = [];
         const daySections = scheduleContainer.querySelectorAll('details');
         daySections.forEach(section => {
             const day = section.querySelector('summary').textContent;
@@ -951,79 +704,35 @@
                 });
             });
         });
-        // Resort after update
-        timetableData.sort((a, b) => {
-            const dayA = getDayIndex(a.day);
-            const dayB = getDayIndex(b.day);
-            if (dayA !== dayB) return dayA - dayB;
-            return a.time.localeCompare(b.time);
-        });
-        showStatus('Changes saved! Feel free to download.', 'success');
-        // Re-render current view
-        if (currentView === 'card') {
-            renderCardView();
-        } else if (currentView === 'table') {
-            renderTableView();
-        }
+        timetableData.sort((a, b) => getDayIndex(a.day) - getDayIndex(b.day) || a.time.localeCompare(b.time));
+        showStatus('Changes saved! Download or continue editing.', 'success');
+        switchView(currentView); // Re-render current view
     }
 
+    // Download as PDF
     async function downloadAsPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-        const pageHeight = doc.internal.pageSize.height;
-        const pageWidth = doc.internal.pageSize.width;
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { 
-            scale: 3, 
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            scrollY: -window.scrollY,
-            windowHeight: document.body.scrollHeight,
-            useCORS: true,
-            logging: false
-        });
+        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pageWidth;
+        const imgWidth = doc.internal.pageSize.getWidth();
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            doc.addPage();
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         doc.save('timetable.pdf');
     }
 
+    // Download as PNG
     async function downloadAsPNG() {
         const element = currentView === 'card' ? scheduleContainer : scheduleTable;
-        const canvas = await html2canvas(element, { 
-            scale: 3, 
-            backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-            scrollY: -window.scrollY,
-            windowHeight: document.body.scrollHeight,
-            useCORS: true,
-            logging: false
-        });
-        // To fix opacity, create a new canvas with solid background
-        const newCanvas = document.createElement('canvas');
-        newCanvas.width = canvas.width;
-        newCanvas.height = canvas.height;
-        const ctx = newCanvas.getContext('2d');
-        ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff';
-        ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-        ctx.drawImage(canvas, 0, 0);
+        const canvas = await html2canvas(element, { scale: 2, backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff' });
         const link = document.createElement('a');
         link.download = 'timetable.png';
-        link.href = newCanvas.toDataURL('image/png');
+        link.href = canvas.toDataURL('image/png');
         link.click();
     }
 
+    // Download as CSV
     function downloadAsCSV() {
         const csvData = timetableData.map(row => [row.day, row.time, row.code, row.name, row.faculty, row.room]);
         const csv = Papa.unparse({ data: csvData, fields: ['Day', 'Time', 'Code', 'Name', 'Faculty', 'Room'] });
@@ -1034,6 +743,7 @@
         link.click();
     }
 
+    // Download as XLSX
     function downloadAsXLSX() {
         const wb = XLSX.utils.book_new();
         const wsData = [['Day', 'Time', 'Code', 'Name', 'Faculty', 'Room'], ...timetableData.map(row => [row.day, row.time, row.code, row.name, row.faculty, row.room])];
