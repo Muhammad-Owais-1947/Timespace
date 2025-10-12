@@ -129,6 +129,10 @@
         }
         .class-card p {
             font-weight: 500;
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
         }
     </style>
 </head>
@@ -750,13 +754,16 @@
         clone.style.position = 'absolute';
         clone.style.left = '-9999px';
         clone.style.top = '0';
-        clone.style.width = element.offsetWidth + 'px';
+        clone.style.width = '800px'; // Fixed width to ensure layout
         clone.style.height = '';
         clone.style.overflow = 'visible';
+        if (document.documentElement.classList.contains('dark')) {
+            clone.classList.add('dark');
+        }
         document.body.appendChild(clone);
 
         // Calculate full height
-        const fullHeight = clone.scrollHeight;
+        const fullHeight = clone.scrollHeight + 20; // Extra padding
         clone.style.height = fullHeight + 'px';
 
         const canvas = await html2canvas(clone, {
