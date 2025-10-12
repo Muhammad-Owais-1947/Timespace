@@ -249,6 +249,7 @@
     let fileData = null;
     let timetableData = defaultTimetableData.slice(); // Start with default
     let currentView = 'card'; // Default view: 'card' or 'table'
+    let source = 'default'; // 'default' or 'uploaded'
 
     // DOM elements
     const statusMessage = document.getElementById('status-message');
@@ -469,6 +470,7 @@
                 throw new Error('Unsupported file type.');
             }
             timetableData = data;
+            source = 'uploaded';
             renderTimetable(timetableData);
         } catch (error) {
             console.error('Processing error:', error);
@@ -539,6 +541,7 @@
                 if (!jsonText) throw new Error("No content.");
 
                 timetableData = JSON.parse(jsonText);
+                source = 'uploaded';
                 loadingIndicator.classList.add('hidden');
                 showStatus('Analysis complete! Schedule rendered.', 'success');
                 renderTimetable(timetableData);
@@ -588,23 +591,41 @@
             const dayClasses = groupedData[day];
             const colorClass = DAY_COLORS[day] || 'bg-gray-100 dark:bg-gray-800';
 
-            const daySection = document.createElement('details');
+            const daySection = document.createElement('div');
             daySection.className = `p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ${colorClass} fade-in mb-6`;
             daySection.style.animationDelay = `${index * 0.1}s`;
 
             let htmlContent = `
-                <summary class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-5 pb-3 border-b border-gray-300 dark:border-gray-600 cursor-pointer">${day}</summary>
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-5 pb-3 border-b border-gray-300 dark:border-gray-600">${day}</h3>
                 <div class="space-y-6 sortable" id="sortable-${day.replace(/\s/g, '-')}">
             `;
 
             dayClasses.forEach((c, cIndex) => {
+                let timeElement, nameElement, codeElement, facultyElement, roomElement;
+
+                if (source === 'default') {
+                    // Non-editable for default
+                    timeElement = `<p class="w-full text-xl font-bold">${c.time || 'N/A'}</p>`;
+                    nameElement = `<p class="w-full font-medium text-lg mt-2">${c.name || 'N/A'}</p>`;
+                    codeElement = `<p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: ${c.code || 'N/A'}</p>`;
+                    roomElement = `Room: ${c.room || 'N/A'}`;
+                    facultyElement = `${c.faculty || 'N/A'}`;
+                } else {
+                    // Editable for uploaded
+                    timeElement = `<input type="text" class="time-input w-full text-xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />`;
+                    nameElement = `<input type="text" class="name-input w-full font-medium text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-2" value="${c.name || 'N/A'}" />`;
+                    codeElement = `<p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>`;
+                    roomElement = `Room: <input type="text" class="room-input ml-2 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />`;
+                    facultyElement = `<input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.faculty || 'N/A'}" />`;
+                }
+
                 htmlContent += `
                     <div class="class-card bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-6 text-base text-gray-900 dark:text-gray-100" data-index="${cIndex}">
                         <div class="border-b sm:border-b-0 sm:border-r pb-4 sm:pb-0 sm:pr-6 border-gray-300 dark:border-gray-600">
                             <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Time & Course</p>
-                            <input type="text" class="time-input w-full text-xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.time || 'N/A'}" />
-                            <input type="text" class="name-input w-full font-medium text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 mt-2" value="${c.name || 'N/A'}" />
-                            <p class="text-base text-gray-500 dark:text-gray-400 mt-2">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.code || 'N/A'}" /></p>
+                            ${timeElement}
+                            ${nameElement}
+                            ${codeElement}
                         </div>
                         <div class="pt-4 sm:pt-0 sm:pl-6">
                             <p class="text-sm font-medium uppercase text-blue-600 dark:text-blue-400 mb-2">Location & Teacher</p>
@@ -613,14 +634,14 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mr-2 text-red-500" viewBox="0 0 16 16">
                                       <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                                     </svg>
-                                    Room: <input type="text" class="room-input ml-2 font-bold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.room || 'N/A'}" />
+                                    ${roomElement}
                                 </p>
                             </div>
                             <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mr-2 text-green-600 inline-block" viewBox="0 0 16 16">
                                   <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                                 </svg>
-                                <input type="text" class="faculty-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500" value="${c.faculty || 'N/A'}" />
+                                ${facultyElement}
                             </p>
                         </div>
                     </div>
@@ -632,15 +653,17 @@
             scheduleContainer.appendChild(daySection);
 
             const sortableContainer = daySection.querySelector('.sortable');
-            Sortable.create(sortableContainer, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                chosenClass: 'sortable-chosen',
-                onEnd: updateTimetableData
-            });
+            if (source !== 'default') {
+                Sortable.create(sortableContainer, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: updateTimetableData
+                });
 
-            const inputs = daySection.querySelectorAll('input');
-            inputs.forEach(input => input.addEventListener('change', updateTimetableData));
+                const inputs = daySection.querySelectorAll('input');
+                inputs.forEach(input => input.addEventListener('change', updateTimetableData));
+            }
         });
     }
 
@@ -688,19 +711,20 @@
 
     // Update timetable data after edits or reorders
     function updateTimetableData() {
+        if (source === 'default') return; // Prevent updates for default
         timetableData = [];
-        const daySections = scheduleContainer.querySelectorAll('details');
+        const daySections = scheduleContainer.querySelectorAll('.fade-in'); // Adjusted selector since no details
         daySections.forEach(section => {
-            const day = section.querySelector('summary').textContent;
+            const day = section.querySelector('h3').textContent;
             const cards = section.querySelectorAll('.class-card');
             cards.forEach(card => {
                 timetableData.push({
                     day: day,
-                    time: card.querySelector('.time-input').value,
-                    code: card.querySelector('.code-input').value,
-                    name: card.querySelector('.name-input').value,
-                    faculty: card.querySelector('.faculty-input').value,
-                    room: card.querySelector('.room-input').value
+                    time: card.querySelector('.time-input') ? card.querySelector('.time-input').value : card.querySelector('p.text-xl').textContent,
+                    code: card.querySelector('.code-input') ? card.querySelector('.code-input').value : card.querySelector('p.text-base').textContent.replace('Code: ', ''),
+                    name: card.querySelector('.name-input') ? card.querySelector('.name-input').value : card.querySelector('p.font-medium').textContent,
+                    faculty: card.querySelector('.faculty-input') ? card.querySelector('.faculty-input').value : card.querySelector('p.text-lg.font-medium').textContent.trim(),
+                    room: card.querySelector('.room-input') ? card.querySelector('.room-input').value : card.querySelector('p.flex.items-center').textContent.replace('Room: ', '').trim()
                 });
             });
         });
