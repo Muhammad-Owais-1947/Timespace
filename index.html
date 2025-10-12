@@ -72,7 +72,7 @@
     <!-- Header -->
     <header class="mb-8 pb-4 border-b border-gray-300 dark:border-gray-600">
         <h1 class="text-4xl font-extrabold text-gray-800 dark:text-gray-200 text-center animate-pulse">Timetable Analyzer</h1>
-        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download! If Gemini fails, it will fallback to OCR.</p>
+        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download! If Gemini fails, it will fallback to OCR. Check console (F12) for detailed errors.</p>
     </header>
 
     <!-- Upload and Status Area -->
@@ -112,9 +112,9 @@
     });
 
     // --- Global State and Constants ---
-    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your actual Google Gemini API key
-    const OCR_API_KEY = 'K87730774188957'; // Free OCR.space key (signup for your own at ocr.space for better limits)
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your actual Google Gemini API key from https://aistudio.google.com/app/apikey
+    const OCR_API_KEY = 'K87730774188957'; // Free OCR.space key; signup at ocr.space for your own to avoid limits
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
     const OCR_API_URL = 'https://api.ocr.space/parse/image';
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB constraint
     
@@ -230,10 +230,11 @@
                 body: formData
             });
 
-            if (!response.ok) throw new Error('OCR API failed');
-
             const result = await response.json();
-            if (result.IsErroredOnProcessing) throw new Error(result.ErrorMessage || 'OCR error');
+            console.log('OCR Response:', result);
+            if (result.IsErroredOnProcessing) {
+                throw new Error(result.ErrorMessage || 'OCR error');
+            }
 
             let text = '';
             result.ParsedResults.forEach(pr => { text += pr.ParsedText + '\n'; });
@@ -243,6 +244,7 @@
             if (data.length === 0) throw new Error('No data extracted from OCR.');
             return data;
         } catch (error) {
+            console.error('OCR Error:', error);
             throw error;
         }
     }
@@ -253,7 +255,7 @@
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
-            // Assume format: Day Time Code Name Faculty Room (customize regex as needed)
+            // Assume format: Day Time Code Name Faculty Room (customize regex as needed for your timetables)
             const match = line.match(/(\w+) ([\d: -]+[AP]M?) (\w+) ([\w\s]+) ([\w\s]+) ([\w-]+)/i);
             if (match) {
                 data.push({
@@ -296,7 +298,7 @@
         timetableData = [];
 
         const fileType = file.name.split('.').pop().toLowerCase();
-        const mimeType = file.type;
+        let mimeType = file.type;
 
         try {
             if (['csv'].includes(fileType)) {
@@ -317,15 +319,15 @@
                 try {
                     await callGeminiAPI(mimeType, fileType);
                 } catch (geminiError) {
-                    console.error('Gemini error:', geminiError);
+                    console.error('Gemini detailed error:', geminiError);
                     try {
                         const data = await fallbackOCR(file, mimeType);
                         timetableData = data;
-                        showStatus('Fallback OCR complete! Schedule rendered below.', 'success');
+                        showStatus('Fallback OCR complete! Schedule rendered below. Note: Parsing may not be perfect; edit as needed.', 'success');
                         renderTimetable(timetableData);
                     } catch (ocrError) {
-                        console.error('OCR error:', ocrError);
-                        showStatus('Both Gemini and OCR failed. Please try a clearer file or check API keys.', 'error');
+                        console.error('OCR detailed error:', ocrError);
+                        showStatus('Both Gemini and OCR failed. Check console for details, ensure API keys are set, and try a different file.', 'error');
                     }
                 }
             } else {
@@ -333,7 +335,7 @@
             }
         } catch (error) {
             console.error("File processing error:", error);
-            showStatus(`Error processing file: ${error.message}`, 'error');
+            showStatus(`Error processing file: ${error.message}. Check console for more details.`, 'error');
             loadingIndicator.classList.add('hidden');
         }
     }
@@ -356,12 +358,12 @@
             items: {
                 type: "OBJECT",
                 properties: {
-                    "day": { "type": "STRING", "description": "The day of the week (e.g., Monday, Tuesday)." },
-                    "time": { "type": "STRING", "description": "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
-                    "code": { "type": "STRING", "description": "The course code (e.g., IS230)." },
-                    "name": { "type": "STRING", "description": "The full course name." },
-                    "faculty": { "type": "STRING", "description": "The instructor's name. Use 'N/A' if missing." },
-                    "room": { "type": "STRING", "description": "The room number (e.g., SST1-101)." }
+                    day: { type: "STRING", description: "The day of the week (e.g., Monday, Tuesday)." },
+                    time: { type: "STRING", description: "The consolidated time slot (Start Time - End Time, e.g., 03:30 PM - 04:45 PM)." },
+                    code: { type: "STRING", description: "The course code (e.g., IS230)." },
+                    name: { type: "STRING", description: "The full course name." },
+                    faculty: { type: "STRING", description: "The instructor's name. Use 'N/A' if missing." },
+                    room: { type: "STRING", description: "The room number (e.g., SST1-101)." }
                 },
                 required: ["day", "time", "code", "name", "faculty", "room"]
             }
@@ -384,10 +386,10 @@
                     ]
                 }
             ],
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            generation_config: {
-                response_mime_type: "application/json",
-                response_schema: responseSchema
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema
             }
         };
 
@@ -403,10 +405,13 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} - ${await response.text()}`);
+                    const errorText = await response.text();
+                    console.log('Gemini API Error Response:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
                 }
 
                 const result = await response.json();
+                console.log('Gemini Response:', result);
                 
                 const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!jsonText) {
@@ -437,7 +442,7 @@
         downloadButton.classList.remove('hidden');
 
         if (!data || data.length === 0) {
-            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 bg-white dark:bg-gray-800 rounded-xl fade-in">No schedule data could be extracted. Please check the file quality.</p>';
+            scheduleContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 p-6 bg-white dark:bg-gray-800 rounded-xl fade-in">No schedule data could be extracted. Please check the file quality or customize parsing.</p>';
             return;
         }
 
@@ -469,9 +474,9 @@
                         <!-- Left Column (Time and Course) -->
                         <div class="border-b sm:border-b-0 sm:border-r pb-2 sm:pb-0 sm:pr-4 border-gray-300 dark:border-gray-600">
                             <p class="text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400 mb-1">Time & Course</p>
-                            <input type="text" class="time-input w-full text-xl font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.time}" />
-                            <input type="text" class="name-input w-full font-bold text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500 mt-1" value="${c.name}" />
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.code}" /></p>
+                            <input type="text" class="time-input w-full text-xl font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.time || 'N/A'}" />
+                            <input type="text" class="name-input w-full font-bold text-lg bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500 mt-1" value="${c.name || 'N/A'}" />
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Code: <input type="text" class="code-input bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.code || 'N/A'}" /></p>
                         </div>
 
                         <!-- Right Column (Faculty and Room) -->
@@ -482,7 +487,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill mr-1 text-red-500" viewBox="0 0 16 16">
                                       <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
                                     </svg>
-                                    Room: <input type="text" class="room-input ml-1 font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.room}" />
+                                    Room: <input type="text" class="room-input ml-1 font-extrabold bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-indigo-500" value="${c.room || 'N/A'}" />
                                 </p>
                             </div>
                             <p class="text-base text-gray-600 dark:text-gray-400 font-medium">
