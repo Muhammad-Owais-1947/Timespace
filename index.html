@@ -72,7 +72,7 @@
     <!-- Header -->
     <header class="mb-8 pb-4 border-b border-gray-300 dark:border-gray-600">
         <h1 class="text-4xl font-extrabold text-gray-800 dark:text-gray-200 text-center animate-pulse">Timetable Analyzer</h1>
-        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download!</p>
+        <p class="text-md text-gray-500 dark:text-gray-400 text-center mt-2">Upload your schedule (PDF, PNG, JPG, CSV, XLSX) to generate an interactive, color-coded view. Edit, reorder, and download! If Gemini fails, it will fallback to OCR.</p>
     </header>
 
     <!-- Upload and Status Area -->
@@ -91,7 +91,7 @@
     <!-- Loading Spinner -->
     <div id="loading-indicator" class="text-center py-10 hidden">
         <div class="animate-spin inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full" role="status"></div>
-        <p class="text-indigo-600 dark:text-indigo-400 font-medium mt-3 animate-bounce">Analyzing schedule with Gemini...</p>
+        <p class="text-indigo-600 dark:text-indigo-400 font-medium mt-3 animate-bounce">Analyzing schedule...</p>
     </div>
 
     <!-- Results Area -->
@@ -112,8 +112,10 @@
     });
 
     // --- Global State and Constants ---
-    const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; // Replace with your actual Google Gemini API key
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    const GEMINI_API_KEY = "AIzaSyD76XIgb16ksJJ7JvTwhzWdZP54PGlCLtM"; // Replace with your actual Google Gemini API key
+    const OCR_API_KEY = 'K87730774188957'; // Free OCR.space key (signup for your own at ocr.space for better limits)
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const OCR_API_URL = 'https://api.ocr.space/parse/image';
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB constraint
     
     // Day-to-color mapping for rendering
@@ -211,6 +213,62 @@
         });
     }
 
+    // --- Fallback OCR Parsing ---
+
+    async function fallbackOCR(file, mimeType) {
+        showStatus('Gemini failed. Trying fallback OCR...', 'success');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('language', 'eng');
+        formData.append('isTable', 'true');
+        formData.append('OCREngine', '2');
+
+        try {
+            const response = await fetch(OCR_API_URL, {
+                method: 'POST',
+                headers: { 'apikey': OCR_API_KEY },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('OCR API failed');
+
+            const result = await response.json();
+            if (result.IsErroredOnProcessing) throw new Error(result.ErrorMessage || 'OCR error');
+
+            let text = '';
+            result.ParsedResults.forEach(pr => { text += pr.ParsedText + '\n'; });
+
+            // Basic parsing of OCR text into structured data
+            const data = parseOCRTextToData(text);
+            if (data.length === 0) throw new Error('No data extracted from OCR.');
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    function parseOCRTextToData(text) {
+        const data = [];
+        const lines = text.split(/\r?\n/);
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+            // Assume format: Day Time Code Name Faculty Room (customize regex as needed)
+            const match = line.match(/(\w+) ([\d: -]+[AP]M?) (\w+) ([\w\s]+) ([\w\s]+) ([\w-]+)/i);
+            if (match) {
+                data.push({
+                    day: match[1],
+                    time: match[2],
+                    code: match[3],
+                    name: match[4],
+                    faculty: match[5] || 'N/A',
+                    room: match[6]
+                });
+            }
+        }
+        return data;
+    }
+
     // --- Core Application Logic ---
 
     async function handleFileUpload(event) {
@@ -256,7 +314,20 @@
             } else if (['pdf', 'png', 'jpg', 'jpeg'].includes(fileType)) {
                 fileData = await fileToBase64(file);
                 showStatus('File converted. Analyzing with Gemini...', 'success');
-                await callGeminiAPI(mimeType, fileType);
+                try {
+                    await callGeminiAPI(mimeType, fileType);
+                } catch (geminiError) {
+                    console.error('Gemini error:', geminiError);
+                    try {
+                        const data = await fallbackOCR(file, mimeType);
+                        timetableData = data;
+                        showStatus('Fallback OCR complete! Schedule rendered below.', 'success');
+                        renderTimetable(timetableData);
+                    } catch (ocrError) {
+                        console.error('OCR error:', ocrError);
+                        showStatus('Both Gemini and OCR failed. Please try a clearer file or check API keys.', 'error');
+                    }
+                }
             } else {
                 throw new Error('Unsupported file type.');
             }
@@ -325,14 +396,14 @@
 
         while (attempt < maxRetries) {
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status} - ${await response.text()}`);
                 }
 
                 const result = await response.json();
@@ -350,9 +421,8 @@
             } catch (error) {
                 attempt++;
                 if (attempt >= maxRetries) {
-                    console.error("Gemini API call failed after multiple retries:", error);
                     loadingIndicator.classList.add('hidden');
-                    return showStatus('Failed to analyze the timetable. Please ensure the file is clear and try again.', 'error');
+                    throw error; // Let fallback handle it
                 }
                 const delay = Math.pow(2, attempt) * 1000;
                 console.warn(`Attempt ${attempt} failed. Retrying in ${delay / 1000}s...`);
