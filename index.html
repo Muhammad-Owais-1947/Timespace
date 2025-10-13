@@ -265,11 +265,11 @@
     // ===================================================================================
 
     // --- AUTO-HIDING HEADER ---
-    const header = document.querySelector('header');
+    const pageHeader = document.querySelector('header');
     let lastScrollTop = 0;
     window.addEventListener('scroll', () => {
         let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        header.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > header.offsetHeight);
+        pageHeader.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > pageHeader.offsetHeight);
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     });
 
@@ -329,7 +329,7 @@
         { day: "Friday", time: "02:00 PM - 03:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", room: "2N-12" }
     ];
     let appData = JSON.parse(JSON.stringify(defaultTimetableData));
-    let dataHeaders = []; let dayColumnKey = ''; let dateColumnKey = ''; let currentView = 'card'; let source = 'default';
+    let dataHeaders = []; let dayColumnKey = ''; let dateColumnKey = ''; let currentView = 'card';
 
     // --- DOM ELEMENT SELECTORS ---
     const pageLoader = document.getElementById('page-loader');
@@ -376,8 +376,6 @@
 
     function clearData() {
         appData = JSON.parse(JSON.stringify(defaultTimetableData));
-        source = 'default';
-        fileUpload.value = '';
         prepareAndRender('card');
         showStatus('schedule_cleared', 'success');
     }
@@ -418,7 +416,7 @@
 
     async function callSmartAI(mimeType, dataForAI) {
         const isJson = mimeType === 'application/json';
-        const systemPrompt = `Analyze this data. First, determine its most likely type (e.g., 'timetable', 'checklist', 'project-plan'). Second, identify if any column contains dates; if so, normalize them to 'YYYY-MM-DD' format. Third, extract all data into a JSON array. Finally, based on the content, suggest the best primary view ('table', 'card', 'list', 'calendar'). Your entire response MUST be a single JSON object with two keys: "viewSuggestion" and "data".`;
+        const systemPrompt = `Analyze this data. First, determine its most likely type (e.g., 'timetable', 'checklist', 'project-plan'). Second, identify if any column contains dates; if so, normalize them to 'YYYY-MM-DD' format. Third, extract all data into a JSON array. Finally, based on the content, suggest the best primary view ('table', 'card', 'list', 'calendar'). For a 'checklist', suggest 'list'. For a 'timetable' with days, suggest 'card'. If dates are prominent, suggest 'calendar'. Otherwise, suggest 'table'. Your entire response MUST be a single JSON object with two keys: "viewSuggestion" and "data".`;
         const userParts = isJson ? [{ text: "Analyze this JSON data: " + dataForAI }] : [{ text: "Extract and analyze the data from this document." }, { inlineData: { mimeType, data: dataForAI } }];
         const payload = { contents: [{ parts: userParts }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json" } };
         try {
@@ -430,9 +428,7 @@
             const resultObject = JSON.parse(jsonText.replace(/^```json\s*|```$/g, '').trim());
             if (!resultObject.data || !Array.isArray(resultObject.data) || resultObject.data.length === 0) throw new Error("AI analysis resulted in empty or invalid data.");
             appData = resultObject.data;
-            const viewSuggestion = resultObject.viewSuggestion || 'table';
-            source = 'uploaded';
-            prepareAndRender(viewSuggestion);
+            prepareAndRender(resultObject.viewSuggestion || 'table');
         } catch (error) {
             console.error('AI Error:', error);
             showStatus(error.message, 'error');
@@ -441,10 +437,16 @@
         }
     }
 
+    // --- UI RENDERING ---
     function prepareAndRender(suggestedView) {
         controlsArea.classList.remove('hidden');
         downloadOptions.classList.remove('hidden');
-        if (!appData || appData.length === 0) { dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`; dataContainer.classList.remove('hidden'); return; }
+        if (!appData || appData.length === 0) { 
+            dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
+            dataContainer.classList.remove('hidden');
+            [dataTable.parentElement, calendarContainer].forEach(el => el.classList.add('hidden'));
+            return;
+        }
         dataHeaders = Object.keys(appData[0]);
         dayColumnKey = findDayColumnKey(dataHeaders);
         dateColumnKey = findDateColumnKey(dataHeaders);
