@@ -53,13 +53,13 @@
         .day-section.day-fri { background-color: #ede9fe; } .dark .day-section.day-fri { background-color: #4c1d95; }
         .day-section.day-sat { background-color: #ffedd5; } .dark .day-section.day-sat { background-color: #7c2d12; }
         .day-section.day-sun { background-color: #fce7f3; } .dark .day-section.day-sun { background-color: #831843; }
-        #schedule-table tr.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark #schedule-table tr.day-mon { background-color: #164e3233; }
-        #schedule-table tr.day-tue { background-color: #eff6ff; border-left: 3px solid #60a5fa; } .dark #schedule-table tr.day-tue { background-color: #1e3a8a33; }
-        #schedule-table tr.day-wed { background-color: #fef2f2; border-left: 3px solid #f87171; } .dark #schedule-table tr.day-wed { background-color: #7f1d1d33; }
-        #schedule-table tr.day-thu { background-color: #ecfeff; border-left: 3px solid #22d3ee; } .dark #schedule-table tr.day-thu { background-color: #164e6333; }
-        #schedule-table tr.day-fri { background-color: #faf5ff; border-left: 3px solid #a78bfa; } .dark #schedule-table tr.day-fri { background-color: #4c1d9533; }
-        #schedule-table tr.day-sat { background-color: #fff7ed; border-left: 3px solid #fb923c; } .dark #schedule-table tr.day-sat { background-color: #7c2d1233; }
-        #schedule-table tr.day-sun { background-color: #fdf4ff; border-left: 3px solid #f472b6; } .dark #schedule-table tr.day-sun { background-color: #83184333; }
+        #data-table tr.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark #data-table tr.day-mon { background-color: #164e3233; }
+        #data-table tr.day-tue { background-color: #eff6ff; border-left: 3px solid #60a5fa; } .dark #data-table tr.day-tue { background-color: #1e3a8a33; }
+        #data-table tr.day-wed { background-color: #fef2f2; border-left: 3px solid #f87171; } .dark #data-table tr.day-wed { background-color: #7f1d1d33; }
+        #data-table tr.day-thu { background-color: #ecfeff; border-left: 3px solid #22d3ee; } .dark #data-table tr.day-thu { background-color: #164e6333; }
+        #data-table tr.day-fri { background-color: #faf5ff; border-left: 3px solid #a78bfa; } .dark #data-table tr.day-fri { background-color: #4c1d9533; }
+        #data-table tr.day-sat { background-color: #fff7ed; border-left: 3px solid #fb923c; } .dark #data-table tr.day-sat { background-color: #7c2d1233; }
+        #data-table tr.day-sun { background-color: #fdf4ff; border-left: 3px solid #f472b6; } .dark #data-table tr.day-sun { background-color: #83184333; }
         .class-card { background-color: #ffffff; border: 1px solid #e5e7eb; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: grab; }
         .dark .class-card { background-color: #1f2937; border-color: #374151; }
         .class-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
@@ -67,14 +67,14 @@
         .sortable-chosen { opacity: 0.7; transform: scale(1.02); }
         .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #schedule-table { width: 100%; border-collapse: collapse; }
-        #schedule-table th, #schedule-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-        .dark #schedule-table th, .dark #schedule-table td { border-bottom-color: #374151; }
-        #schedule-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
-        .dark #schedule-table th { background-color: #1f2937; color: #9ca3af; }
-        #schedule-table tbody tr { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
-        #schedule-table tbody tr:hover { transform: translateY(-2px); background-color: #f3f4f6; }
-        .dark #schedule-table tbody tr:hover { background-color: #374151; }
+        #data-table { width: 100%; border-collapse: collapse; }
+        #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        .dark #data-table th, .dark #data-table td { border-bottom-color: #374151; }
+        #data-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
+        .dark #data-table th { background-color: #1f2937; color: #9ca3af; }
+        #data-table tbody tr { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
+        #data-table tbody tr:hover { transform: translateY(-2px); background-color: #f3f4f6; }
+        .dark #data-table tbody tr:hover { background-color: #374151; }
         .class-card input { background-color: transparent; border: 0; border-bottom: 1px dashed #9ca3af; padding: 2px 0; width: 100%; transition: border-color 0.2s; }
         .class-card input:focus { outline: none; border-bottom: 1px solid #3b82f6; }
         .btn-animate { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out, filter 0.2s ease-in-out; }
@@ -379,7 +379,7 @@
 
         processingLoader.classList.remove('hidden');
         showStatus('file_uploaded', 'success');
-        ['data-container', 'data-table', 'calendar-container'].forEach(id => document.getElementById(id).innerHTML = '');
+        [dataContainer, dataTable.parentElement, calendarContainer].forEach(el => el.classList.add('hidden'));
         controlsArea.classList.add('hidden');
         downloadOptions.classList.add('hidden');
 
@@ -388,14 +388,14 @@
             let rawDataForAI;
             if (fileExt === 'csv') {
                 rawDataForAI = await parseCSV(file);
+                await callSmartAI('application/json', JSON.stringify(rawDataForAI));
             } else if (fileExt === 'xlsx') {
                 rawDataForAI = await parseXLSX(file);
+                await callSmartAI('application/json', JSON.stringify(rawDataForAI));
             } else {
                 const fileData = await fileToBase64(file);
                 await callSmartAI(file.type, fileData);
-                return;
             }
-            await callSmartAI('application/json', JSON.stringify(rawDataForAI));
         } catch (error) {
             console.error('Processing error:', error);
             showStatus(error.message, 'error');
@@ -450,6 +450,7 @@
 
         if (!appData || appData.length === 0) {
             dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
+            dataContainer.classList.remove('hidden');
             return;
         }
 
@@ -464,10 +465,104 @@
         switchView(suggestedView);
     }
     
-    function renderCardView() { /* ... unchanged but uses dataContainer now ... */ }
-    function renderTableView() { /* ... unchanged but uses dataTable now ... */ }
-    function renderListView() { /* ... unchanged but uses dataContainer now ... */ }
-    function renderCalendarView() { /* ... unchanged ... */ }
+    function renderCardView() { 
+        dataContainer.innerHTML = '';
+        const groupedData = appData.reduce((acc, item) => {
+            const key = dayColumnKey ? (item[dayColumnKey] || 'Uncategorized') : 'All Entries';
+            (acc[key] = acc[key] || []).push(item);
+            return acc;
+        }, {});
+        const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => getDayIndex(a) - getDayIndex(b)) : ['All Entries'];
+
+        sortedGroups.forEach((groupKey, index) => {
+            const dayClass = DAY_CLASSES[groupKey] || '';
+            const daySection = document.createElement('div');
+            daySection.className = `day-section ${dayClass} p-4 rounded-lg fade-in`;
+            daySection.style.animationDelay = `${index * 0.05}s`;
+            let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4 sortable" id="sortable-${groupKey.replace(/\s/g, '-')}">`;
+            groupedData[groupKey].forEach((entry, entryIndex) => {
+                let cardContent = '';
+                dataHeaders.forEach((header, i) => {
+                    const value = entry[header] || 'N/A';
+                    const displayValue = `<span class="break-words">${value}</span>`;
+                    if (i < 2) cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
+                    else cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
+                });
+                htmlContent += `<div class="class-card p-4 rounded-lg" data-original-index="${entryIndex}"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+            });
+            htmlContent += `</div>`;
+            daySection.innerHTML = htmlContent;
+            dataContainer.appendChild(daySection);
+        });
+        dataContainer.classList.remove('hidden');
+    }
+
+    function renderTableView() { 
+        const thead = dataTable.querySelector('thead');
+        const tbody = dataTable.querySelector('tbody');
+        thead.innerHTML = ''; tbody.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        dataHeaders.forEach(header => { headerRow.innerHTML += `<th class="capitalize">${header}</th>`; });
+        thead.appendChild(headerRow);
+        
+        appData.forEach(entry => {
+            const row = document.createElement('tr');
+            const dayValue = dayColumnKey ? entry[dayColumnKey] : null;
+            row.className = `${DAY_CLASSES[dayValue] || ''} text-sm`;
+            let rowHTML = '';
+            dataHeaders.forEach(header => { rowHTML += `<td class="whitespace-nowrap">${entry[header] || 'N/A'}</td>`; });
+            row.innerHTML = rowHTML;
+            tbody.appendChild(row);
+        });
+        dataTable.parentElement.classList.remove('hidden');
+    }
+    
+    function renderListView() { 
+        dataContainer.innerHTML = '';
+        let listHtml = '<ul class="space-y-3 p-4">';
+        appData.forEach(item => {
+            const primaryText = Object.values(item)[0] || '';
+            const secondaryText = Object.values(item)[1] || '';
+            listHtml += `
+                <li class="flex items-center rounded-md bg-white dark:bg-slate-800 p-3 shadow-sm border dark:border-slate-700">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500">
+                    <div>
+                        <p class="font-medium text-slate-800 dark:text-slate-200">${primaryText}</p>
+                        ${secondaryText ? `<p class="text-sm text-slate-500 dark:text-slate-400">${secondaryText}</p>` : ''}
+                    </div>
+                </li>`;
+        });
+        listHtml += '</ul>';
+        dataContainer.innerHTML = listHtml;
+        dataContainer.classList.remove('hidden');
+    }
+    
+    function renderCalendarView() { 
+        calendarContainer.innerHTML = '';
+        const now = new Date();
+        const year = now.getFullYear(); const month = now.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => calendarContainer.innerHTML += `<div class="calendar-header">${day}</div>`);
+        for (let i = 0; i < firstDay.getDay(); i++) calendarContainer.innerHTML += `<div class="calendar-day other-month"></div>`;
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            let dayCell = `<div class="calendar-day"><div class="calendar-day-number">${day}</div>`;
+            const currentDate = new Date(year, month, day);
+            appData.forEach(item => {
+                if(item[dateColumnKey]) {
+                    const itemDate = new Date(item[dateColumnKey] + 'T00:00:00');
+                    if (itemDate.toDateString() === currentDate.toDateString()) {
+                        const primaryText = Object.values(item)[0] || 'Event';
+                        dayCell += `<div class="calendar-item">${primaryText}</div>`;
+                    }
+                }
+            });
+            dayCell += `</div>`;
+            calendarContainer.innerHTML += dayCell;
+        }
+        calendarContainer.classList.remove('hidden');
+    }
 
     function switchView(view) {
         currentView = view;
@@ -492,11 +587,59 @@
 
     function updateTimetableData() { /* ... unchanged but uses appData now ... */ }
     function createCaptureStylesheet(isDark) { /* ... unchanged ... */ }
+    
+    function getActiveElementForCapture() {
+        switch (currentView) {
+            case 'card': case 'list': return dataContainer;
+            case 'table': return dataTable.parentElement;
+            case 'calendar': return calendarContainer;
+            default: return null;
+        }
+    }
+
     async function captureFullElement(element) { /* ... unchanged ... */ }
-    async function downloadAsPDF() { /* ... logic updated for new containers ... */ }
-    async function downloadAsPNG() { /* ... logic updated for new containers ... */ }
-    function downloadAsCSV() { /* ... unchanged but uses appData now ... */ }
-    function downloadAsXLSX() { /* ... unchanged but uses appData now ... */ }
+    
+    async function downloadAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const element = getActiveElementForCapture();
+        if (!element) return;
+        showStatus('preparing_pdf', 'success');
+        try {
+            const canvas = await captureFullElement(element);
+            const imgData = canvas.toDataURL('image/png');
+            const { width, height } = canvas;
+            const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] });
+            pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+            pdf.save('time-space-export.pdf');
+        } catch (error) { showStatus(error.message, 'error'); }
+    }
+
+    async function downloadAsPNG() {
+        const element = getActiveElementForCapture();
+        if (!element) return;
+        showStatus('preparing_png', 'success');
+        try {
+            const canvas = await captureFullElement(element);
+            const link = document.createElement('a');
+            link.download = 'time-space-export.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (error) { showStatus(error.message, 'error'); }
+    }
+    function downloadAsCSV() {
+        const csv = Papa.unparse(appData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'time-space-export.csv';
+        link.click();
+    }
+    function downloadAsXLSX() {
+        const ws = XLSX.utils.json_to_sheet(appData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Data');
+        XLSX.writeFile(wb, 'time-space-export.xlsx');
+    }
 </script>
 
 </body>
