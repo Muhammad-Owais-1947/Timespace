@@ -75,10 +75,8 @@
         #data-table tbody tr { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
         #data-table tbody tr:hover { transform: translateY(-2px); background-color: #f3f4f6; }
         .dark #data-table tbody tr:hover { background-color: #374151; }
-        .class-card input { background-color: transparent; border: 0; border-bottom: 1px dashed #9ca3af; padding: 2px 0; width: 100%; transition: border-color 0.2s; }
-        .class-card input:focus { outline: none; border-bottom: 1px solid #3b82f6; }
         .btn-animate { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out, filter 0.2s ease-in-out; }
-        .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); filter: brightness(1.1); }
         .dark .btn-animate:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
         #report-issue-button { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background-color: #ef4444; color: white; width: 3.5rem; height: 3.5rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(239, 68, 68, 1); animation: glow-red 2s infinite; }
         .dark #report-issue-button { background-color: #f87171; }
@@ -90,17 +88,6 @@
         .loader-text { animation: pulse-text 2s ease-in-out infinite; }
         @keyframes draw { 0% { stroke-dashoffset: 250; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -250; } }
         @keyframes pulse-text { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        #calendar-container { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background-color: #e5e7eb; border: 1px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; }
-        .dark #calendar-container { background-color: #374151; border-color: #374151; }
-        .calendar-header { text-align: center; font-weight: 600; padding: 0.5rem 0; background-color: #f9fafb; font-size: 0.875rem; }
-        .dark .calendar-header { background-color: #1f2937; }
-        .calendar-day { background-color: #ffffff; padding: 0.5rem; min-height: 100px; }
-        .dark .calendar-day { background-color: #111827; }
-        .calendar-day.other-month { background-color: #f3f4f6; }
-        .dark .calendar-day.other-month { background-color: #1f2937; }
-        .calendar-day-number { font-weight: 500; }
-        .calendar-item { font-size: 0.75rem; padding: 0.25rem; margin-top: 0.25rem; border-radius: 0.25rem; background-color: #dbeafe; color: #1e40af; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .dark .calendar-item { background-color: #1e3a8a; color: #bfdbfe; }
     </style>
 </head>
 
@@ -162,7 +149,6 @@
                                 <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
                                 <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
                                 <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
-                                <button id="view-calendar" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="calendar_view">Calendar View</button>
                             </div>
                             <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50" data-translate-key="clear_button">Clear</button>
                         </div>
@@ -171,9 +157,8 @@
             </div>
             <div id="results-area" class="bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6">
                 <div id="data-container" class="space-y-6 hidden"></div>
-                <div id="calendar-container" class="hidden"></div>
-                <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-                    <table id="data-table" class="hidden">
+                <div id="data-table-wrapper" class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 hidden">
+                    <table id="data-table">
                         <thead></thead>
                         <tbody></tbody>
                     </table>
@@ -211,7 +196,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature2_title">Multiple View Options</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature2_desc">View your information as a table, cards, a checklist, or even on a calendar if dates are found.</p>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature2_desc">View your information as a table, cards, or a simple checklist.</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
@@ -288,10 +273,10 @@
     const langToggle = document.getElementById('lang-toggle');
     const translations = {
         en: {
-            site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", calendar_view: "Calendar View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, a checklist, or even on a calendar if dates are found.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", default_loaded: "Default data loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File uploaded. Processing...", preparing_pdf: "Preparing PDF...", preparing_png: "Preparing PNG...", changes_saved: "Changes saved!", no_data: "No data to display.", unsupported_file_type: "Unsupported file type."
+            site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File uploaded. Processing...", preparing_pdf: "Preparing PDF...", preparing_png: "Preparing PNG...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type."
         },
         ur: {
-            site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", calendar_view: "Calendar View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, checklist, ya calendar par dekhein agar tareekhein mojood hain.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", default_loaded: "Default data load ho gaya. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", changes_saved: "Tabdiliyan mehfooz ho gayin!", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type."
+            site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type."
         }
     };
     let currentLang = 'en';
@@ -329,14 +314,14 @@
         { day: "Friday", time: "02:00 PM - 03:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", room: "2N-12" }
     ];
     let appData = JSON.parse(JSON.stringify(defaultTimetableData));
-    let dataHeaders = []; let dayColumnKey = ''; let dateColumnKey = ''; let currentView = 'card';
+    let dataHeaders = []; let dayColumnKey = ''; let currentView = 'card';
 
     // --- DOM ELEMENT SELECTORS ---
     const pageLoader = document.getElementById('page-loader');
     const processingLoader = document.getElementById('processing-loader');
     const statusMessage = document.getElementById('status-message');
     const dataContainer = document.getElementById('data-container');
-    const calendarContainer = document.getElementById('calendar-container');
+    const dataTableWrapper = document.getElementById('data-table-wrapper');
     const dataTable = document.getElementById('data-table');
     const controlsArea = document.getElementById('controls-area');
     const downloadOptions = document.getElementById('download-options');
@@ -372,7 +357,6 @@
     function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
     function getDayIndex(day) { return DAY_ORDER.indexOf(day) === -1 ? Infinity : DAY_ORDER.indexOf(day); }
     function findDayColumnKey(headers) { const keywords = ['day', 'weekday', 'jour', 'din']; return headers.find(h => keywords.includes(h.toLowerCase())) || ''; }
-    function findDateColumnKey(headers) { const keywords = ['date', 'deadline', 'day', 'tarikh']; return headers.find(h => keywords.some(k => h.toLowerCase().includes(k))) || ''; }
 
     function clearData() {
         appData = JSON.parse(JSON.stringify(defaultTimetableData));
@@ -394,7 +378,7 @@
 
         processingLoader.classList.remove('hidden');
         showStatus('file_uploaded', 'success');
-        [dataContainer, dataTable.parentElement, calendarContainer].forEach(el => el.classList.add('hidden'));
+        [dataContainer, dataTableWrapper].forEach(el => el.classList.add('hidden'));
         controlsArea.classList.add('hidden');
         downloadOptions.classList.add('hidden');
 
@@ -444,26 +428,14 @@
         if (!appData || appData.length === 0) { 
             dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
             dataContainer.classList.remove('hidden');
-            [dataTable.parentElement, calendarContainer].forEach(el => el.classList.add('hidden'));
+            dataTableWrapper.classList.add('hidden');
             return;
         }
         dataHeaders = Object.keys(appData[0]);
         dayColumnKey = findDayColumnKey(dataHeaders);
-        dateColumnKey = findDateColumnKey(dataHeaders);
-
-        document.querySelectorAll('#view-buttons button').forEach(btn => btn.classList.add('hidden'));
-        ['view-card', 'view-table', 'view-list'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-        if (dateColumnKey) {
-            document.getElementById('view-calendar').classList.remove('hidden');
-        }
         
-        // Default to card view unless a better one is obvious
-        let bestView = defaultView;
-        if(dateColumnKey) bestView = 'calendar';
-        if(dayColumnKey) bestView = 'card';
-
-
-        switchView(bestView);
+        let preferredView = dayColumnKey ? 'card' : 'table';
+        switchView(preferredView);
     }
     
     function renderCardView() { 
@@ -512,49 +484,32 @@
             row.innerHTML = rowHTML;
             tbody.appendChild(row);
         });
-        dataTable.parentElement.classList.remove('hidden');
+        dataTableWrapper.classList.remove('hidden');
     }
     
     function renderListView() { 
         dataContainer.innerHTML = '';
         let listHtml = '<ul class="space-y-3 p-4">';
         appData.forEach(item => {
-            const primaryText = Object.values(item)[0] || '';
-            const secondaryText = Object.values(item)[1] || '';
-            listHtml += `<li class="flex items-center rounded-md bg-white dark:bg-slate-800 p-3 shadow-sm border dark:border-slate-700"><input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500"><div><p class="font-medium text-slate-800 dark:text-slate-200">${primaryText}</p>${secondaryText ? `<p class="text-sm text-slate-500 dark:text-slate-400">${secondaryText}</p>` : ''}</div></li>`;
+            const dayValue = dayColumnKey ? item[dayColumnKey] : null;
+            const dayClass = DAY_CLASSES[dayValue] || '';
+
+            listHtml += `<li class="flex items-center rounded-md p-3 shadow-sm border dark:border-slate-700 ${dayClass}">
+                            <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500 flex-shrink-0">
+                            <div>`;
+            dataHeaders.forEach((header, i) => {
+                const value = item[header] || 'N/A';
+                 if (i === 0) {
+                    listHtml += `<p class="font-medium text-slate-800 dark:text-slate-200">${value}</p>`;
+                 } else {
+                    listHtml += `<p class="text-sm text-slate-600 dark:text-slate-400">${header}: ${value}</p>`;
+                 }
+            });
+            listHtml += `</div></li>`;
         });
         listHtml += '</ul>';
         dataContainer.innerHTML = listHtml;
         dataContainer.classList.remove('hidden');
-    }
-    
-    function renderCalendarView() { 
-        calendarContainer.innerHTML = '';
-        const now = new Date();
-        const year = now.getFullYear(); const month = now.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        daysOfWeek.forEach(day => calendarContainer.innerHTML += `<div class="calendar-header">${day}</div>`);
-        for (let i = 0; i < firstDay.getDay(); i++) calendarContainer.innerHTML += `<div class="calendar-day other-month"></div>`;
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            let dayCell = `<div class="calendar-day"><div class="calendar-day-number">${day}</div>`;
-            const currentDate = new Date(year, month, day);
-            appData.forEach(item => {
-                if(item[dateColumnKey]) {
-                    try {
-                        const itemDate = new Date(item[dateColumnKey] + 'T00:00:00');
-                        if (itemDate.toDateString() === currentDate.toDateString()) {
-                            const primaryText = Object.values(item)[0] || 'Event';
-                            dayCell += `<div class="calendar-item" title="${primaryText}">${primaryText}</div>`;
-                        }
-                    } catch(e) { console.error("Invalid date format for calendar:", item[dateColumnKey])}
-                }
-            });
-            dayCell += `</div>`;
-            calendarContainer.innerHTML += dayCell;
-        }
-        calendarContainer.classList.remove('hidden');
     }
 
     function switchView(view) {
@@ -568,30 +523,68 @@
             activeBtn.classList.add('bg-blue-600', 'text-white');
             activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
         }
-        [dataContainer, dataTable.parentElement, calendarContainer].forEach(el => el.classList.add('hidden'));
+        [dataContainer, dataTableWrapper].forEach(el => el.classList.add('hidden'));
         if (view === 'card') renderCardView();
         else if (view === 'table') renderTableView();
         else if (view === 'list') renderListView();
-        else if (view === 'calendar') renderCalendarView();
-        else renderTableView();
+        else renderCardView(); // Default to card view
     }
 
-    function createCaptureStylesheet(isDark) { /* ... same ... */ }
+    function createCaptureStylesheet(isDark) {
+        const style = document.createElement('style');
+        style.id = 'temp-capture-style';
+        let css = `* { transition: none !important; animation: none !important; }`;
+        if (isDark) {
+            css += `
+                .day-section.day-mon, li.day-mon { background-color: #dcfce7 !important; } .day-section.day-tue, li.day-tue { background-color: #dbeafe !important; }
+                .day-section.day-wed, li.day-wed { background-color: #fee2e2 !important; } .day-section.day-thu, li.day-thu { background-color: #cffafe !important; }
+                .day-section.day-fri, li.day-fri { background-color: #ede9fe !important; } .day-section.day-sat, li.day-sat { background-color: #ffedd5 !important; }
+                .day-section.day-sun, li.day-sun { background-color: #fce7f3 !important; }
+                .day-section h3 { color: #1e293b !important; }
+                .class-card, li { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+                p, span, input { color: #475569 !important; }
+                .font-semibold, .font-medium { color: #1e293b !important; }
+            `;
+        }
+        style.textContent = css;
+        document.head.appendChild(style);
+        return style;
+    }
     
     function getActiveElementForCapture() {
         switch (currentView) {
             case 'card': case 'list': return dataContainer;
-            case 'table': return dataTable.parentElement;
-            case 'calendar': return calendarContainer;
+            case 'table': return dataTableWrapper;
             default: return null;
         }
     }
 
-    async function captureFullElement(element) { /* ... same ... */ }
-    async function downloadAsPDF() { /* ... same ... */ }
-    async function downloadAsPNG() { /* ... same ... */ }
-    function downloadAsCSV() { /* ... same ... */ }
-    function downloadAsXLSX() { /* ... same ... */ }
+    async function captureFullElement(element) { 
+        const isDark = document.documentElement.classList.contains('dark');
+        const tempStyleSheet = createCaptureStylesheet(isDark);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        try {
+            return await html2canvas(element, { scale: 2, backgroundColor: '#f8fafc', useCORS: true });
+        } finally {
+            document.head.removeChild(tempStyleSheet);
+        }
+     }
+    async function downloadAsPDF() {
+        const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return;
+        showStatus('preparing_pdf', 'success');
+        try { const canvas = await captureFullElement(element); const imgData = canvas.toDataURL('image/png'); const { width, height } = canvas; const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); } catch (error) { showStatus(error.message, 'error'); }
+    }
+    async function downloadAsPNG() {
+        const element = getActiveElementForCapture(); if (!element) return;
+        showStatus('preparing_png', 'success');
+        try { const canvas = await captureFullElement(element); const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); } catch (error) { showStatus(error.message, 'error'); }
+    }
+    function downloadAsCSV() {
+        const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click();
+    }
+    function downloadAsXLSX() {
+        const ws = XLSX.utils.json_to_sheet(appData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, 'time-space-export.xlsx');
+    }
 </script>
 
 </body>
