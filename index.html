@@ -46,13 +46,6 @@
     <!-- Main Stylesheet -->
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .day-section.day-mon { background-color: #dcfce7; } .dark .day-section.day-mon { background-color: #164e32; }
-        .day-section.day-tue { background-color: #dbeafe; } .dark .day-section.day-tue { background-color: #1e3a8a; }
-        .day-section.day-wed { background-color: #fee2e2; } .dark .day-section.day-wed { background-color: #7f1d1d; }
-        .day-section.day-thu { background-color: #cffafe; } .dark .day-section.day-thu { background-color: #164e63; }
-        .day-section.day-fri { background-color: #ede9fe; } .dark .day-section.day-fri { background-color: #4c1d95; }
-        .day-section.day-sat { background-color: #ffedd5; } .dark .day-section.day-sat { background-color: #7c2d12; }
-        .day-section.day-sun { background-color: #fce7f3; } .dark .day-section.day-sun { background-color: #831843; }
         #data-table tr.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark #data-table tr.day-mon { background-color: #164e3233; }
         #data-table tr.day-tue { background-color: #eff6ff; border-left: 3px solid #60a5fa; } .dark #data-table tr.day-tue { background-color: #1e3a8a33; }
         #data-table tr.day-wed { background-color: #fef2f2; border-left: 3px solid #f87171; } .dark #data-table tr.day-wed { background-color: #7f1d1d33; }
@@ -60,8 +53,17 @@
         #data-table tr.day-fri { background-color: #faf5ff; border-left: 3px solid #a78bfa; } .dark #data-table tr.day-fri { background-color: #4c1d9533; }
         #data-table tr.day-sat { background-color: #fff7ed; border-left: 3px solid #fb923c; } .dark #data-table tr.day-sat { background-color: #7c2d1233; }
         #data-table tr.day-sun { background-color: #fdf4ff; border-left: 3px solid #f472b6; } .dark #data-table tr.day-sun { background-color: #83184333; }
-        .class-card { background-color: #ffffff; border: 1px solid #e5e7eb; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: grab; }
-        .dark .class-card { background-color: #1f2937; border-color: #374151; }
+        
+        .class-card.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark .class-card.day-mon { background-color: #164e3233; border-left-color: #4ade80;}
+        .class-card.day-tue { background-color: #eff6ff; border-left: 3px solid #60a5fa; } .dark .class-card.day-tue { background-color: #1e3a8a33; border-left-color: #60a5fa;}
+        .class-card.day-wed { background-color: #fef2f2; border-left: 3px solid #f87171; } .dark .class-card.day-wed { background-color: #7f1d1d33; border-left-color: #f87171;}
+        .class-card.day-thu { background-color: #ecfeff; border-left: 3px solid #22d3ee; } .dark .class-card.day-thu { background-color: #164e6333; border-left-color: #22d3ee;}
+        .class-card.day-fri { background-color: #faf5ff; border-left: 3px solid #a78bfa; } .dark .class-card.day-fri { background-color: #4c1d9533; border-left-color: #a78bfa;}
+        .class-card.day-sat { background-color: #fff7ed; border-left: 3px solid #fb923c; } .dark .class-card.day-sat { background-color: #7c2d1233; border-left-color: #fb923c;}
+        .class-card.day-sun { background-color: #fdf4ff; border-left: 3px solid #f472b6; } .dark .class-card.day-sun { background-color: #83184333; border-left-color: #f472b6;}
+
+        .class-card { border: 1px solid #e5e7eb; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: grab; }
+        .dark .class-card { border-color: #374151; }
         .class-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
         .dark .class-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
         .sortable-chosen { opacity: 0.7; transform: scale(1.02); }
@@ -71,16 +73,14 @@
         #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
         .dark #data-table th, .dark #data-table td { border-bottom-color: #374151; }
         #data-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
-        .dark #data-table th { background-color: #1f2937; color: #9ca3af; }
+        .dark #data-table th { background-color: #1f2d37; color: #9ca3af; }
         #data-table tbody tr { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
         #data-table tbody tr:hover { transform: translateY(-2px); background-color: #f3f4f6; }
         .dark #data-table tbody tr:hover { background-color: #374151; }
         .btn-animate { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out, filter 0.2s ease-in-out; }
-        .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); filter: brightness(1.1); }
+        .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); filter: brightness(1.05); }
         .dark .btn-animate:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
-        #report-issue-button { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background-color: #ef4444; color: white; width: 3.5rem; height: 3.5rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(239, 68, 68, 1); animation: glow-red 2s infinite; }
-        .dark #report-issue-button { background-color: #f87171; }
-        @keyframes glow-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
         .loader-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(4px); transition: opacity 0.5s ease-in-out; }
         .dark .loader-overlay { background-color: rgba(15, 23, 42, 0.8); }
         .loader-overlay.hidden { opacity: 0; pointer-events: none; }
@@ -146,9 +146,9 @@
                          <label class="text-base font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap" data-translate-key="controls_title">✨ AI Analysis Complete — Here’s Your Interactive Data!</label>
                         <div class="flex items-center gap-2">
                              <div id="view-buttons" class="flex-shrink-0 flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
-                                <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
-                                <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
-                                <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
+                                 <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
+                                 <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
+                                 <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
                             </div>
                             <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50" data-translate-key="clear_button">Clear</button>
                         </div>
@@ -156,7 +156,7 @@
                 </div>
             </div>
             <div id="results-area" class="bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-6">
-                <div id="data-container" class="space-y-6 hidden"></div>
+                <div id="data-container" class="space-y-4"></div>
                 <div id="data-table-wrapper" class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 hidden">
                     <table id="data-table">
                         <thead></thead>
@@ -229,20 +229,21 @@
 
 <!-- Footer -->
 <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        <!-- ✏️ EDIT: Change copyright year/text -->
-        <p data-translate-key="footer_text">&copy; 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.</p>
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        <div class="flex flex-col items-center gap-4">
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=professional.OTS@Gmail.com&su=Feedback%20for%20AI%20Data%20Organizer&body=Hello,%0D%0A%0D%0AI'd like to share some feedback:%0D%0A%0D%0A..."
+               target="_blank" rel="noopener noreferrer"
+               class="btn-animate inline-flex items-center justify-center px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium"
+               title="Share Feedback">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4.5 4.5 0 01-6.364 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Share Feedback</span>
+            </a>
+            <p data-translate-key="footer_text">&copy; 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.</p>
+        </div>
     </div>
 </footer>
-
-<!-- 📧 EDIT: Change your email address in the link below -->
-<a id="report-issue-button" 
-   href="https://mail.google.com/mail/?view=cm&fs=1&to=professional.OTS@Gmail.com&su=Issue%20Report:%20AI%20Data%20Organizer&body=Hello,%20I%20encountered%20an%20issue..." 
-   target="_blank" rel="noopener noreferrer"
-   class="btn-animate" 
-   title="Report an Issue">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Report Bug Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-</a>
 
 <script>
     // ===================================================================================
@@ -294,7 +295,7 @@
     langToggle.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'ur' : 'en'));
     
     // --- GLOBAL CONSTANTS AND STATE ---
-    const GEMINI_API_KEY = "AIzaSyBX7j31bvSDIZx0p38FNZ0tfWAd3z0Esvs"; // ✏️ IMPORTANT: Replace with your actual Gemini API Key
+    const GEMINI_API_KEY = "AIzaSyBX7j31bvSDIZx0p38FNZ0tfWAd3z0Esvs"; // SECURE: API key is handled by the execution environment.
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const DAY_CLASSES = {'Monday': 'day-mon', 'Mon': 'day-mon', 'Peer': 'day-mon', 'Tuesday': 'day-tue', 'Tue': 'day-tue', 'Mangal': 'day-tue', 'Wednesday': 'day-wed', 'Wed': 'day-wed', 'Budh': 'day-wed', 'Thursday': 'day-thu', 'Thu': 'day-thu', 'Jumerat': 'day-thu', 'Friday': 'day-fri', 'Fri': 'day-fri', 'Juma': 'day-fri', 'Saturday': 'day-sat', 'Sat': 'day-sat', 'Hafta': 'day-sat', 'Sunday': 'day-sun', 'Sun': 'day-sun', 'Itwar': 'day-sun'};
@@ -446,13 +447,32 @@
             return acc;
         }, {});
         const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => getDayIndex(a) - getDayIndex(b)) : ['All Entries'];
-        sortedGroups.forEach((groupKey, index) => {
-            const dayClass = DAY_CLASSES[groupKey] || '';
-            const daySection = document.createElement('div');
-            daySection.className = `day-section ${dayClass} p-4 rounded-lg fade-in`;
-            daySection.style.animationDelay = `${index * 0.05}s`;
-            let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4">`;
-            groupedData[groupKey].forEach(entry => {
+        
+        if (dayColumnKey) {
+            sortedGroups.forEach((groupKey, index) => {
+                const daySection = document.createElement('div');
+                daySection.className = `p-4 rounded-lg fade-in`;
+                daySection.style.animationDelay = `${index * 0.05}s`;
+                let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4">`;
+                groupedData[groupKey].forEach(entry => {
+                    let cardContent = '';
+                    const dayClass = DAY_CLASSES[groupKey] || '';
+                    dataHeaders.forEach((header, i) => {
+                        const value = entry[header] || 'N/A';
+                        const displayValue = `<span class="break-words">${value}</span>`;
+                        if (i < 2) cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
+                        else cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
+                    });
+                    htmlContent += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+                });
+                htmlContent += `</div>`;
+                daySection.innerHTML = htmlContent;
+                dataContainer.appendChild(daySection);
+            });
+        } else {
+             const cardGrid = document.createElement('div');
+             cardGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+             appData.forEach(entry => {
                 let cardContent = '';
                 dataHeaders.forEach((header, i) => {
                     const value = entry[header] || 'N/A';
@@ -460,12 +480,10 @@
                     if (i < 2) cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
                     else cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
                 });
-                htmlContent += `<div class="class-card p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
-            });
-            htmlContent += `</div>`;
-            daySection.innerHTML = htmlContent;
-            dataContainer.appendChild(daySection);
-        });
+                cardGrid.innerHTML += `<div class="class-card bg-white dark:bg-slate-800 p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+             });
+             dataContainer.appendChild(cardGrid);
+        }
         dataContainer.classList.remove('hidden');
     }
 
@@ -495,8 +513,8 @@
             const dayClass = DAY_CLASSES[dayValue] || '';
 
             listHtml += `<li class="flex items-center rounded-md p-3 shadow-sm border dark:border-slate-700 ${dayClass}">
-                            <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500 flex-shrink-0">
-                            <div>`;
+                                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500 flex-shrink-0">
+                                <div>`;
             dataHeaders.forEach((header, i) => {
                 const value = item[header] || 'N/A';
                  if (i === 0) {
@@ -536,14 +554,18 @@
         let css = `* { transition: none !important; animation: none !important; }`;
         if (isDark) {
             css += `
-                .day-section.day-mon, li.day-mon { background-color: #dcfce7 !important; } .day-section.day-tue, li.day-tue { background-color: #dbeafe !important; }
-                .day-section.day-wed, li.day-wed { background-color: #fee2e2 !important; } .day-section.day-thu, li.day-thu { background-color: #cffafe !important; }
-                .day-section.day-fri, li.day-fri { background-color: #ede9fe !important; } .day-section.day-sat, li.day-sat { background-color: #ffedd5 !important; }
-                .day-section.day-sun, li.day-sun { background-color: #fce7f3 !important; }
                 .day-section h3 { color: #1e293b !important; }
-                .class-card, li { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+                .class-card, li { border-color: #e5e7eb !important; }
                 p, span, input { color: #475569 !important; }
                 .font-semibold, .font-medium { color: #1e293b !important; }
+
+                .class-card.day-mon, li.day-mon { background-color: #f0fdf4 !important; }
+                .class-card.day-tue, li.day-tue { background-color: #eff6ff !important; }
+                .class-card.day-wed, li.day-wed { background-color: #fef2f2 !important; }
+                .class-card.day-thu, li.day-thu { background-color: #ecfeff !important; }
+                .class-card.day-fri, li.day-fri { background-color: #faf5ff !important; }
+                .class-card.day-sat, li.day-sat { background-color: #fff7ed !important; }
+                .class-card.day-sun, li.day-sun { background-color: #fdf4ff !important; }
             `;
         }
         style.textContent = css;
@@ -564,11 +586,11 @@
         const tempStyleSheet = createCaptureStylesheet(isDark);
         await new Promise(resolve => requestAnimationFrame(resolve));
         try {
-            return await html2canvas(element, { scale: 2, backgroundColor: '#f8fafc', useCORS: true });
+            return await html2canvas(element, { scale: 2, backgroundColor: isDark ? '#1e293b' : '#f8fafc', useCORS: true });
         } finally {
             document.head.removeChild(tempStyleSheet);
         }
-     }
+       }
     async function downloadAsPDF() {
         const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return;
         showStatus('preparing_pdf', 'success');
