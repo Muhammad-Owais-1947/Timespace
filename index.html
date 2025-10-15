@@ -88,6 +88,22 @@
         .loader-text { animation: pulse-text 2s ease-in-out infinite; }
         @keyframes draw { 0% { stroke-dashoffset: 250; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -250; } }
         @keyframes pulse-text { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        /* Styles for Scroll-to-Top Button */
+        #scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(10px);
+        }
+        #scroll-to-top.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -150,7 +166,8 @@
                                  <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
                                  <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
                             </div>
-                            <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50" data-translate-key="clear_button">Clear</button>
+                            <!-- REFINEMENT 2: Clear button made more visible -->
+                            <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700" data-translate-key="clear_button">Clear</button>
                         </div>
                     </div>
                 </div>
@@ -245,6 +262,14 @@
     </div>
 </footer>
 
+<!-- REFINEMENT 1: Scroll-to-Top Button -->
+<button id="scroll-to-top" class="btn-animate h-12 w-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" aria-label="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+    </svg>
+</button>
+
+
 <script>
     // ===================================================================================
     // JAVASCRIPT LOGIC
@@ -274,7 +299,7 @@
     const langToggle = document.getElementById('lang-toggle');
     const translations = {
         en: {
-            site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File uploaded. Processing...", preparing_pdf: "Preparing PDF...", preparing_png: "Preparing PNG...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type."
+            site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File uploaded. Processing...", preparing_pdf: "PDF Generated...", preparing_png: "PNG Generated...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type."
         },
         ur: {
             site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type."
@@ -329,6 +354,7 @@
     const fileUpload = document.getElementById('file-upload');
     const uploadButton = document.getElementById('upload-button');
     const clearDataBtn = document.getElementById('clear-data');
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
     document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
 
     // --- EVENT LISTENERS ---
@@ -339,6 +365,18 @@
     document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
     document.getElementById('download-csv').addEventListener('click', () => downloadAsCSV());
     document.getElementById('download-xlsx').addEventListener('click', () => downloadAsXLSX());
+    // REFINEMENT 1: Scroll-to-Top Logic
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('show');
+        } else {
+            scrollToTopBtn.classList.remove('show');
+        }
+    });
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
 
     // --- INITIALIZATION ---
     window.addEventListener('load', () => {
@@ -358,6 +396,11 @@
     function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
     function getDayIndex(day) { return DAY_ORDER.indexOf(day) === -1 ? Infinity : DAY_ORDER.indexOf(day); }
     function findDayColumnKey(headers) { const keywords = ['day', 'weekday', 'jour', 'din']; return headers.find(h => keywords.includes(h.toLowerCase())) || ''; }
+    // REFINEMENT 3: Helper function to check if a string is an image URL
+    function isImageUrl(url) {
+        if (typeof url !== 'string') return false;
+        return /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
+    }
 
     function clearData() {
         appData = JSON.parse(JSON.stringify(defaultTimetableData));
@@ -399,11 +442,27 @@
         }
     }
 
+    // ===================================================================================
+    // REFINEMENT 4: AI DATA ANALYSIS (GEMINI API) - SECTION LABELED AND INSTRUCTIONS IMPROVED
+    // ===================================================================================
     async function callSmartAI(mimeType, dataForAI) {
         const isJson = mimeType === 'application/json';
-        const systemPrompt = `Analyze this data. Your only job is to extract all rows into a clean JSON array. Use the headers you find in the data as the keys for the JSON objects. Be accurate. Ignore empty rows or section titles that are not part of the data table.`;
-        const userParts = isJson ? [{ text: "Analyze this JSON data and return it as a clean JSON array: " + dataForAI }] : [{ text: "Extract and analyze the data from this document." }, { inlineData: { mimeType, data: dataForAI } }];
+        
+        // This system prompt is the set of instructions for the AI.
+        // It's engineered to be robust and handle various data types, including image URLs.
+        const systemPrompt = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
+        
+        Follow these rules strictly:
+        1.  **Identify Headers:** Automatically detect the headers from the data. These headers will become the keys for each JSON object in the array.
+        2.  **Extract Rows:** Each row of data must be converted into a separate JSON object.
+        3.  **Handle Image URLs:** If a data value appears to be an image (e.g., ends in .png, .jpg, .jpeg, .gif, .svg, .webp), you MUST preserve the full image and make appare if posible, if not than try to analyze the image content.
+        4.  **Clean Data:** Ignore any text that is clearly not part of the data table, such as page titles, section headings, or footers. Exclude empty or malformed rows from the final output.
+        5.  **Accuracy is Key:** Ensure the mapping of data to the correct headers is precise.
+        6.  **Output Format:** Your final output MUST be only the JSON array, with no additional text, explanations, or markdown formatting like \`\`\`json.`;
+
+        const userParts = isJson ? [{ text: "Analyze this JSON data and return it as a clean JSON array, following system instructions: " + dataForAI }] : [{ text: "Extract and analyze the data from this document, following system instructions." }, { inlineData: { mimeType, data: dataForAI } }];
         const payload = { contents: [{ parts: userParts }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json" } };
+        
         try {
             const response = await fetch(GEMINI_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!response.ok) throw new Error(`API error: ${response.status}`);
@@ -439,6 +498,7 @@
         switchView(preferredView);
     }
     
+    // REFINEMENT 3: Updated rendering to handle image URLs
     function renderCardView() { 
         dataContainer.innerHTML = '';
         const groupedData = appData.reduce((acc, item) => {
@@ -448,45 +508,40 @@
         }, {});
         const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => getDayIndex(a) - getDayIndex(b)) : ['All Entries'];
         
-        if (dayColumnKey) {
-            sortedGroups.forEach((groupKey, index) => {
-                const daySection = document.createElement('div');
-                daySection.className = `p-4 rounded-lg fade-in`;
-                daySection.style.animationDelay = `${index * 0.05}s`;
-                let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4">`;
-                groupedData[groupKey].forEach(entry => {
-                    let cardContent = '';
-                    const dayClass = DAY_CLASSES[groupKey] || '';
-                    dataHeaders.forEach((header, i) => {
-                        const value = entry[header] || 'N/A';
-                        const displayValue = `<span class="break-words">${value}</span>`;
-                        if (i < 2) cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
-                        else cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
-                    });
-                    htmlContent += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
-                });
-                htmlContent += `</div>`;
-                daySection.innerHTML = htmlContent;
-                dataContainer.appendChild(daySection);
-            });
-        } else {
-             const cardGrid = document.createElement('div');
-             cardGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
-             appData.forEach(entry => {
+        sortedGroups.forEach((groupKey, index) => {
+            const daySection = document.createElement('div');
+            daySection.className = `p-4 rounded-lg fade-in`;
+            daySection.style.animationDelay = `${index * 0.05}s`;
+            let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4">`;
+            groupedData[groupKey].forEach(entry => {
                 let cardContent = '';
+                const dayClass = DAY_CLASSES[groupKey] || '';
                 dataHeaders.forEach((header, i) => {
                     const value = entry[header] || 'N/A';
-                    const displayValue = `<span class="break-words">${value}</span>`;
-                    if (i < 2) cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
-                    else cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
+                    let displayValue;
+                    if (isImageUrl(value)) {
+                        displayValue = `<img src="${value}" alt="User content" class="mt-1 w-full h-auto max-h-48 object-contain rounded-md border dark:border-slate-700">`;
+                    } else {
+                        displayValue = `<span class="break-words">${value}</span>`;
+                    }
+
+                    if (i < 2) {
+                         cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
+                    } else {
+                         cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
+                    }
                 });
-                cardGrid.innerHTML += `<div class="class-card bg-white dark:bg-slate-800 p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
-             });
-             dataContainer.appendChild(cardGrid);
-        }
+                htmlContent += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+            });
+            htmlContent += `</div>`;
+            daySection.innerHTML = htmlContent;
+            dataContainer.appendChild(daySection);
+        });
+        
         dataContainer.classList.remove('hidden');
     }
 
+    // REFINEMENT 3: Updated rendering to handle image URLs
     function renderTableView() { 
         const thead = dataTable.querySelector('thead'); const tbody = dataTable.querySelector('tbody');
         thead.innerHTML = ''; tbody.innerHTML = '';
@@ -498,7 +553,14 @@
             const dayValue = dayColumnKey ? entry[dayColumnKey] : null;
             row.className = `${DAY_CLASSES[dayValue] || ''} text-sm`;
             let rowHTML = '';
-            dataHeaders.forEach(header => { rowHTML += `<td class="whitespace-nowrap">${entry[header] || 'N/A'}</td>`; });
+            dataHeaders.forEach(header => {
+                const value = entry[header] || 'N/A';
+                if (isImageUrl(value)) {
+                    rowHTML += `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>`;
+                } else {
+                    rowHTML += `<td class="whitespace-nowrap">${value}</td>`;
+                }
+            });
             row.innerHTML = rowHTML;
             tbody.appendChild(row);
         });
@@ -511,17 +573,18 @@
         appData.forEach(item => {
             const dayValue = dayColumnKey ? item[dayColumnKey] : null;
             const dayClass = DAY_CLASSES[dayValue] || '';
-
             listHtml += `<li class="flex items-center rounded-md p-3 shadow-sm border dark:border-slate-700 ${dayClass}">
                                 <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500 flex-shrink-0">
                                 <div>`;
             dataHeaders.forEach((header, i) => {
                 const value = item[header] || 'N/A';
-                 if (i === 0) {
+                if (isImageUrl(value)) {
+                    listHtml += `<div class="font-medium text-slate-800 dark:text-slate-200"><span class="capitalize">${header}:</span> <img src="${value}" class="mt-1 w-24 h-24 object-cover rounded-md"></div>`;
+                } else if (i === 0) {
                     listHtml += `<p class="font-medium text-slate-800 dark:text-slate-200">${value}</p>`;
-                 } else {
-                    listHtml += `<p class="text-sm text-slate-600 dark:text-slate-400">${header}: ${value}</p>`;
-                 }
+                } else {
+                    listHtml += `<p class="text-sm text-slate-600 dark:text-slate-400 capitalize">${header}: ${value}</p>`;
+                }
             });
             listHtml += `</div></li>`;
         });
@@ -554,18 +617,23 @@
         let css = `* { transition: none !important; animation: none !important; }`;
         if (isDark) {
             css += `
-                .day-section h3 { color: #1e293b !important; }
+                #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; }
+                .day-section h3, h3 { color: #1e293b !important; }
                 .class-card, li { border-color: #e5e7eb !important; }
-                p, span, input { color: #475569 !important; }
-                .font-semibold, .font-medium { color: #1e293b !important; }
+                p, span, input, td, th { color: #334155 !important; }
+                .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; }
+                .text-slate-500, .text-slate-600 { color: #64748b !important; }
 
-                .class-card.day-mon, li.day-mon { background-color: #f0fdf4 !important; }
-                .class-card.day-tue, li.day-tue { background-color: #eff6ff !important; }
-                .class-card.day-wed, li.day-wed { background-color: #fef2f2 !important; }
-                .class-card.day-thu, li.day-thu { background-color: #ecfeff !important; }
-                .class-card.day-fri, li.day-fri { background-color: #faf5ff !important; }
-                .class-card.day-sat, li.day-sat { background-color: #fff7ed !important; }
-                .class-card.day-sun, li.day-sun { background-color: #fdf4ff !important; }
+                .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; }
+                .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; }
+                .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; }
+                .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; }
+                .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; }
+                .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; }
+                .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; }
+
+                #data-table th { background-color: #f9fafb !important; }
+                #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }
             `;
         }
         style.textContent = css;
@@ -581,29 +649,93 @@
         }
     }
 
-    async function captureFullElement(element) { 
+    async function captureFullElement(element) {
+        if (!element) return null;
+
         const isDark = document.documentElement.classList.contains('dark');
         const tempStyleSheet = createCaptureStylesheet(isDark);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        
+        const captureContainer = document.createElement('div');
+        captureContainer.style.position = 'absolute';
+        captureContainer.style.left = '-9999px';
+        captureContainer.style.top = '0';
+        captureContainer.style.width = '1200px'; 
+        captureContainer.style.height = 'auto';
+        captureContainer.style.pointerEvents = 'none';
+
+        const originalParent = element.parentNode;
+        const nextSibling = element.nextSibling;
+        
+        captureContainer.appendChild(element);
+        document.body.appendChild(captureContainer);
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        let canvas;
         try {
-            return await html2canvas(element, { scale: 2, backgroundColor: isDark ? '#1e293b' : '#f8fafc', useCORS: true });
+            canvas = await html2canvas(element, {
+                scale: 3,
+                backgroundColor: '#f8fafc',
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+            });
         } finally {
+            if (nextSibling) {
+                originalParent.insertBefore(element, nextSibling);
+            } else {
+                originalParent.appendChild(element);
+            }
+            document.body.removeChild(captureContainer);
             document.head.removeChild(tempStyleSheet);
         }
-       }
+        return canvas;
+    }
+
     async function downloadAsPDF() {
-        const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return;
+        const { jsPDF } = window.jspdf; 
+        const element = getActiveElementForCapture(); 
+        if (!element) return;
+        
         showStatus('preparing_pdf', 'success');
-        try { const canvas = await captureFullElement(element); const imgData = canvas.toDataURL('image/png'); const { width, height } = canvas; const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); } catch (error) { showStatus(error.message, 'error'); }
+        try { 
+            const canvas = await captureFullElement(element); 
+            if (!canvas) throw new Error("Capture failed.");
+            
+            const imgData = canvas.toDataURL('image/png'); 
+            const { width, height } = canvas; 
+            const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); 
+            pdf.addImage(imgData, 'PNG', 0, 0, width, height); 
+            pdf.save('time-space-export.pdf'); 
+        } catch (error) { 
+            console.error("PDF Export Error:", error); 
+            showStatus(error.message, 'error'); 
+        }
     }
+
     async function downloadAsPNG() {
-        const element = getActiveElementForCapture(); if (!element) return;
+        const element = getActiveElementForCapture(); 
+        if (!element) return;
+
         showStatus('preparing_png', 'success');
-        try { const canvas = await captureFullElement(element); const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); } catch (error) { showStatus(error.message, 'error'); }
+        try { 
+            const canvas = await captureFullElement(element); 
+             if (!canvas) throw new Error("Capture failed.");
+
+            const link = document.createElement('a'); 
+            link.download = 'time-space-export.png'; 
+            link.href = canvas.toDataURL('image/png'); 
+            link.click(); 
+        } catch (error) { 
+            console.error("PNG Export Error:", error); 
+            showStatus(error.message, 'error'); 
+        }
     }
+
     function downloadAsCSV() {
         const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click();
     }
+    
     function downloadAsXLSX() {
         const ws = XLSX.utils.json_to_sheet(appData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, 'time-space-export.xlsx');
     }
