@@ -442,7 +442,7 @@
             allDOMElements.submitAdminLogin.disabled = true;
 
             try {
-                if (SECURE_API_URL === "https://security.anonymoushacker151122.workers.dev/" || !SECURE_API_URL.startsWith('https://')) {
+                if (SECURE_API_URL === "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE" || !SECURE_API_URL.startsWith('https://')) {
                     throw new Error("Worker URL is not configured correctly.");
                 }
 
@@ -546,7 +546,7 @@
 
         // --- AI DATA ANALYSIS ---
         async function callSmartAI(mimeType, dataForAI) {
-            if (SECURE_API_URL === "https://security.anonymoushacker151122.workers.dev/" || !SECURE_API_URL.startsWith('https://')) {
+            if (SECURE_API_URL === "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE" || !SECURE_API_URL.startsWith('https://')) {
                  showStatus("API endpoint is not configured by the developer.", "error");
                  throw new Error("API URL not configured.");
             }
