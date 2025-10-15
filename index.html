@@ -282,7 +282,7 @@
     const GEMINI_API_KEY = ""; // SECURE: API key is handled by the execution environment.
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const ADMIN_SECRET_URL = "PASTE_YOUR_JSONBIN_URL_HERE"; 
+    const ADMIN_SECRET_URL = "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5"; 
     const USER_UPLOAD_LIMIT = 5;
     const UPLOAD_LIMIT_HOURS = 1;
     let isAdmin = false;
@@ -387,7 +387,16 @@
             allDOMElements.versionModal.classList.add('hidden');
             localStorage.setItem('version2_popup_shown', 'true');
         });
-        allDOMElements.adminButton.addEventListener('click', () => allDOMElements.adminModal.classList.remove('hidden'));
+        allDOMElements.adminButton.addEventListener('click', () => {
+            if (isAdmin) {
+                // If already admin, log out
+                isAdmin = false;
+                allDOMElements.adminButton.textContent = 'Admin';
+                allDOMElements.adminButton.classList.remove('text-green-500', 'dark:text-green-400');
+            } else {
+                allDOMElements.adminModal.classList.remove('hidden');
+            }
+        });
         allDOMElements.cancelAdminLogin.addEventListener('click', () => allDOMElements.adminModal.classList.add('hidden'));
         allDOMElements.submitAdminLogin.addEventListener('click', handleAdminLogin);
         allDOMElements.adminPasswordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAdminLogin(); });
@@ -411,20 +420,26 @@
         allDOMElements.statusMessage.classList.remove('hidden');
     }
 
-    // --- CHANGE: Updated Admin Login Logic ---
     async function handleAdminLogin() {
         const enteredPassword = allDOMElements.adminPasswordInput.value;
         allDOMElements.adminError.textContent = 'Verifying...';
 
         try {
-            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5") {
-                throw new Error("Admin URL not configured.");
+            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "PASTE_YOUR_JSONBIN_URL_HERE") {
+                throw new Error("Admin URL not configured by the developer.");
             }
-            const response = await fetch(ADMIN_SECRET_URL);
-            if (!response.ok) throw new Error('Could not verify password.');
+            const response = await fetch(ADMIN_SECRET_URL, {
+                headers: {
+                    // NOTE: JSONBin.io requires an access key for private bins.
+                    // This key is intentionally left blank for you to fill in.
+                    'X-Access-Key': '$2a$10$Htj0j.vo/A79sXgc8V6SAewXQHu.pvXyDHyZik3hzzv8bZGWkFQPe'
+                }
+            });
+            if (!response.ok) {
+                 throw new Error(`Could not fetch secret (Status: ${response.status}). Check URL and Access Key.`);
+            }
             
             const data = await response.json();
-            // In JSONBin, the actual data is inside a 'record' property
             const correctPassword = data.record.secret;
 
             if (enteredPassword === correctPassword) {
