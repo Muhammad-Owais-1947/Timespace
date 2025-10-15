@@ -17,17 +17,17 @@
 
     <!-- SEO: Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://example.com/"> <!-- ✏️ EDIT: Change this to your live URL -->
+    <meta property="og:url" content="https://example.com/">
     <meta property="og:title" content="Time Space | AI Data Organizer">
     <meta property="og:description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file of your notes, schedule, or list, and our AI will create a beautiful, interactive display for you.">
-    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space"> <!-- ✏️ EDIT: Change to a link of a preview image -->
+    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space">
     
     <!-- SEO: Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://example.com/"> <!-- ✏️ EDIT: Change this to your live URL -->
+    <meta property="twitter:url" content="https://example.com/">
     <meta property="twitter:title" content="Time Space | AI Data Organizer">
     <meta property="twitter:description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file of your notes, schedule, or list, and our AI will create a beautiful, interactive display for you.">
-    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space"> <!-- ✏️ EDIT: Change to a link of a preview image -->
+    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space">
 
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -46,6 +46,12 @@
     <!-- Main Stylesheet -->
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        /* CHANGE 2: Smoother and slightly slower modal transitions */
+        .modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); transition: opacity 0.5s ease; }
+        .modal-content { transition: transform 0.5s ease, opacity 0.5s ease; }
+        .modal-overlay.hidden { opacity: 0; pointer-events: none; }
+        .modal-overlay.hidden .modal-content { transform: scale(0.95); opacity: 0; }
+
         #data-table tr.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark #data-table tr.day-mon { background-color: #164e3233; }
         #data-table tr.day-tue { background-color: #eff6ff; border-left: 3px solid #60a5fa; } .dark #data-table tr.day-tue { background-color: #1e3a8a33; }
         #data-table tr.day-wed { background-color: #fef2f2; border-left: 3px solid #f87171; } .dark #data-table tr.day-wed { background-color: #7f1d1d33; }
@@ -66,7 +72,6 @@
         .dark .class-card { border-color: #374151; }
         .class-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
         .dark .class-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
-        .sortable-chosen { opacity: 0.7; transform: scale(1.02); }
         .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #data-table { width: 100%; border-collapse: collapse; }
@@ -74,36 +79,14 @@
         .dark #data-table th, .dark #data-table td { border-bottom-color: #374151; }
         #data-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
         .dark #data-table th { background-color: #1f2d37; color: #9ca3af; }
-        #data-table tbody tr { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
-        #data-table tbody tr:hover { transform: translateY(-2px); background-color: #f3f4f6; }
-        .dark #data-table tbody tr:hover { background-color: #374151; }
         .btn-animate { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out, filter 0.2s ease-in-out; }
         .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); filter: brightness(1.05); }
         .dark .btn-animate:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
-        
         .loader-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(248, 250, 252, 0.8); backdrop-filter: blur(4px); transition: opacity 0.5s ease-in-out; }
         .dark .loader-overlay { background-color: rgba(15, 23, 42, 0.8); }
         .loader-overlay.hidden { opacity: 0; pointer-events: none; }
-        .loader-logo path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: draw 2s ease-in-out infinite; }
-        .loader-text { animation: pulse-text 2s ease-in-out infinite; }
-        @keyframes draw { 0% { stroke-dashoffset: 250; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -250; } }
-        @keyframes pulse-text { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        
-        /* Styles for Scroll-to-Top Button */
-        #scroll-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            transform: translateY(10px);
-        }
-        #scroll-to-top.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
+        #scroll-to-top { position: fixed; bottom: 20px; right: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; transform: translateY(10px); z-index: 50;}
+        #scroll-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 </head>
 
@@ -111,18 +94,43 @@
 
 <!-- Initial Page Loader -->
 <div id="page-loader" class="loader-overlay">
-    <svg class="loader-logo h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
-    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="loading_analyzer">Loading Time Space...</p>
+    <svg class="h-16 w-16 text-blue-600 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
+    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg animate-pulse" data-translate-key="loading_analyzer">Loading Time Space...</p>
 </div>
 
 <!-- File Processing Loader -->
 <div id="processing-loader" class="loader-overlay hidden">
-     <svg class="loader-logo h-16 w-16 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
-    <p class="loader-text text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="analyzing">Making magic behind the scenes...</p>
+     <svg class="h-16 w-16 text-blue-600 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
+    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg animate-pulse" data-translate-key="analyzing">Making magic behind the scenes...</p>
+</div>
+
+<!-- Version 2.0 Welcome Modal -->
+<div id="version-modal" class="modal-overlay hidden">
+    <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-md m-4 p-6 rounded-2xl shadow-xl text-center">
+        <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Welcome to Time Space 2.0!</h2>
+        <p class="mt-4 text-slate-600 dark:text-slate-300">This new version introduces an improved AI, better download quality, and a smoother experience. Enjoy!</p>
+        <button id="close-version-modal" class="btn-animate mt-6 w-full px-6 py-2 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Got it!</button>
+    </div>
+</div>
+
+<!-- Admin Password Modal -->
+<div id="admin-modal" class="modal-overlay hidden">
+    <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-sm m-4 p-6 rounded-2xl shadow-xl">
+        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 text-center">Admin Access</h2>
+        <p id="admin-error" class="text-sm text-red-500 text-center mt-2 h-4"></p>
+        <div class="mt-4">
+            <label for="admin-password" class="text-sm font-medium text-slate-600 dark:text-slate-400">Password</label>
+            <input type="password" id="QAZplm@110022994" class="mt-1 w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="mt-6 flex gap-3">
+            <button id="cancel-admin-login" class="btn-animate w-full px-4 py-2 text-sm font-semibold bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-500">Cancel</button>
+            <button id="submit-admin-login" class="btn-animate w-full px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Login</button>
+        </div>
+    </div>
 </div>
 
 <!-- Header -->
-<header class="sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-transform duration-300">
+<header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-transform duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <a href="#" class="flex items-center space-x-2">
@@ -130,11 +138,13 @@
                 <span class="font-bold text-lg sm:text-xl text-slate-900 dark:text-white" data-translate-key="site_name">Time Space</span>
             </a>
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <nav class="hidden md:flex items-center space-x-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600 dark:text-slate-400">
                     <a href="#features" class="hover:text-blue-600 transition-colors" data-translate-key="nav_features">Features</a>
                     <a href="#portfolio" class="hover:text-blue-600 transition-colors" data-translate-key="nav_portfolio">Portfolio</a>
                 </nav>
                 <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+                <!-- CHANGE 1: Admin button visibility fix -->
+                <button id="admin-button" class="hidden md:flex items-center justify-center h-9 px-3 rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate text-sm font-semibold">Admin</button>
                 <button id="lang-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate font-semibold text-xs"></button>
                 <button id="theme-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate">
                     <svg class="h-5 w-5 block dark:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" role="img" aria-label="Moon Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
@@ -166,7 +176,6 @@
                                  <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
                                  <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
                             </div>
-                            <!-- REFINEMENT 2: Clear button made more visible -->
                             <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700" data-translate-key="clear_button">Clear</button>
                         </div>
                     </div>
@@ -235,7 +244,6 @@
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl" data-translate-key="portfolio_title">Have a Look</h2>
             <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-translate-key="portfolio_desc">Interested in seeing more of my work? Visit my portfolio to explore other projects.</p>
             <div class="mt-8">
-                <!-- ✏️ EDIT: Change the link to your portfolio -->
                 <a href="https://muhammad-owais-1947.github.io/portfolio/" target="_blank" rel="noopener noreferrer" class="btn-animate inline-block px-8 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md" data-translate-key="portfolio_button">
                     Check Out What I’ve Built
                 </a>
@@ -262,205 +270,246 @@
     </div>
 </footer>
 
-<!-- REFINEMENT 1: Scroll-to-Top Button -->
+<!-- Scroll-to-Top Button -->
 <button id="scroll-to-top" class="btn-animate h-12 w-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" aria-label="Scroll to top">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
     </svg>
 </button>
 
-
 <script>
     // ===================================================================================
     // JAVASCRIPT LOGIC
     // ===================================================================================
 
-    // --- AUTO-HIDING HEADER ---
-    const pageHeader = document.querySelector('header');
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        pageHeader.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > pageHeader.offsetHeight);
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    });
-
-    // --- THEME MANAGEMENT ---
-    const themeToggle = document.getElementById('theme-toggle');
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    }
-    themeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    });
-
-    // --- LANGUAGE MANAGEMENT (CENTRALIZED TRANSLATIONS) ---
-    // ✏️ To add/edit text, modify this section.
-    const langToggle = document.getElementById('lang-toggle');
-    const translations = {
-        en: {
-            site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File uploaded. Processing...", preparing_pdf: "PDF Generated...", preparing_png: "PNG Generated...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type."
-        },
-        ur: {
-            site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type."
-        }
-    };
-    let currentLang = 'en';
-    function getText(key, lang = currentLang) { return translations[lang]?.[key] || key; }
-    function setLanguage(lang) {
-        currentLang = lang;
-        document.documentElement.lang = lang;
-        langToggle.textContent = lang === 'en' ? 'UR' : 'EN';
-        document.querySelectorAll('[data-translate-key]').forEach(el => {
-            const key = el.dataset.translateKey;
-            el.textContent = getText(key);
-        });
-        localStorage.setItem('language', lang);
-    }
-    langToggle.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'ur' : 'en'));
-    
-    // --- GLOBAL CONSTANTS AND STATE ---
+    // --- GLOBAL STATE & CONSTANTS ---
     const GEMINI_API_KEY = "AIzaSyBX7j31bvSDIZx0p38FNZ0tfWAd3z0Esvs"; // SECURE: API key is handled by the execution environment.
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
-    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const ADMIN_PASSWORD = "QAZplm@110022994";
+    const USER_UPLOAD_LIMIT = 5;
+    const UPLOAD_LIMIT_HOURS = 1;
+    let isAdmin = false;
+    let appData = [];
+    let dataHeaders = [];
+    let dayColumnKey = '';
+    let currentView = 'card';
     const DAY_CLASSES = {'Monday': 'day-mon', 'Mon': 'day-mon', 'Peer': 'day-mon', 'Tuesday': 'day-tue', 'Tue': 'day-tue', 'Mangal': 'day-tue', 'Wednesday': 'day-wed', 'Wed': 'day-wed', 'Budh': 'day-wed', 'Thursday': 'day-thu', 'Thu': 'day-thu', 'Jumerat': 'day-thu', 'Friday': 'day-fri', 'Fri': 'day-fri', 'Juma': 'day-fri', 'Saturday': 'day-sat', 'Sat': 'day-sat', 'Hafta': 'day-sat', 'Sunday': 'day-sun', 'Sun': 'day-sun', 'Itwar': 'day-sun'};
     const DAY_ORDER = ['Monday', 'Mon', 'Peer', 'Tuesday', 'Tue', 'Mangal', 'Wednesday', 'Wed', 'Budh', 'Thursday', 'Thu', 'Jumerat', 'Friday', 'Fri', 'Juma', 'Saturday', 'Sat', 'Hafta', 'Sunday', 'Sun', 'Itwar'];
     const defaultTimetableData = [
-        { day: "Monday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Anusha Gilani", room: "SST-101" },
-        { day: "Monday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Anusha Gilani", room: "2N-02" },
-        { day: "Tuesday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", room: "2N-03" },
-        { day: "Tuesday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", room: "1C-15" },
-        { day: "Wednesday", time: "08:00 AM - 09:15 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", room: "2N-12" },
-        { day: "Wednesday", time: "09:30 AM - 10:45 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", room: "2N-12" },
-        { day: "Thursday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Anusha Gilani", room: "SST-101" },
-        { day: "Thursday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Anusha Gilani", room: "2N-02" },
-        { day: "Friday", time: "11:00 AM - 12:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", room: "2N-12" },
-        { day: "Friday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", room: "2N-03" },
-        { day: "Friday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", room: "1C-15" },
-        { day: "Friday", time: "02:00 PM - 03:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", room: "2N-12" }
+    // Monday    
+    { day: "Monday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Nagesh-Kumar", type: "Theory", mode: "On-Campus", room: "SST-101" },
+    { day: "Monday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Unconfirmed", type: "Theory", mode: "On-Campus", room: "2N-02" },
+
+    // Tuesday
+    { day: "Tuesday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", type: "Theory", mode: "On-Campus", room: "2N-03" },
+    { day: "Tuesday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", type: "Theory", mode: "On-Campus", room: "1C-15" },
+
+    // Wednesday
+    { day: "Wednesday", time: "08:00 AM - 09:15 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", type: "Theory", mode: "On-Campus", room: "2N-12" },
+    { day: "Wednesday", time: "09:30 AM - 10:45 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", type: "Theory", mode: "On-Campus", room: "2N-12" },
+
+    // Thursday
+    { day: "Thursday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Nagesh-Kumar", type: "Theory", mode: "On-Campus", room: "SST-101" },
+    { day: "Thursday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Unconfirmed", type: "Theory", mode: "On-Campus", room: "2N-02" },
+
+    // Friday
+    { day: "Friday", time: "11:00 AM - 12:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", type: "Theory", mode: "On-Campus", room: "2N-12" },
+    { day: "Friday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", type: "Theory", mode: "On-Campus", room: "2N-03" },
+    { day: "Friday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", type: "Theory", mode: "On-Campus", room: "1C-15" },
+    { day: "Friday", time: "02:00 PM - 03:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", type: "Theory", mode: "On-Campus", room: "2N-12" }
+
     ];
-    let appData = JSON.parse(JSON.stringify(defaultTimetableData));
-    let dataHeaders = []; let dayColumnKey = ''; let currentView = 'card';
 
     // --- DOM ELEMENT SELECTORS ---
-    const pageLoader = document.getElementById('page-loader');
-    const processingLoader = document.getElementById('processing-loader');
-    const statusMessage = document.getElementById('status-message');
-    const dataContainer = document.getElementById('data-container');
-    const dataTableWrapper = document.getElementById('data-table-wrapper');
-    const dataTable = document.getElementById('data-table');
-    const controlsArea = document.getElementById('controls-area');
-    const downloadOptions = document.getElementById('download-options');
-    const fileUpload = document.getElementById('file-upload');
-    const uploadButton = document.getElementById('upload-button');
-    const clearDataBtn = document.getElementById('clear-data');
-    const scrollToTopBtn = document.getElementById('scroll-to-top');
-    document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
-
-    // --- EVENT LISTENERS ---
-    uploadButton.addEventListener('click', () => fileUpload.click());
-    fileUpload.addEventListener('change', handleFileUpload);
-    clearDataBtn.addEventListener('click', clearData);
-    document.getElementById('download-pdf').addEventListener('click', () => downloadAsPDF());
-    document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
-    document.getElementById('download-csv').addEventListener('click', () => downloadAsCSV());
-    document.getElementById('download-xlsx').addEventListener('click', () => downloadAsXLSX());
-    // REFINEMENT 1: Scroll-to-Top Logic
-    window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            scrollToTopBtn.classList.add('show');
-        } else {
-            scrollToTopBtn.classList.remove('show');
-        }
-    });
-    scrollToTopBtn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
+    const allDOMElements = {
+        pageLoader: document.getElementById('page-loader'),
+        processingLoader: document.getElementById('processing-loader'),
+        statusMessage: document.getElementById('status-message'),
+        dataContainer: document.getElementById('data-container'),
+        dataTableWrapper: document.getElementById('data-table-wrapper'),
+        dataTable: document.getElementById('data-table'),
+        controlsArea: document.getElementById('controls-area'),
+        downloadOptions: document.getElementById('download-options'),
+        fileUpload: document.getElementById('file-upload'),
+        uploadButton: document.getElementById('upload-button'),
+        clearDataBtn: document.getElementById('clear-data'),
+        scrollToTopBtn: document.getElementById('scroll-to-top'),
+        pageHeader: document.querySelector('header'),
+        themeToggle: document.getElementById('theme-toggle'),
+        langToggle: document.getElementById('lang-toggle'),
+        versionModal: document.getElementById('version-modal'),
+        closeVersionModal: document.getElementById('close-version-modal'),
+        adminModal: document.getElementById('admin-modal'),
+        adminButton: document.getElementById('admin-button'),
+        cancelAdminLogin: document.getElementById('cancel-admin-login'),
+        submitAdminLogin: document.getElementById('submit-admin-login'),
+        adminPasswordInput: document.getElementById('admin-password'),
+        adminError: document.getElementById('admin-error'),
+    };
+    
+    // --- TRANSLATIONS ---
+    const translations = { en: { site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type.", upload_limit_reached: `Upload limit of ${USER_UPLOAD_LIMIT} files per hour reached.` }, ur: { site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type.", upload_limit_reached: `Har ghantay ${USER_UPLOAD_LIMIT} files ki upload had tak pahonch gaye.` } };
+    let currentLang = 'en';
+    function getText(key, lang = currentLang) { return translations[lang]?.[key] || key; }
 
     // --- INITIALIZATION ---
     window.addEventListener('load', () => {
+        setupEventListeners();
         const savedLang = localStorage.getItem('language') || 'en';
         setLanguage(savedLang);
-        setTimeout(() => pageLoader.classList.add('hidden'), 250);
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        setTimeout(() => {
+            allDOMElements.pageLoader.classList.add('hidden');
+            // CHANGE 2: Delayed and conditional popup
+            if (!localStorage.getItem('version2_popup_shown')) {
+                setTimeout(() => {
+                    allDOMElements.versionModal.classList.remove('hidden');
+                }, 10000);
+            }
+        }, 500);
+        appData = JSON.parse(JSON.stringify(defaultTimetableData));
         prepareAndRender('card');
         showStatus('welcome_message', 'success');
     });
 
-    // --- CORE FUNCTIONS ---
-    function showStatus(messageKey, type) {
-        statusMessage.textContent = getText(messageKey);
-        statusMessage.className = `mt-4 p-3 rounded-md text-sm text-center w-full ${type === 'error' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'}`;
-        statusMessage.classList.remove('hidden');
-    }
-    function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
-    function getDayIndex(day) { return DAY_ORDER.indexOf(day) === -1 ? Infinity : DAY_ORDER.indexOf(day); }
-    function findDayColumnKey(headers) { const keywords = ['day', 'weekday', 'jour', 'din']; return headers.find(h => keywords.includes(h.toLowerCase())) || ''; }
-    // REFINEMENT 3: Helper function to check if a string is an image URL
-    function isImageUrl(url) {
-        if (typeof url !== 'string') return false;
-        return /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
-    }
+    // --- EVENT LISTENERS SETUP ---
+    function setupEventListeners() {
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            // Header hide/show
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            allDOMElements.pageHeader.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > allDOMElements.pageHeader.offsetHeight);
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            // Scroll-to-top button
+            allDOMElements.scrollToTopBtn.classList.toggle('show', window.pageYOffset > 300);
+        });
 
-    function clearData() {
-        appData = JSON.parse(JSON.stringify(defaultTimetableData));
-        prepareAndRender('card');
-        showStatus('schedule_cleared', 'success');
+        allDOMElements.scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        allDOMElements.themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+        allDOMElements.langToggle.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'ur' : 'en'));
+        allDOMElements.uploadButton.addEventListener('click', () => allDOMElements.fileUpload.click());
+        allDOMElements.fileUpload.addEventListener('change', handleFileUpload);
+        allDOMElements.clearDataBtn.addEventListener('click', clearData);
+        document.getElementById('download-pdf').addEventListener('click', () => downloadAsPDF());
+        document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
+        document.getElementById('download-csv').addEventListener('click', () => downloadAsCSV());
+        document.getElementById('download-xlsx').addEventListener('click', () => downloadAsXLSX());
+        allDOMElements.closeVersionModal.addEventListener('click', () => {
+            allDOMElements.versionModal.classList.add('hidden');
+            localStorage.setItem('version2_popup_shown', 'true');
+        });
+        allDOMElements.adminButton.addEventListener('click', () => allDOMElements.adminModal.classList.remove('hidden'));
+        allDOMElements.cancelAdminLogin.addEventListener('click', () => allDOMElements.adminModal.classList.add('hidden'));
+        allDOMElements.submitAdminLogin.addEventListener('click', handleAdminLogin);
+        allDOMElements.adminPasswordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAdminLogin(); });
+        document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
     }
     
-    // --- FILE PROCESSING ---
-    function structureParsedData(rawData) { if (rawData.length < 2) return []; const headers = rawData[0]; const dataRows = rawData.slice(1); return dataRows.map(row => { const entry = {}; headers.forEach((header, index) => { entry[header] = (row[index] || '').toString().trim(); }); return entry; }).filter(entry => Object.values(entry).some(val => val));}
-    function parseCSV(file) { return new Promise((resolve, reject) => { Papa.parse(file, { complete: res => res.errors.length ? reject(res.errors[0]) : resolve(structureParsedData(res.data)), error: reject, skipEmptyLines: true }); }); }
-    function parseXLSX(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => { try { const workbook = XLSX.read(e.target.result, { type: 'binary' }); const worksheet = workbook.Sheets[workbook.SheetNames[0]]; resolve(structureParsedData(XLSX.utils.sheet_to_json(worksheet, { header: 1 }))); } catch (err) { reject(err); } }; reader.onerror = reject; reader.readAsBinaryString(file); }); }
+    // --- CORE APP LOGIC ---
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        allDOMElements.langToggle.textContent = lang === 'en' ? 'UR' : 'EN';
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            el.textContent = getText(el.dataset.translateKey);
+        });
+        localStorage.setItem('language', lang);
+    }
+    
+    function showStatus(messageKey, type) {
+        allDOMElements.statusMessage.textContent = getText(messageKey);
+        allDOMElements.statusMessage.className = `mt-4 p-3 rounded-md text-sm text-center w-full ${type === 'error' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'}`;
+        allDOMElements.statusMessage.classList.remove('hidden');
+    }
+
+    function handleAdminLogin() {
+        const password = allDOMElements.adminPasswordInput.value;
+        if (password === ADMIN_PASSWORD) {
+            isAdmin = true;
+            allDOMElements.adminModal.classList.add('hidden');
+            allDOMElements.adminButton.textContent = 'Admin Mode ✅';
+            allDOMElements.adminButton.classList.add('text-green-500', 'dark:text-green-400');
+            allDOMElements.adminPasswordInput.value = '';
+            allDOMElements.adminError.textContent = '';
+        } else {
+            allDOMElements.adminError.textContent = 'Incorrect password.';
+        }
+    }
+    
+    // --- FILE UPLOAD & RATE LIMITING ---
+    function checkUploadLimit() {
+        if (isAdmin) return true;
+        const now = new Date().getTime();
+        const oneHourAgo = now - (UPLOAD_LIMIT_HOURS * 60 * 60 * 1000);
+        const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
+        const recentUploads = uploads.filter(timestamp => timestamp > oneHourAgo);
+        localStorage.setItem('userUploads', JSON.stringify(recentUploads));
+        return recentUploads.length < USER_UPLOAD_LIMIT;
+    }
+
+    function recordUpload() {
+        if (isAdmin) return;
+        const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
+        uploads.push(new Date().getTime());
+        localStorage.setItem('userUploads', JSON.stringify(uploads));
+    }
 
     async function handleFileUpload(event) {
+        if (!checkUploadLimit()) {
+            showStatus('upload_limit_reached', 'error');
+            return;
+        }
+
         const file = event.target.files[0];
         if (!file) return;
-        if (file.size > MAX_FILE_SIZE) return showStatus('File too large! Max size is 10MB.', 'error');
-        const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf', 'text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        if (!allowedTypes.includes(file.type) && !file.name.endsWith('.csv')) return showStatus('unsupported_file_type', 'error');
-
-        processingLoader.classList.remove('hidden');
+        if (file.size > MAX_FILE_SIZE) {
+            showStatus('File too large! Max size is 10MB.', 'error');
+            return;
+        }
+        
+        allDOMElements.processingLoader.classList.remove('hidden');
         showStatus('file_uploaded', 'success');
-        [dataContainer, dataTableWrapper].forEach(el => el.classList.add('hidden'));
-        controlsArea.classList.add('hidden');
-        downloadOptions.classList.add('hidden');
+        [allDOMElements.dataContainer, allDOMElements.dataTableWrapper, allDOMElements.controlsArea, allDOMElements.downloadOptions].forEach(el => el.classList.add('hidden'));
 
         try {
             const fileExt = file.name.split('.').pop().toLowerCase();
-            if (fileExt === 'csv' || fileExt === 'xlsx') {
+            if (['csv', 'xlsx'].includes(fileExt)) {
                 const rawData = (fileExt === 'csv') ? await parseCSV(file) : await parseXLSX(file);
                 await callSmartAI('application/json', JSON.stringify(rawData));
             } else {
                 const fileData = await fileToBase64(file);
                 await callSmartAI(file.type, fileData);
             }
+            recordUpload();
         } catch (error) {
             console.error('Processing error:', error);
             showStatus(error.message, 'error');
-            processingLoader.classList.add('hidden');
+            allDOMElements.processingLoader.classList.add('hidden');
         }
     }
 
-    // ===================================================================================
-    // REFINEMENT 4: AI DATA ANALYSIS (GEMINI API) - SECTION LABELED AND INSTRUCTIONS IMPROVED
-    // ===================================================================================
-    async function callSmartAI(mimeType, dataForAI) {
-        const isJson = mimeType === 'application/json';
-        
-        // This system prompt is the set of instructions for the AI.
-        // It's engineered to be robust and handle various data types, including image URLs.
-        const systemPrompt = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
-        
-        Follow these rules strictly:
-        1.  **Identify Headers:** Automatically detect the headers from the data. These headers will become the keys for each JSON object in the array.
-        2.  **Extract Rows:** Each row of data must be converted into a separate JSON object.
-        3.  **Handle Image URLs:** If a data value appears to be an image (e.g., ends in .png, .jpg, .jpeg, .gif, .svg, .webp), you MUST preserve the full image and make appare if posible, if not than try to analyze the image content.
-        4.  **Clean Data:** Ignore any text that is clearly not part of the data table, such as page titles, section headings, or footers. Exclude empty or malformed rows from the final output.
-        5.  **Accuracy is Key:** Ensure the mapping of data to the correct headers is precise.
-        6.  **Output Format:** Your final output MUST be only the JSON array, with no additional text, explanations, or markdown formatting like \`\`\`json.`;
+    function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
+    function parseCSV(file) { return new Promise((resolve, reject) => Papa.parse(file, { complete: res => res.errors.length ? reject(res.errors[0]) : resolve(structureParsedData(res.data)), error: reject, skipEmptyLines: true })); }
+    function parseXLSX(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => { try { const book = XLSX.read(e.target.result, { type: 'binary' }); resolve(structureParsedData(XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]], { header: 1 }))); } catch (err) { reject(err); } }; reader.onerror = reject; reader.readAsBinaryString(file); }); }
+    function structureParsedData(data) { if (data.length < 2) return []; const headers = data[0]; return data.slice(1).map(row => headers.reduce((obj, h, i) => ({ ...obj, [h]: (row[i] || '').toString().trim() }), {})).filter(entry => Object.values(entry).some(val => val));}
 
-        const userParts = isJson ? [{ text: "Analyze this JSON data and return it as a clean JSON array, following system instructions: " + dataForAI }] : [{ text: "Extract and analyze the data from this document, following system instructions." }, { inlineData: { mimeType, data: dataForAI } }];
+    // --- AI DATA ANALYSIS (GEMINI API) ---
+    async function callSmartAI(mimeType, dataForAI) {
+        const systemPrompt = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
+        Follow these rules strictly:
+        1.  **Identify Headers:** Automatically detect headers. These become the keys for each JSON object.
+        2.  **Extract Rows:** Each data row must be a separate JSON object.
+        3.  **Handle Image URLs:** If a value is a URL ending in .png, .jpg, etc., preserve the full URL string. Do not analyze the image content.
+        4.  **Clean Data:** Ignore page titles, headings, or footers. Exclude empty/malformed rows.
+        5.  **Accuracy is Key:** Ensure precise mapping of data to headers.
+        6.  **Output Format:** Your final output MUST be only the JSON array, with no extra text or markdown.`;
+        const userParts = mimeType === 'application/json' ? [{ text: "Analyze this JSON data: " + dataForAI }] : [{ text: "Extract and analyze the data from this document." }, { inlineData: { mimeType, data: dataForAI } }];
         const payload = { contents: [{ parts: userParts }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json" } };
         
         try {
@@ -477,268 +526,104 @@
             console.error('AI Error:', error);
             showStatus(error.message, 'error');
         } finally {
-             processingLoader.classList.add('hidden');
+             allDOMElements.processingLoader.classList.add('hidden');
         }
     }
 
-    // --- UI RENDERING ---
+    // --- DYNAMIC UI RENDERING ---
+    function isImageUrl(url) { return typeof url === 'string' && /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url); }
+    function findDayColumnKey(headers) { return headers.find(h => ['day', 'weekday', 'jour', 'din'].includes(h.toLowerCase())) || ''; }
+    function clearData() { appData = JSON.parse(JSON.stringify(defaultTimetableData)); prepareAndRender('card'); showStatus('schedule_cleared', 'success'); }
+
     function prepareAndRender(defaultView = 'card') {
-        controlsArea.classList.remove('hidden');
-        downloadOptions.classList.remove('hidden');
+        allDOMElements.controlsArea.classList.remove('hidden');
+        allDOMElements.downloadOptions.classList.remove('hidden');
         if (!appData || appData.length === 0) { 
-            dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
-            dataContainer.classList.remove('hidden');
-            dataTableWrapper.classList.add('hidden');
+            allDOMElements.dataContainer.innerHTML = `<p class="text-center text-slate-500 p-8">${getText('no_data')}</p>`;
             return;
         }
         dataHeaders = Object.keys(appData[0]);
         dayColumnKey = findDayColumnKey(dataHeaders);
-        
-        let preferredView = dayColumnKey ? 'card' : 'table';
-        switchView(preferredView);
+        switchView(dayColumnKey ? defaultView : 'table');
     }
     
-    // REFINEMENT 3: Updated rendering to handle image URLs
     function renderCardView() { 
+        const { dataContainer } = allDOMElements;
         dataContainer.innerHTML = '';
         const groupedData = appData.reduce((acc, item) => {
             const key = dayColumnKey ? (item[dayColumnKey] || 'Uncategorized') : 'All Entries';
             (acc[key] = acc[key] || []).push(item);
             return acc;
         }, {});
-        const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => getDayIndex(a) - getDayIndex(b)) : ['All Entries'];
+        const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)) : ['All Entries'];
         
-        sortedGroups.forEach((groupKey, index) => {
-            const daySection = document.createElement('div');
-            daySection.className = `p-4 rounded-lg fade-in`;
-            daySection.style.animationDelay = `${index * 0.05}s`;
-            let htmlContent = `<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">${groupKey}</h3><div class="space-y-4">`;
-            groupedData[groupKey].forEach(entry => {
-                let cardContent = '';
-                const dayClass = DAY_CLASSES[groupKey] || '';
-                dataHeaders.forEach((header, i) => {
-                    const value = entry[header] || 'N/A';
-                    let displayValue;
-                    if (isImageUrl(value)) {
-                        displayValue = `<img src="${value}" alt="User content" class="mt-1 w-full h-auto max-h-48 object-contain rounded-md border dark:border-slate-700">`;
-                    } else {
-                        displayValue = `<span class="break-words">${value}</span>`;
-                    }
+        // REFINEMENT 1: Make grid responsive to data
+        const columns = dataHeaders.length;
+        let gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+        if (columns > 6) { gridClass = 'grid-cols-1 sm:grid-cols-2'; }
+        else if (columns > 4) { gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'; }
 
-                    if (i < 2) {
-                         cardContent += `<p class="font-semibold text-slate-900 dark:text-white capitalize">${header}: ${displayValue}</p>`;
-                    } else {
-                         cardContent += `<p class="text-slate-500 dark:text-slate-400 capitalize text-sm">${header}: ${displayValue}</p>`;
-                    }
-                });
-                htmlContent += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+        const container = document.createElement('div');
+        container.className = `grid ${gridClass} gap-4`;
+
+        appData.forEach(entry => {
+            let cardContent = '';
+            dataHeaders.forEach((header, i) => {
+                const value = entry[header] || 'N/A';
+                const displayValue = isImageUrl(value) ? `<img src="${value}" alt="User content" class="mt-1 w-full h-auto max-h-48 object-contain rounded-md">` : `<span class="break-words">${value}</span>`;
+                cardContent += `<p class="${i < 2 ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 text-sm'} capitalize">${header}: ${displayValue}</p>`;
             });
-            htmlContent += `</div>`;
-            daySection.innerHTML = htmlContent;
-            dataContainer.appendChild(daySection);
+            const dayClass = dayColumnKey ? (DAY_CLASSES[entry[dayColumnKey]] || '') : '';
+            container.innerHTML += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
         });
-        
+        dataContainer.appendChild(container);
         dataContainer.classList.remove('hidden');
     }
 
-    // REFINEMENT 3: Updated rendering to handle image URLs
     function renderTableView() { 
-        const thead = dataTable.querySelector('thead'); const tbody = dataTable.querySelector('tbody');
+        const { dataTable } = allDOMElements;
+        const thead = dataTable.querySelector('thead');
+        const tbody = dataTable.querySelector('tbody');
         thead.innerHTML = ''; tbody.innerHTML = '';
-        const headerRow = document.createElement('tr');
-        dataHeaders.forEach(header => { headerRow.innerHTML += `<th class="capitalize">${header}</th>`; });
-        thead.appendChild(headerRow);
+        thead.innerHTML = `<tr>${dataHeaders.map(h => `<th class="capitalize">${h}</th>`).join('')}</tr>`;
         appData.forEach(entry => {
-            const row = document.createElement('tr');
-            const dayValue = dayColumnKey ? entry[dayColumnKey] : null;
-            row.className = `${DAY_CLASSES[dayValue] || ''} text-sm`;
-            let rowHTML = '';
-            dataHeaders.forEach(header => {
+            const row = tbody.insertRow();
+            row.className = `${(dayColumnKey && DAY_CLASSES[entry[dayColumnKey]]) || ''} text-sm`;
+            row.innerHTML = dataHeaders.map(header => {
                 const value = entry[header] || 'N/A';
-                if (isImageUrl(value)) {
-                    rowHTML += `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>`;
-                } else {
-                    rowHTML += `<td class="whitespace-nowrap">${value}</td>`;
-                }
-            });
-            row.innerHTML = rowHTML;
-            tbody.appendChild(row);
+                return isImageUrl(value) ? `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>` : `<td class="whitespace-nowrap">${value}</td>`;
+            }).join('');
         });
-        dataTableWrapper.classList.remove('hidden');
+        allDOMElements.dataTableWrapper.classList.remove('hidden');
     }
     
-    function renderListView() { 
-        dataContainer.innerHTML = '';
-        let listHtml = '<ul class="space-y-3 p-4">';
-        appData.forEach(item => {
-            const dayValue = dayColumnKey ? item[dayColumnKey] : null;
-            const dayClass = DAY_CLASSES[dayValue] || '';
-            listHtml += `<li class="flex items-center rounded-md p-3 shadow-sm border dark:border-slate-700 ${dayClass}">
-                                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 mr-4 focus:ring-blue-500 flex-shrink-0">
-                                <div>`;
-            dataHeaders.forEach((header, i) => {
-                const value = item[header] || 'N/A';
-                if (isImageUrl(value)) {
-                    listHtml += `<div class="font-medium text-slate-800 dark:text-slate-200"><span class="capitalize">${header}:</span> <img src="${value}" class="mt-1 w-24 h-24 object-cover rounded-md"></div>`;
-                } else if (i === 0) {
-                    listHtml += `<p class="font-medium text-slate-800 dark:text-slate-200">${value}</p>`;
-                } else {
-                    listHtml += `<p class="text-sm text-slate-600 dark:text-slate-400 capitalize">${header}: ${value}</p>`;
-                }
-            });
-            listHtml += `</div></li>`;
-        });
-        listHtml += '</ul>';
-        dataContainer.innerHTML = listHtml;
-        dataContainer.classList.remove('hidden');
-    }
-
     function switchView(view) {
         currentView = view;
         document.querySelectorAll('#view-buttons button').forEach(btn => {
-            btn.classList.remove('bg-blue-600', 'text-white');
-            btn.classList.add('text-slate-600', 'dark:text-slate-300');
+            const isActive = btn.id === `view-${view}`;
+            btn.classList.toggle('bg-blue-600', isActive);
+            btn.classList.toggle('text-white', isActive);
+            btn.classList.toggle('text-slate-600', !isActive);
+            btn.classList.toggle('dark:text-slate-300', !isActive);
         });
-        const activeBtn = document.getElementById(`view-${view}`);
-        if(activeBtn) {
-            activeBtn.classList.add('bg-blue-600', 'text-white');
-            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
-        }
-        [dataContainer, dataTableWrapper].forEach(el => el.classList.add('hidden'));
+        [allDOMElements.dataContainer, allDOMElements.dataTableWrapper].forEach(el => el.classList.add('hidden'));
         if (view === 'card') renderCardView();
         else if (view === 'table') renderTableView();
-        else if (view === 'list') renderListView();
-        else renderCardView(); // Default to card view
     }
 
-    function createCaptureStylesheet(isDark) {
-        const style = document.createElement('style');
-        style.id = 'temp-capture-style';
-        let css = `* { transition: none !important; animation: none !important; }`;
-        if (isDark) {
-            css += `
-                #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; }
-                .day-section h3, h3 { color: #1e293b !important; }
-                .class-card, li { border-color: #e5e7eb !important; }
-                p, span, input, td, th { color: #334155 !important; }
-                .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; }
-                .text-slate-500, .text-slate-600 { color: #64748b !important; }
+    // --- DOWNLOAD & CAPTURE LOGIC ---
+    async function captureFullElement(element) { /* ... [Unchanged from previous correct version] ... */ }
+    async function downloadAsPDF() { /* ... [Unchanged from previous correct version] ... */ }
+    async function downloadAsPNG() { /* ... [Unchanged from previous correct version] ... */ }
+    function downloadAsCSV() { const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click(); }
+    function downloadAsXLSX() { const ws = XLSX.utils.json_to_sheet(appData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, 'time-space-export.xlsx'); }
 
-                .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; }
-                .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; }
-                .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; }
-                .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; }
-                .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; }
-                .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; }
-                .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; }
-
-                #data-table th { background-color: #f9fafb !important; }
-                #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }
-            `;
-        }
-        style.textContent = css;
-        document.head.appendChild(style);
-        return style;
-    }
-    
-    function getActiveElementForCapture() {
-        switch (currentView) {
-            case 'card': case 'list': return dataContainer;
-            case 'table': return dataTableWrapper;
-            default: return null;
-        }
-    }
-
-    async function captureFullElement(element) {
-        if (!element) return null;
-
-        const isDark = document.documentElement.classList.contains('dark');
-        const tempStyleSheet = createCaptureStylesheet(isDark);
-        
-        const captureContainer = document.createElement('div');
-        captureContainer.style.position = 'absolute';
-        captureContainer.style.left = '-9999px';
-        captureContainer.style.top = '0';
-        captureContainer.style.width = '1200px'; 
-        captureContainer.style.height = 'auto';
-        captureContainer.style.pointerEvents = 'none';
-
-        const originalParent = element.parentNode;
-        const nextSibling = element.nextSibling;
-        
-        captureContainer.appendChild(element);
-        document.body.appendChild(captureContainer);
-
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        let canvas;
-        try {
-            canvas = await html2canvas(element, {
-                scale: 3,
-                backgroundColor: '#f8fafc',
-                useCORS: true,
-                scrollX: 0,
-                scrollY: 0,
-            });
-        } finally {
-            if (nextSibling) {
-                originalParent.insertBefore(element, nextSibling);
-            } else {
-                originalParent.appendChild(element);
-            }
-            document.body.removeChild(captureContainer);
-            document.head.removeChild(tempStyleSheet);
-        }
-        return canvas;
-    }
-
-    async function downloadAsPDF() {
-        const { jsPDF } = window.jspdf; 
-        const element = getActiveElementForCapture(); 
-        if (!element) return;
-        
-        showStatus('preparing_pdf', 'success');
-        try { 
-            const canvas = await captureFullElement(element); 
-            if (!canvas) throw new Error("Capture failed.");
-            
-            const imgData = canvas.toDataURL('image/png'); 
-            const { width, height } = canvas; 
-            const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); 
-            pdf.addImage(imgData, 'PNG', 0, 0, width, height); 
-            pdf.save('time-space-export.pdf'); 
-        } catch (error) { 
-            console.error("PDF Export Error:", error); 
-            showStatus(error.message, 'error'); 
-        }
-    }
-
-    async function downloadAsPNG() {
-        const element = getActiveElementForCapture(); 
-        if (!element) return;
-
-        showStatus('preparing_png', 'success');
-        try { 
-            const canvas = await captureFullElement(element); 
-             if (!canvas) throw new Error("Capture failed.");
-
-            const link = document.createElement('a'); 
-            link.download = 'time-space-export.png'; 
-            link.href = canvas.toDataURL('image/png'); 
-            link.click(); 
-        } catch (error) { 
-            console.error("PNG Export Error:", error); 
-            showStatus(error.message, 'error'); 
-        }
-    }
-
-    function downloadAsCSV() {
-        const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click();
-    }
-    
-    function downloadAsXLSX() {
-        const ws = XLSX.utils.json_to_sheet(appData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, 'time-space-export.xlsx');
-    }
+    // --- These functions are copied from the previous version as they were correct ---
+    async function captureFullElement(element) {if (!element) return null; const isDark = document.documentElement.classList.contains('dark'); const tempStyleSheet = createCaptureStylesheet(isDark); const captureContainer = document.createElement('div'); captureContainer.style.position = 'absolute'; captureContainer.style.left = '-9999px'; captureContainer.style.top = '0'; captureContainer.style.width = '1200px'; captureContainer.style.height = 'auto'; captureContainer.style.pointerEvents = 'none'; const originalParent = element.parentNode; const nextSibling = element.nextSibling; captureContainer.appendChild(element); document.body.appendChild(captureContainer); await new Promise(resolve => setTimeout(resolve, 300)); let canvas; try { canvas = await html2canvas(element, { scale: 3, backgroundColor: '#f8fafc', useCORS: true, scrollX: 0, scrollY: 0 }); } finally { if (nextSibling) { originalParent.insertBefore(element, nextSibling); } else { originalParent.appendChild(element); } document.body.removeChild(captureContainer); document.head.removeChild(tempStyleSheet); } return canvas; }
+    function createCaptureStylesheet(isDark) { const style = document.createElement('style'); style.id = 'temp-capture-style'; let css = `* { transition: none !important; animation: none !important; }`; if (isDark) { css += ` #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e293b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
+    function getActiveElementForCapture() { switch (currentView) { case 'card': case 'list': return allDOMElements.dataContainer; case 'table': return allDOMElements.dataTableWrapper; default: return null; } }
+    async function downloadAsPDF() { const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_pdf', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const imgData = canvas.toDataURL('image/png'); const { width, height } = canvas; const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); } catch (error) { console.error("PDF Export Error:", error); showStatus(error.message, 'error'); } }
+    async function downloadAsPNG() { const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_png', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); } catch (error) { console.error("PNG Export Error:", error); showStatus(error.message, 'error'); } }
 </script>
 
 </body>
