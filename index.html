@@ -277,15 +277,14 @@
     // ===================================================================================
     // CONFIGURATION - PASTE YOUR SECRETS HERE
     // ===================================================================================
-    // 1. Get this from your JSONBin.io dashboard URL after creating a bin.
-    const ADMIN_SECRET_URL = "PASTE_YOUR_JSONBIN_URL_HERE"; 
+    // 1. For your Admin Password
+    const ADMIN_SECRET_URL = "https://api.jsonbin.io/v3/b/68efbd1bae596e708f157dce"; 
     
-    // 2. Get this from the "API Keys" section of your JSONBin.io account.
-    const JSONBIN_ACCESS_KEY = "PASTE_YOUR_JSONBIN_ACCESS_KEY_HERE";
+    // 2. For your Gemini API Key (HIGHLY INSECURE - FOR PERSONAL PROJECTS ONLY)
+    const GEMINI_API_KEY_URL = "https://api.jsonbin.io/v3/b/68efbbbbd0ea881f40a4b414";
 
-    // 3. IMPORTANT: Leave this blank. For security, API keys should not be in client-side code.
-    const GEMINI_API_KEY = ""; 
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+    // 3. Your universal Access Key for JSONBin
+    const JSONBIN_ACCESS_KEY = "$2a$10$35Fzoe9waxumyiIefm8LJ.2Y3UWuT2LhnbN.9tg7eXuGN6a3.HyDO";
     // ===================================================================================
     // END OF CONFIGURATION
     // ===================================================================================
@@ -433,17 +432,12 @@
         allDOMElements.statusMessage.classList.remove('hidden');
     }
 
-    /**
-     * **[FIXED & SECURE]** Handles the admin login process.
-     * It fetches the correct password from your private JSONBin and compares it.
-     */
     async function handleAdminLogin() {
         const enteredPassword = allDOMElements.adminPasswordInput.value;
         allDOMElements.adminError.textContent = 'Verifying...';
         allDOMElements.submitAdminLogin.disabled = true;
 
-        // **FIXED**: This check is now robust and works correctly.
-        if (ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5" || JSONBIN_ACCESS_KEY === "$2a$10$Htj0j.vo/A79sXgc8V6SAewXQHu.pvXyDHyZik3hzzv8bZGWkFQPe") {
+        if (ADMIN_SECRET_URL === "PASTE_YOUR_JSONBIN_URL_HERE_FOR_ADMIN_PASSWORD" || JSONBIN_ACCESS_KEY === "PASTE_YOUR_JSONBIN_ACCESS_KEY_HERE") {
             allDOMElements.adminError.textContent = 'Error: Admin secrets are not configured.';
             console.error("Please paste your JSONBin URL and Access Key into the configuration block at the top of the script.");
             allDOMElements.submitAdminLogin.disabled = false;
@@ -451,43 +445,33 @@
         }
 
         try {
-            // Step 1: Securely fetch your private bin from JSONBin.io
             const response = await fetch(ADMIN_SECRET_URL, {
-                headers: {
-                    'X-Access-Key': JSONBIN_ACCESS_KEY
-                }
+                headers: { 'X-Access-Key': JSONBIN_ACCESS_KEY }
             });
 
-            if (!response.ok) {
-                // This will catch errors if the URL is wrong or the key is invalid
-                throw new Error(`Could not fetch secret (Status: ${response.status}). Check URL and Access Key.`);
-            }
+            if (response.status === 401) { throw new Error("Unauthorized (401): Your JSONBIN_ACCESS_KEY is likely incorrect or does not have permission to read this bin."); }
+            if (response.status === 404) { throw new Error("Not Found (404): Your ADMIN_SECRET_URL could not be found. Please check the URL."); }
+            if (!response.ok) { throw new Error(`Could not fetch secret (Status: ${response.status}).`); }
             
-            // Step 2: Get the data from the bin
             const data = await response.json();
-            // The actual data is inside the 'record' property for JSONBin v3
             const correctPassword = data.record.secret;
 
-            // Step 3: Compare the passwords
             if (enteredPassword === correctPassword) {
-                // ACCESS GRANTED
                 isAdmin = true;
                 allDOMElements.adminButton.textContent = 'Admin Mode ✅';
                 allDOMElements.adminButton.classList.add('text-green-500', 'dark:text-green-400');
-                
-                // Close and reset the modal by simulating a click on the cancel button
                 allDOMElements.cancelAdminLogin.click();
-
             } else {
-                // ACCESS DENIED
                 allDOMElements.adminError.textContent = 'Incorrect password.';
-                allDOMElements.adminPasswordInput.select(); // Highlight the text for easy re-entry
+                allDOMElements.adminPasswordInput.select();
             }
         } catch (error) {
-            console.error("Admin login error:", error);
-            allDOMElements.adminError.textContent = 'Verification failed. Contact site owner.';
+            console.error("Admin login error:", error.message);
+            if (error.message.includes("401")) { allDOMElements.adminError.textContent = 'Authorization Failed. Check Access Key.'; } 
+            else if (error.message.includes("404")) { allDOMElements.adminError.textContent = 'Bin not found. Check URL.'; } 
+            else if (error instanceof TypeError) { allDOMElements.adminError.textContent = 'Network error. Check connection.'; } 
+            else { allDOMElements.adminError.textContent = 'Verification failed. See console.'; }
         } finally {
-            // Re-enable the login button in all cases
             allDOMElements.submitAdminLogin.disabled = false;
         }
     }
@@ -551,34 +535,71 @@
 
     // --- AI DATA ANALYSIS (GEMINI API) ---
     async function callSmartAI(mimeType, dataForAI) {
-        const systemPrompt = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
-        Follow these rules strictly:
-        1.  **Identify Headers:** Automatically detect headers. These become the keys for each JSON object.
-        2.  **Extract Rows:** Each data row must be a separate JSON object.
-        3.  **Handle Image URLs:** If a value is a URL ending in .png, .jpg, etc., preserve the full URL string. Do not analyze the image content.
-        4.  **Clean Data:** Ignore page titles, headings, or footers. Exclude empty/malformed rows.
-        5.  **Accuracy is Key:** Ensure precise mapping of data to headers.
-        6.  **Output Format:** Your final output MUST be only the JSON array, with no extra text or markdown.`;
-        const userParts = mimeType === 'application/json' ? [{ text: "Analyze this JSON data: " + dataForAI }] : [{ text: "Extract and analyze the data from this document." }, { inlineData: { mimeType, data: dataForAI } }];
-        const payload = { contents: [{ parts: userParts }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json" } };
-        
         try {
-            const response = await fetch(GEMINI_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            // **[INSECURE]** Step 1: Fetch the API key from JSONBin.
+            if (GEMINI_API_KEY_URL === "PASTE_YOUR_NEW_JSONBIN_URL_HERE_FOR_API_KEY") {
+                throw new Error("Gemini API Key URL is not configured.");
+            }
+            const keyResponse = await fetch(GEMINI_API_KEY_URL, {
+                headers: { 'X-Access-Key': JSONBIN_ACCESS_KEY }
+            });
+            if (!keyResponse.ok) {
+                throw new Error(`Failed to fetch API key from JSONBin (Status: ${keyResponse.status}).`);
+            }
+            const keyData = await keyResponse.json();
+            const fetchedApiKey = keyData.record.gemini_key;
+
+            if (!fetchedApiKey) {
+                throw new Error("API key not found in the JSONBin data.");
+            }
+
+            // Step 2: Use the fetched key to call the Gemini API.
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${fetchedApiKey}`;
+
+            const systemPrompt = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
+            Follow these rules strictly:
+            1.  **Identify Headers:** Automatically detect headers. These become the keys for each JSON object.
+            2.  **Extract Rows:** Each data row must be a separate JSON object.
+            3.  **Clean Data:** Ignore page titles, headings, or footers. Exclude empty/malformed rows.
+            4.  **Accuracy is Key:** Ensure precise mapping of data to headers.
+            5.  **Output Format:** Your final output MUST be only the JSON array, with no extra text or markdown.`;
+
+            const userParts = mimeType === 'application/json' 
+                ? [{ text: "Analyze this JSON data: " + dataForAI }] 
+                : [{ text: "Extract and analyze the data from this document." }, { inlineData: { mimeType, data: dataForAI } }];
+                
+            const payload = { 
+                contents: [{ parts: userParts }], 
+                systemInstruction: { parts: [{ text: systemPrompt }] }, 
+                generationConfig: { responseMimeType: "application/json" } 
+            };
+            
+            const response = await fetch(GEMINI_API_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload) 
+            });
+
+            if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
+            
             const result = await response.json();
             const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!jsonText) throw new Error("AI could not understand the document.");
+            
             const parsedData = JSON.parse(jsonText.replace(/^```json\s*|```$/g, '').trim());
             if (!Array.isArray(parsedData) || parsedData.length === 0) throw new Error("AI analysis resulted in empty or invalid data.");
+            
             appData = parsedData;
             prepareAndRender();
+
         } catch (error) {
-            console.error('AI Error:', error);
+            console.error('AI Error:', error.message);
             showStatus(error.message, 'error');
         } finally {
              allDOMElements.processingLoader.classList.add('hidden');
         }
     }
+
 
     // --- DYNAMIC UI RENDERING ---
     function isImageUrl(url) { return typeof url === 'string' && /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url); }
