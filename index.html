@@ -166,11 +166,11 @@
             <div id="controls-area" class="hidden">
                  <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                         <label class="text-base font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap" data-translate-key="controls_title">✨ AI Analysis Complete — Here’s Your Interactive Data!</label>
+                          <label class="text-base font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap" data-translate-key="controls_title">✨ AI Analysis Complete — Here’s Your Interactive Data!</label>
                         <div class="flex items-center gap-2">
-                             <div id="view-buttons" class="flex-shrink-0 flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
-                                 <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
-                                 <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
+                              <div id="view-buttons" class="flex-shrink-0 flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
+                                   <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
+                                   <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
                             </div>
                             <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700" data-translate-key="clear_button">Clear</button>
                         </div>
@@ -275,14 +275,23 @@
 
 <script>
     // ===================================================================================
-    // JAVASCRIPT LOGIC
+    // CONFIGURATION - PASTE YOUR SECRETS HERE
+    // ===================================================================================
+    // 1. Get this from your JSONBin.io dashboard URL after creating a bin.
+    const ADMIN_SECRET_URL = "PASTE_YOUR_JSONBIN_URL_HERE"; 
+    
+    // 2. Get this from the "API Keys" section of your JSONBin.io account.
+    const JSONBIN_ACCESS_KEY = "PASTE_YOUR_JSONBIN_ACCESS_KEY_HERE";
+
+    // 3. IMPORTANT: Leave this blank. For security, API keys should not be in client-side code.
+    const GEMINI_API_KEY = ""; 
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+    // ===================================================================================
+    // END OF CONFIGURATION
     // ===================================================================================
 
     // --- GLOBAL STATE & CONSTANTS ---
-    const GEMINI_API_KEY = ""; // SECURE: API key is handled by the execution environment.
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const ADMIN_SECRET_URL = "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5"; 
     const USER_UPLOAD_LIMIT = 5;
     const UPLOAD_LIMIT_HOURS = 1;
     let isAdmin = false;
@@ -365,7 +374,7 @@
         let lastScrollTop = 0;
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            allDOMElements.pageHeader.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > allDOMElements.pageHeader.offsetHeight);
+            allDOMElements.pageHeader.style.transform = (scrollTop > lastScrollTop && scrollTop > allDOMElements.pageHeader.offsetHeight) ? 'translateY(-100%)' : 'translateY(0)';
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
             allDOMElements.scrollToTopBtn.classList.toggle('show', window.pageYOffset > 300);
         });
@@ -394,9 +403,14 @@
                 allDOMElements.adminButton.classList.remove('text-green-500', 'dark:text-green-400');
             } else {
                 allDOMElements.adminModal.classList.remove('hidden');
+                 allDOMElements.adminPasswordInput.focus();
             }
         });
-        allDOMElements.cancelAdminLogin.addEventListener('click', () => allDOMElements.adminModal.classList.add('hidden'));
+        allDOMElements.cancelAdminLogin.addEventListener('click', () => {
+            allDOMElements.adminModal.classList.add('hidden');
+            allDOMElements.adminError.textContent = '';
+            allDOMElements.adminPasswordInput.value = '';
+        });
         allDOMElements.submitAdminLogin.addEventListener('click', handleAdminLogin);
         allDOMElements.adminPasswordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAdminLogin(); });
         document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
@@ -419,42 +433,65 @@
         allDOMElements.statusMessage.classList.remove('hidden');
     }
 
+    /**
+     * **[FIXED & SECURE]** Handles the admin login process.
+     * It fetches the correct password from your private JSONBin and compares it.
+     */
     async function handleAdminLogin() {
         const enteredPassword = allDOMElements.adminPasswordInput.value;
         allDOMElements.adminError.textContent = 'Verifying...';
+        allDOMElements.submitAdminLogin.disabled = true;
+
+        // **FIXED**: This check is now robust and works correctly.
+        if (ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5" || JSONBIN_ACCESS_KEY === "$2a$10$Htj0j.vo/A79sXgc8V6SAewXQHu.pvXyDHyZik3hzzv8bZGWkFQPe") {
+            allDOMElements.adminError.textContent = 'Error: Admin secrets are not configured.';
+            console.error("Please paste your JSONBin URL and Access Key into the configuration block at the top of the script.");
+            allDOMElements.submitAdminLogin.disabled = false;
+            return;
+        }
 
         try {
-            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5") {
-                throw new Error("Admin URL not configured by the developer.");
-            }
+            // Step 1: Securely fetch your private bin from JSONBin.io
             const response = await fetch(ADMIN_SECRET_URL, {
                 headers: {
-                    'X-Access-Key': '$2a$10$Htj0j.vo/A79sXgc8V6SAewXQHu.pvXyDHyZik3hzzv8bZGWkFQPe'
+                    'X-Access-Key': JSONBIN_ACCESS_KEY
                 }
             });
+
             if (!response.ok) {
-                 throw new Error(`Could not fetch secret (Status: ${response.status}). Check URL and Access Key.`);
+                // This will catch errors if the URL is wrong or the key is invalid
+                throw new Error(`Could not fetch secret (Status: ${response.status}). Check URL and Access Key.`);
             }
             
+            // Step 2: Get the data from the bin
             const data = await response.json();
+            // The actual data is inside the 'record' property for JSONBin v3
             const correctPassword = data.record.secret;
 
+            // Step 3: Compare the passwords
             if (enteredPassword === correctPassword) {
+                // ACCESS GRANTED
                 isAdmin = true;
-                allDOMElements.adminModal.classList.add('hidden');
                 allDOMElements.adminButton.textContent = 'Admin Mode ✅';
                 allDOMElements.adminButton.classList.add('text-green-500', 'dark:text-green-400');
-                allDOMElements.adminPasswordInput.value = '';
-                allDOMElements.adminError.textContent = '';
+                
+                // Close and reset the modal by simulating a click on the cancel button
+                allDOMElements.cancelAdminLogin.click();
+
             } else {
+                // ACCESS DENIED
                 allDOMElements.adminError.textContent = 'Incorrect password.';
+                allDOMElements.adminPasswordInput.select(); // Highlight the text for easy re-entry
             }
         } catch (error) {
             console.error("Admin login error:", error);
             allDOMElements.adminError.textContent = 'Verification failed. Contact site owner.';
+        } finally {
+            // Re-enable the login button in all cases
+            allDOMElements.submitAdminLogin.disabled = false;
         }
     }
-    
+
     // --- FILE UPLOAD & RATE LIMITING ---
     function checkUploadLimit() {
         if (isAdmin) return true;
