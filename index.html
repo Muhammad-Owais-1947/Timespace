@@ -119,7 +119,6 @@
         <p id="admin-error" class="text-sm text-red-500 text-center mt-2 h-4"></p>
         <div class="mt-4">
             <label for="admin-password" class="text-sm font-medium text-slate-600 dark:text-slate-400">Password</label>
-            <!-- FIX: Corrected the ID of the password input field -->
             <input type="password" id="admin-password" class="mt-1 w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
         </div>
         <div class="mt-6 flex gap-3">
@@ -129,7 +128,6 @@
     </div>
 </div>
 
-<!-- Header -->
 <header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-transform duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -143,8 +141,7 @@
                     <a href="#portfolio" class="hover:text-blue-600 transition-colors" data-translate-key="nav_portfolio">Portfolio</a>
                 </nav>
                 <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
-                <!-- FIX: Corrected admin button visibility -->
-                <button id="admin-button" class="hidden md:flex items-center justify-center h-9 px-3 rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate text-sm font-semibold">Admin</button>
+                <button id="admin-button" class="md:flex items-center justify-center h-9 px-3 rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate text-sm font-semibold hidden">Admin</button>
                 <button id="lang-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate font-semibold text-xs"></button>
                 <button id="theme-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors btn-animate">
                     <svg class="h-5 w-5 block dark:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" role="img" aria-label="Moon Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
@@ -174,7 +171,6 @@
                              <div id="view-buttons" class="flex-shrink-0 flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
                                  <button id="view-card" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="card_view">Card View</button>
                                  <button id="view-table" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="table_view">Table View</button>
-                                 <button id="view-list" class="hidden px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate" data-translate-key="list_view">List View</button>
                             </div>
                             <button id="clear-data" class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors btn-animate bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700" data-translate-key="clear_button">Clear</button>
                         </div>
@@ -286,7 +282,7 @@
     const GEMINI_API_KEY = ""; // SECURE: API key is handled by the execution environment.
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const ADMIN_PASSWORD = "QAZplm@110022994";
+    const ADMIN_SECRET_URL = "PASTE_YOUR_JSONBIN_URL_HERE"; 
     const USER_UPLOAD_LIMIT = 5;
     const UPLOAD_LIMIT_HOURS = 1;
     let isAdmin = false;
@@ -297,27 +293,18 @@
     const DAY_CLASSES = {'Monday': 'day-mon', 'Mon': 'day-mon', 'Peer': 'day-mon', 'Tuesday': 'day-tue', 'Tue': 'day-tue', 'Mangal': 'day-tue', 'Wednesday': 'day-wed', 'Wed': 'day-wed', 'Budh': 'day-wed', 'Thursday': 'day-thu', 'Thu': 'day-thu', 'Jumerat': 'day-thu', 'Friday': 'day-fri', 'Fri': 'day-fri', 'Juma': 'day-fri', 'Saturday': 'day-sat', 'Sat': 'day-sat', 'Hafta': 'day-sat', 'Sunday': 'day-sun', 'Sun': 'day-sun', 'Itwar': 'day-sun'};
     const DAY_ORDER = ['Monday', 'Mon', 'Peer', 'Tuesday', 'Tue', 'Mangal', 'Wednesday', 'Wed', 'Budh', 'Thursday', 'Thu', 'Jumerat', 'Friday', 'Fri', 'Juma', 'Saturday', 'Sat', 'Hafta', 'Sunday', 'Sun', 'Itwar'];
     const defaultTimetableData = [
-		// Monday
-		{ day: "Monday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Nagesh-Kumar", type: "Theory", mode: "On-Campus", room: "SST-101" },
-		{ day: "Monday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Unconfirmed", type: "Theory", mode: "On-Campus", room: "2N-02" },
-
-		// Tuesday
-		{ day: "Tuesday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", type: "Theory", mode: "On-Campus", room: "2N-03" },
-		{ day: "Tuesday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", type: "Theory", mode: "On-Campus", room: "1C-15" },
-
-		// Wednesday
-		{ day: "Wednesday", time: "08:00 AM - 09:15 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", type: "Theory", mode: "On-Campus", room: "2N-12" },
-		{ day: "Wednesday", time: "09:30 AM - 10:45 AM", code: "IS360", name: "Data Communication and Networking", faculty: "Abdul Ghafar", type: "Theory", mode: "On-Campus", room: "2N-12" },
-
-		// Thursday
-		{ day: "Thursday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Nagesh-Kumar", type: "Theory", mode: "On-Campus", room: "SST-101" },
-		{ day: "Thursday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Unconfirmed", type: "Theory", mode: "On-Campus", room: "2N-02" },
-
-		// Friday
-		{ day: "Friday", time: "11:00 AM - 12:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", type: "Theory", mode: "On-Campus", room: "2N-12" },
-		{ day: "Friday", time: "05:00 PM - 06:15 PM", code: "FN340", name: "Business Finance", faculty: "Dr. M Mahmood Shah Khan", type: "Theory", mode: "On-Campus", room: "2N-03" },
-		{ day: "Friday", time: "03:30 PM - 04:45 PM", code: "MK210", name: "Principles of Marketing", faculty: "Dr. Abdul Waheed", type: "Theory", mode: "On-Campus", room: "1C-15" },
-		{ day: "Friday", time: "02:00 PM - 03:15 PM", code: "IS412", name: "IT Project Management", faculty: "Sana Amjad", type: "Theory", mode: "On-Campus", room: "2N-12" }
+		{ day: "Monday", "C.Code": "IS230", Name: "Emerging Technologies", Faculty: "Anusha Gilani", Type: "Theory", Mode: "On-Campus", "Start Time": "03:30 PM", "End Time": "04:45 PM", Room: "SST-101" },
+        { day: "Monday", "C.Code": "IS240", Name: "Management Information System", Faculty: "Anusha Gilani", Type: "Theory", Mode: "On-Campus", "Start Time": "02:00 PM", "End Time": "03:15 PM", Room: "2N-02" },
+        { day: "Tuesday", "C.Code": "FN340", Name: "Business Finance", Faculty: "Dr. M Mahmood Shah Khan", Type: "Theory", Mode: "On-Campus", "Start Time": "05:00 PM", "End Time": "06:15 PM", Room: "2N-03" },
+        { day: "Tuesday", "C.Code": "MK210", Name: "Principles of Marketing", Faculty: "Dr. Abdul Waheed", Type: "Theory", Mode: "On-Campus", "Start Time": "03:30 PM", "End Time": "04:45 PM", Room: "1C-15" },
+        { day: "Wednesday", "C.Code": "IS360", Name: "Data Communication and Networking", Faculty: "Abdul Ghafar", Type: "Theory", Mode: "On-Campus", "Start Time": "08:00 AM", "End Time": "09:15 AM", Room: "2N-12" },
+        { day: "Wednesday", "C.Code": "IS360", Name: "Data Communication and Networking", Faculty: "Abdul Ghafar", Type: "Theory", Mode: "On-Campus", "Start Time": "09:30 AM", "End Time": "10:45 AM", Room: "2N-12" },
+        { day: "Thursday", "C.Code": "IS230", Name: "Emerging Technologies", Faculty: "Anusha Gilani", Type: "Theory", Mode: "On-Campus", "Start Time": "03:30 PM", "End Time": "04:45 PM", Room: "SST-101" },
+        { day: "Thursday", "C.Code": "IS240", Name: "Management Information System", Faculty: "Anusha Gilani", Type: "Theory", Mode: "On-Campus", "Start Time": "02:00 PM", "End Time": "03:15 PM", Room: "2N-02" },
+        { day: "Friday", "C.Code": "IS412", Name: "IT Project Management", Faculty: "Sana Amjad", Type: "Theory", Mode: "On-Campus", "Start Time": "11:00 AM", "End Time": "12:15 PM", Room: "2N-12" },
+        { day: "Friday", "C.Code": "FN340", Name: "Business Finance", Faculty: "Dr. M Mahmood Shah Khan", Type: "Theory", Mode: "On-Campus", "Start Time": "05:00 PM", "End Time": "06:15 PM", Room: "2N-03" },
+        { day: "Friday", "C.Code": "MK210", Name: "Principles of Marketing", Faculty: "Dr. Abdul Waheed", Type: "Theory", Mode: "On-Campus", "Start Time": "03:30 PM", "End Time": "04:45 PM", Room: "1C-15" },
+        { day: "Friday", "C.Code": "IS412", Name: "IT Project Management", Faculty: "Sana Amjad", Type: "Theory", Mode: "On-Campus", "Start Time": "02:00 PM", "End Time": "03:15 PM", Room: "2N-12" }
     ];
 
     // --- DOM ELEMENT SELECTORS ---
@@ -365,7 +352,7 @@
             if (!localStorage.getItem('version2_popup_shown')) {
                 setTimeout(() => {
                     allDOMElements.versionModal.classList.remove('hidden');
-                }, 15000); // 15 seconds delay
+                }, 15000); 
             }
         }, 500);
         appData = JSON.parse(JSON.stringify(defaultTimetableData));
@@ -377,11 +364,9 @@
     function setupEventListeners() {
         let lastScrollTop = 0;
         window.addEventListener('scroll', () => {
-            // Header hide/show
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             allDOMElements.pageHeader.classList.toggle('-translate-y-full', scrollTop > lastScrollTop && scrollTop > allDOMElements.pageHeader.offsetHeight);
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-            // Scroll-to-top button
             allDOMElements.scrollToTopBtn.classList.toggle('show', window.pageYOffset > 300);
         });
 
@@ -426,17 +411,35 @@
         allDOMElements.statusMessage.classList.remove('hidden');
     }
 
-    function handleAdminLogin() {
-        const password = allDOMElements.adminPasswordInput.value;
-        if (password === ADMIN_PASSWORD) {
-            isAdmin = true;
-            allDOMElements.adminModal.classList.add('hidden');
-            allDOMElements.adminButton.textContent = 'Admin Mode ✅';
-            allDOMElements.adminButton.classList.add('text-green-500', 'dark:text-green-400');
-            allDOMElements.adminPasswordInput.value = '';
-            allDOMElements.adminError.textContent = '';
-        } else {
-            allDOMElements.adminError.textContent = 'Incorrect password.';
+    // --- CHANGE: Updated Admin Login Logic ---
+    async function handleAdminLogin() {
+        const enteredPassword = allDOMElements.adminPasswordInput.value;
+        allDOMElements.adminError.textContent = 'Verifying...';
+
+        try {
+            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5") {
+                throw new Error("Admin URL not configured.");
+            }
+            const response = await fetch(ADMIN_SECRET_URL);
+            if (!response.ok) throw new Error('Could not verify password.');
+            
+            const data = await response.json();
+            // In JSONBin, the actual data is inside a 'record' property
+            const correctPassword = data.record.secret;
+
+            if (enteredPassword === correctPassword) {
+                isAdmin = true;
+                allDOMElements.adminModal.classList.add('hidden');
+                allDOMElements.adminButton.textContent = 'Admin Mode ✅';
+                allDOMElements.adminButton.classList.add('text-green-500', 'dark:text-green-400');
+                allDOMElements.adminPasswordInput.value = '';
+                allDOMElements.adminError.textContent = '';
+            } else {
+                allDOMElements.adminError.textContent = 'Incorrect password.';
+            }
+        } catch (error) {
+            console.error("Admin login error:", error);
+            allDOMElements.adminError.textContent = 'Verification failed. Contact site owner.';
         }
     }
     
@@ -548,13 +551,6 @@
     function renderCardView() { 
         const { dataContainer } = allDOMElements;
         dataContainer.innerHTML = '';
-        const groupedData = appData.reduce((acc, item) => {
-            const key = dayColumnKey ? (item[dayColumnKey] || 'Uncategorized') : 'All Entries';
-            (acc[key] = acc[key] || []).push(item);
-            return acc;
-        }, {});
-        const sortedGroups = dayColumnKey ? Object.keys(groupedData).sort((a,b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)) : ['All Entries'];
-        
         const columns = dataHeaders.length;
         let gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
         if (columns > 6) { gridClass = 'grid-cols-1 sm:grid-cols-2'; }
@@ -608,9 +604,9 @@
         else if (view === 'table') renderTableView();
     }
 
-    // --- DOWNLOAD & CAPTURE LOGIC ---
+    // --- DOWNLOAD & CAPTURE LOGIC (UNCHANGED) ---
     async function captureFullElement(element) {if (!element) return null; const isDark = document.documentElement.classList.contains('dark'); const tempStyleSheet = createCaptureStylesheet(isDark); const captureContainer = document.createElement('div'); captureContainer.style.position = 'absolute'; captureContainer.style.left = '-9999px'; captureContainer.style.top = '0'; captureContainer.style.width = '1200px'; captureContainer.style.height = 'auto'; captureContainer.style.pointerEvents = 'none'; const originalParent = element.parentNode; const nextSibling = element.nextSibling; captureContainer.appendChild(element); document.body.appendChild(captureContainer); await new Promise(resolve => setTimeout(resolve, 300)); let canvas; try { canvas = await html2canvas(element, { scale: 3, backgroundColor: '#f8fafc', useCORS: true, scrollX: 0, scrollY: 0 }); } finally { if (nextSibling) { originalParent.insertBefore(element, nextSibling); } else { originalParent.appendChild(element); } document.body.removeChild(captureContainer); document.head.removeChild(tempStyleSheet); } return canvas; }
-    function createCaptureStylesheet(isDark) { const style = document.createElement('style'); style.id = 'temp-capture-style'; let css = `* { transition: none !important; animation: none !important; }`; if (isDark) { css += ` #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e293b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
+    function createCaptureStylesheet(isDark) { const style = document.createElement('style'); style.id = 'temp-capture-style'; let css = `* { transition: none !important; animation: none !important; }`; if (isDark) { css += ` #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e2d3b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e2d3b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
     function getActiveElementForCapture() { switch (currentView) { case 'card': case 'list': return allDOMElements.dataContainer; case 'table': return allDOMElements.dataTableWrapper; default: return null; } }
     async function downloadAsPDF() { const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_pdf', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const imgData = canvas.toDataURL('image/png'); const { width, height } = canvas; const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); } catch (error) { console.error("PDF Export Error:", error); showStatus(error.message, 'error'); } }
     async function downloadAsPNG() { const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_png', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); } catch (error) { console.error("PNG Export Error:", error); showStatus(error.message, 'error'); } }
