@@ -279,7 +279,19 @@
     // ===================================================================================
     // CONFIGURATION - PASTE YOUR WORKER URL HERE
     // ===================================================================================
+    // 1. Paste the URL you get from your Cloudflare Worker dashboard. It must start with https://
     const SECURE_API_URL = "https://security.anonymoushacker151122.workers.dev/";
+
+    // 2. CUSTOMIZE THE AI's BEHAVIOR
+    //    You can change this text to give the AI different instructions.
+    const GEMINI_SYSTEM_PROMPT = `You are a data analysis expert. Your primary function is to extract structured data from user-provided files or text and return it as a clean JSON array of objects.
+        Follow these rules strictly:
+        1.  **Identify Headers:** Automatically detect headers. These become the keys for each JSON object.
+        2.  **Extract Rows:** Each data row must be a separate JSON object.
+        3.  **Handle Image URLs:** If a value is a URL ending in .png, .jpg, etc., preserve the full URL string. Do not analyze the image content.
+        4.  **Clean Data:** Ignore page titles, headings, or footers. Exclude empty/malformed rows.
+        5.  **Accuracy is Key:** Ensure precise mapping of data to headers.
+        6.  **Output Format:** Your final output MUST be only the JSON array, with no extra text or markdown.`;
 
     // Wrapped all code in DOMContentLoaded to prevent timing errors
     document.addEventListener('DOMContentLoaded', () => {
@@ -543,7 +555,12 @@
                 const response = await fetch(SECURE_API_URL, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ action: 'analyzeData', mimeType, dataForAI }) 
+                    body: JSON.stringify({ 
+                        action: 'analyzeData', 
+                        mimeType, 
+                        dataForAI,
+                        systemPrompt: GEMINI_SYSTEM_PROMPT // Send custom instructions
+                    }) 
                 });
                 if (!response.ok) {
                     const errorResult = await response.json().catch(() => ({error: `API error: ${response.statusText}`}));
