@@ -282,7 +282,7 @@
     const GEMINI_API_KEY = ""; // SECURE: API key is handled by the execution environment.
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const ADMIN_SECRET_URL = "PASTE_YOUR_JSONBIN_URL_HERE"; 
+    const ADMIN_SECRET_URL = "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5"; 
     const USER_UPLOAD_LIMIT = 5;
     const UPLOAD_LIMIT_HOURS = 1;
     let isAdmin = false;
@@ -424,12 +424,12 @@
         allDOMElements.adminError.textContent = 'Verifying...';
 
         try {
-            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "PASTE_YOUR_JSONBIN_URL_HERE") {
+            if (!ADMIN_SECRET_URL || ADMIN_SECRET_URL === "https://api.jsonbin.io/v3/b/68ef6c2543b1c97be96925c5") {
                 throw new Error("Admin URL not configured by the developer.");
             }
             const response = await fetch(ADMIN_SECRET_URL, {
                 headers: {
-                    'X-Access-Key': 'PASTE_YOUR_JSONBIN_MASTER_KEY_HERE'
+                    'X-Access-Key': '$2a$10$Htj0j.vo/A79sXgc8V6SAewXQHu.pvXyDHyZik3hzzv8bZGWkFQPe'
                 }
             });
             if (!response.ok) {
