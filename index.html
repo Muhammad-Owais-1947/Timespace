@@ -11,9 +11,29 @@
     <!--  favicon -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z' /%3E%3C/svg%3E">
     
-    <!-- SEO & External Libraries -->
-    <meta name="description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file and our AI will create a beautiful, interactive display.">
+    <!-- SEO: Meta Tags -->
+    <meta name="description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file of your notes, schedule, or list, and our AI will create a beautiful, interactive display for you.">
+    <meta name="keywords" content="data organizer, schedule maker, list maker, AI organizer, timetable generator, upload data, data analysis tool">
+
+    <!-- SEO: Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:title" content="Time Space | AI Data Organizer">
+    <meta property="og:description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file of your notes, schedule, or list, and our AI will create a beautiful, interactive display for you.">
+    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space">
+    
+    <!-- SEO: Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://example.com/">
+    <meta property="twitter:title" content="Time Space | AI Data Organizer">
+    <meta property="twitter:description" content="Instantly analyze and organize any data. Upload a PDF, image, CSV, or Excel file of your notes, schedule, or list, and our AI will create a beautiful, interactive display for you.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Time+Space">
+
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,23 +43,11 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
-    <!-- REFINEMENT: Dark Mode Flash Fix -->
-    <script>
-        // This script runs immediately to prevent a flash of white on dark mode.
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
-
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
-    </script>
-    
     <!-- Main Stylesheet -->
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); transition: opacity 0.3s ease; }
-        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        .modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); transition: opacity 0.5s ease; }
+        .modal-content { transition: transform 0.5s ease, opacity 0.5s ease; }
         .modal-overlay.hidden { opacity: 0; pointer-events: none; }
         .modal-overlay.hidden .modal-content { transform: scale(0.95); opacity: 0; }
         #data-table tr.day-mon { background-color: #f0fdf4; border-left: 3px solid #4ade80; } .dark #data-table tr.day-mon { background-color: #164e3233; }
@@ -58,14 +66,12 @@
         .class-card.day-sun { background-color: #fdf4ff; border-left: 3px solid #f472b6; } .dark .class-card.day-sun { background-color: #83184333; border-left-color: #f472b6;}
         .class-card { border: 1px solid #e5e7eb; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: grab; }
         .dark .class-card { border-color: #374151; }
-        .class-card p { word-break: break-word; } /* Allows long text to wrap */
         .class-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
         .dark .class-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
         .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* REFINEMENT: Make table adaptive by using 'auto' layout */
-        #data-table { width: 100%; border-collapse: collapse; table-layout: auto; }
-        #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; word-wrap: break-word; }
+        #data-table { width: 100%; border-collapse: collapse; }
+        #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
         .dark #data-table th, .dark #data-table td { border-bottom-color: #374151; }
         #data-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
         .dark #data-table th { background-color: #1f2d37; color: #9ca3af; }
@@ -79,24 +85,19 @@
         #scroll-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 </head>
+
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
 
 <!-- Initial Page Loader -->
 <div id="page-loader" class="loader-overlay">
-    <div class="relative w-16 h-16">
-        <div class="absolute inset-0 border-4 border-blue-200 dark:border-blue-800 rounded-full"></div>
-        <div class="absolute inset-0 border-4 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
-    </div>
-    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="loading_analyzer">Loading Time Space...</p>
+    <svg class="h-16 w-16 text-blue-600 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
+    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg animate-pulse" data-translate-key="loading_analyzer">Loading Time Space...</p>
 </div>
 
 <!-- File Processing Loader -->
 <div id="processing-loader" class="loader-overlay hidden">
-     <div class="relative w-16 h-16">
-        <div class="absolute inset-0 border-4 border-blue-200 dark:border-blue-800 rounded-full"></div>
-        <div class="absolute inset-0 border-4 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
-    </div>
-    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="analyzing">Making magic behind the scenes...</p>
+     <svg class="h-16 w-16 text-blue-600 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C6.095 4.01 5.25 4.973 5.25 6.108V18.75c0 1.243.87 2.25 1.976 2.25h4.272a2.25 2.25 0 002.25-2.25V5.117A2.25 2.25 0 0011.25 3H9.75a2.25 2.25 0 00-2.25 2.25z" /></svg>
+    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg animate-pulse" data-translate-key="analyzing">Making magic behind the scenes...</p>
 </div>
 
 <!-- Version 2.0 Welcome Modal -->
@@ -115,6 +116,7 @@
         <p id="admin-error" class="text-sm text-red-500 text-center mt-2 h-4"></p>
         <div class="mt-4">
             <label for="admin-password" class="text-sm font-medium text-slate-600 dark:text-slate-400">Password</label>
+            <!-- BUG FIX: Changed the id back to "admin-password" -->
             <input type="password" id="admin-password" class="mt-1 w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
         </div>
         <div class="mt-6 flex gap-3">
@@ -276,7 +278,7 @@
     // CONFIGURATION - PASTE YOUR WORKER URL HERE
     // ===================================================================================
     // 1. Paste the URL you get from your Cloudflare Worker dashboard. It must start with https://
-    const SECURE_API_URL = "https://security.anonymoushacker151122.workers.dev/";
+    const SECURE_API_URL = "https://codesecurity.pubg89r3.workers.dev/";
 
     // 2. CUSTOMIZE THE AI's BEHAVIOR
     //    You can change this text to give the AI different instructions.
