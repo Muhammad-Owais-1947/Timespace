@@ -88,7 +88,7 @@
         <div class="absolute inset-0 border-4 border-blue-200 dark:border-blue-800 rounded-full"></div>
         <div class="absolute inset-0 border-4 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
     </div>
-    <p class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg" data-translate-key="analyzing">Making magic behind the scenes...</p>
+    <p id="processing-quote" class="text-blue-600 dark:text-blue-400 font-medium mt-4 text-lg text-center px-4"></p>
 </div>
 
 <!-- Version 2.0 Welcome Modal -->
@@ -145,7 +145,8 @@
     <section class="text-center py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white" data-translate-key="hero_title">Intelligent Data Organizer</h1>
         <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400" data-translate-key="hero_subtitle">Automatically analyze, structure, and visualize your data. Just upload any file to begin.</p>
-        <div id="data-app" class="max-w-4xl mx-auto mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-left">
+        <!-- REFINEMENT: Wider layout -->
+        <div id="data-app" class="max-w-7xl mx-auto mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-left">
             <div id="upload-section" class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col items-center">
                  <button id="upload-button" class="btn-animate w-full max-w-xs px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500" data-translate-key="upload_button">Upload Your Data File</button>
                 <input type="file" id="file-upload" accept="image/*,application/pdf,.csv" class="hidden"/>
@@ -194,29 +195,29 @@
             <div class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="flex items-start space-x-4">
                     <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Cloud Upload Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2.25l-3-3m0-3l3-3V12m0 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature1_title">Smart Data Extraction</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature1_desc">Intelligently analyzes any data structure from images, PDFs, and CSV files.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Intelligent Categorization</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Our AI doesn't just display data; it understands it, automatically finding key categories and applying beautiful, color-coded labels for intuitive organization.</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
                     <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Layout Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature2_title">Multiple View Options</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature2_desc">View your information as a table, cards, or a simple checklist.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Server-Side Security</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Your API keys and passwords are never exposed to the browser. All secure operations are handled by a robust backend, with rate limiting to prevent abuse.</p>
                     </div>
                 </div>
                 <div class="flex items-start space-x-4">
                     <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img" aria-label="Download Icon"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6" role="img"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature3_title">Multiple Export Options</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature3_desc">Download your organized data as a PDF, PNG, or CSV file.</p>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Full & Flexible Exports</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Download your *entire* dataset as a print-ready PDF, a high-quality PNG, or a standard CSV. Our system ensures no data gets cut off, no matter how long.</p>
                     </div>
                 </div>
             </div>
@@ -290,12 +291,19 @@
         const UPLOAD_LIMIT_HOURS = 1;
         const ADMIN_ATTEMPT_LIMIT = 5;
         let isAdmin = false;
-        let adminPassword = ''; // FIX: Store the admin password here upon successful login
+        let adminPassword = ''; 
         let appData = [];
         let dataHeaders = [];
         let categoryColumnKey = '';
         let categoryColorMap = {};
         let currentView = 'card';
+        const motivationalQuotes = [
+            { en: "Turning your data into gold...", ur: "Aapke data ko sonay mein badal rahe hain..." },
+            { en: "Organizing chaos, one byte at a time...", ur: "Har byte ko tarteeb de rahe hain..." },
+            { en: "Unlocking the stories in your files...", ur: "Aapki files ki kahaniyan khol rahe hain..." },
+            { en: "The journey of a thousand miles begins with a single step.", ur: "Hazaar meel ka safar ek qadam se shuru hota hai." },
+            { en: "Patience is beautiful.", ur: "Sabar khoobsurat hai." }
+        ];
         const defaultTimetableData = [
             { day: "Monday", time: "03:30 PM - 04:45 PM", code: "IS230", name: "Emerging Technologies", faculty: "Nagesh-Kumar", type: "Theory", mode: "On-Campus", room: "SST-101" },
             { day: "Monday", time: "02:00 PM - 03:15 PM", code: "IS240", name: "Management Information System", faculty: "Unconfirmed", type: "Theory", mode: "On-Campus", room: "2N-02" },
@@ -325,6 +333,7 @@
             allDOMElements = {
                 pageLoader: document.getElementById('page-loader'),
                 processingLoader: document.getElementById('processing-loader'),
+                processingQuote: document.getElementById('processing-quote'),
                 statusMessage: document.getElementById('status-message'),
                 dataContainer: document.getElementById('data-container'),
                 dataTableWrapper: document.getElementById('data-table-wrapper'),
@@ -547,8 +556,11 @@
                 return;
             }
             
+            const quote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            allDOMElements.processingQuote.textContent = currentLang === 'ur' ? quote.ur : quote.en;
             allDOMElements.processingLoader.classList.remove('hidden');
-            showStatus('file_uploaded', 'success');
+            allDOMElements.statusMessage.classList.add('hidden'); // Hide previous status messages
+
             [allDOMElements.dataContainer, allDOMElements.dataTableWrapper, allDOMElements.controlsArea, allDOMElements.downloadOptions].forEach(el => el.classList.add('hidden'));
 
             try {
@@ -623,7 +635,8 @@
                 const foundHeader = headers.find(h => h.toLowerCase().includes(pHeader));
                 if (foundHeader) return foundHeader;
             }
-            return '';
+            // Fallback to the first column if no priority header is found
+            return headers[0] || '';
         }
 
         function setupCategorization() {
@@ -708,8 +721,7 @@
             appData.forEach(entry => {
                 const row = tbody.insertRow();
                 const categoryValue = entry[categoryColumnKey];
-                const rowColorClass = categoryColorMap[categoryValue] ? categoryColorMap[categoryValue].replace('day-label-','day-') : '';
-                row.className = `text-sm align-top`; // Keep background consistent for readability
+                row.className = `text-sm align-top`; 
                 row.innerHTML = dataHeaders.map(header => {
                     const value = entry[header] || 'N/A';
                     const noWrapClass = /time|code|room|type|mode|date/i.test(header) ? 'whitespace-nowrap' : '';
