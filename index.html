@@ -20,7 +20,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
     <!-- Dark Mode Flash Fix -->
@@ -154,8 +153,8 @@
         <div id="data-app" class="max-w-4xl mx-auto mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-left">
             <div id="upload-section" class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col items-center">
                  <button id="upload-button" class="btn-animate w-full max-w-xs px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-500" data-translate-key="upload_button">Upload Your Data File</button>
-                <input type="file" id="file-upload" accept="image/*,application/pdf,.csv,.xlsx" class="hidden"/>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2" data-translate-key="upload_caption">Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.</p>
+                <input type="file" id="file-upload" accept="image/*,application/pdf,.csv" class="hidden"/>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2" data-translate-key="upload_caption">Max file size: 10MB. Supports PDF, PNG, JPG, CSV.</p>
                 <div id="status-message" class="mt-4 p-3 rounded-md text-sm text-center hidden w-full" role="alert"></div>
             </div>
             <div id="controls-area" class="hidden">
@@ -185,7 +184,6 @@
                     <button id="download-pdf" class="btn-animate px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md shadow-sm" data-translate-key="download_pdf">Download PDF</button>
                     <button id="download-png" class="btn-animate px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-md shadow-sm" data-translate-key="download_png">Download PNG</button>
                     <button id="download-csv" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm" data-translate-key="download_csv">Download CSV</button>
-                    <button id="download-xlsx" class="btn-animate px-4 py-2 text-sm font-medium bg-slate-600 text-white rounded-md shadow-sm" data-translate-key="download_xlsx">Download XLSX</button>
                 </div>
             </div>
         </div>
@@ -223,7 +221,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="feature3_title">Multiple Export Options</h3>
-                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature3_desc">Download your organized data as a PDF, PNG, CSV, or XLSX file.</p>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400" data-translate-key="feature3_desc">Download your organized data as a PDF, PNG, or CSV file.</p>
                     </div>
                 </div>
             </div>
@@ -323,7 +321,7 @@
         let allDOMElements = {};
 
         // --- TRANSLATIONS ---
-        const translations = { en: { site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV, XLSX.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", download_xlsx: "Download XLSX", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, CSV, and Excel files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, CSV, or XLSX file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type.", upload_limit_reached: `Upload limit of ${USER_UPLOAD_LIMIT} files per hour reached.` }, ur: { site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV, XLSX support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", download_xlsx: "XLSX Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type.", upload_limit_reached: `Har ghantay ${USER_UPLOAD_LIMIT} files ki upload had tak pahonch gaye.` } };
+        const translations = { en: { site_name: "Time Space", nav_features: "Features", nav_portfolio: "Portfolio", hero_title: "Intelligent Data Organizer", hero_subtitle: "Automatically analyze, structure, and visualize your data. Just upload any file to begin.", upload_button: "Upload Your Data File", upload_caption: "Max file size: 10MB. Supports PDF, PNG, JPG, CSV.", controls_title: "✨ AI Analysis Complete — Here’s Your Interactive Data!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Clear", download_pdf: "Download PDF", download_png: "Download PNG", download_csv: "Download CSV", features_title: "Powerful Features, Simple Interface", features_subtitle: "Everything you need to manage your data efficiently.", feature1_title: "Smart Data Extraction", feature1_desc: "Intelligently analyzes any data structure from images, PDFs, and CSV files.", feature2_title: "Multiple View Options", feature2_desc: "View your information as a table, cards, or a simple checklist.", feature3_title: "Multiple Export Options", feature3_desc: "Download your organized data as a PDF, PNG, or CSV file.", portfolio_title: "Have a Look", portfolio_desc: "Interested in seeing more of my work? Visit my portfolio to explore other projects.", portfolio_button: "Check Out What I’ve Built", footer_text: "© 2025 Time Space. All rights reserved. Crafted with Code & Coffee ☕ — Muhammad Owais.", loading_analyzer: "Loading Time Space...", analyzing: "Making magic behind the scenes...", welcome_message: "Welcome to Time Space! The default timetable is loaded. Upload a file to see the magic.", schedule_cleared: "Data cleared. Showing default timetable.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...", no_data: "No data to display.", unsupported_file_type: "Unsupported file type.", upload_limit_reached: `Upload limit of ${USER_UPLOAD_LIMIT} files per hour reached.` }, ur: { site_name: "Time Space", nav_features: "Khususiyat", nav_portfolio: "Portfolio", hero_title: "Aqalmand Data Organizer", hero_subtitle: "Apne data ko khud bakhud tajzia, tarteeb, aur visualize karein. Shuru karne ke liye bas koi file upload karein.", upload_button: "Apni Data File Upload Karein", upload_caption: "Max file size: 10MB. PDF, PNG, JPG, CSV support hai.", controls_title: "✨ AI Tajzia Mukammal — Aapka Interactive Data Hazir Hai!", card_view: "Card View", table_view: "Table View", list_view: "List View", clear_button: "Saaf Karein", download_pdf: "PDF Download Karein", download_png: "PNG Download Karein", download_csv: "CSV Download Karein", features_title: "Zabardast Khususiyat, Asan Interface", features_subtitle: "Apne data ko muassar tareeqe se manage karne ke liye har cheez.", feature1_title: "Smart Data Nikalna", feature1_desc: "Tasaveer, PDFs, CSV, aur Excel files se kisi bhi data structure ka aqalmandana tajzia karta hai.", feature2_title: "Mukhtalif Views", feature2_desc: "Apni maloomat ko table, cards, ya-simple checklist ke tor par dekhein.", feature3_title: "Kayi Export Options", feature3_desc: "Apna tarteeb shuda data PDF, PNG, CSV, ya XLSX file ke tor par download karein.", portfolio_title: "Mera Kaam Dekhein", portfolio_desc: "Mera mazeed kaam dekhne mein dilchaspi hai? Doosre projects ke liye mera portfolio visit karein.", portfolio_button: "Mera Kaam Dekhein", footer_text: "© 2025 Time Space. Tamam huqooq mehfooz hain. Code & Coffee se banaya ☕ — Muhammad Owais.", loading_analyzer: "Time Space Load ho raha hai...", analyzing: "Parde ke peeche jadu ho raha hai...", welcome_message: "Time Space mein khush amdeed! Default timetable load ho gaya hai. Jadu dekhne ke liye file upload karein.", schedule_cleared: "Data saaf ho gaya. Default timetable dikhaya ja raha hai.", file_uploaded: "File upload ho gayi. Processing ho rahi hai...", preparing_pdf: "PDF tayar ho raha hai...", preparing_png: "PNG tayar ho raha hai...", no_data: "Dikhanay ke liye koi data nahi.", unsupported_file_type: "Na-qabil e qubool file type.", upload_limit_reached: `Har ghantay ${USER_UPLOAD_LIMIT} files ki upload had tak pahonch gaye.` } };
         let currentLang = 'en';
         function getText(key, lang = currentLang) { return translations[lang]?.[key] || key; }
 
@@ -397,7 +395,6 @@
             document.getElementById('download-pdf').addEventListener('click', () => downloadAsPDF());
             document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
             document.getElementById('download-csv').addEventListener('click', () => downloadAsCSV());
-            document.getElementById('download-xlsx').addEventListener('click', () => downloadAsXLSX());
             allDOMElements.closeVersionModal.addEventListener('click', () => {
                 allDOMElements.versionModal.classList.add('hidden');
                 localStorage.setItem('version2_popup_shown', 'true');
@@ -562,8 +559,8 @@
 
             try {
                 const fileExt = file.name.split('.').pop().toLowerCase();
-                const data = (fileExt === 'csv') ? await parseCSV(file) : (fileExt === 'xlsx') ? await parseXLSX(file) : await fileToBase64(file);
-                const mimeType = (fileExt === 'csv' || fileExt === 'xlsx') ? 'application/json' : file.type;
+                const data = (fileExt === 'csv') ? await parseCSV(file) : await fileToBase64(file);
+                const mimeType = (fileExt === 'csv') ? 'application/json' : file.type;
                 const dataForAI = (mimeType === 'application/json') ? JSON.stringify(data) : data;
                 await callSmartAI(mimeType, dataForAI);
                 recordUpload();
@@ -577,7 +574,6 @@
 
         function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
         function parseCSV(file) { return new Promise((resolve, reject) => Papa.parse(file, { complete: res => res.errors.length ? reject(res.errors[0]) : resolve(structureParsedData(res.data)), error: reject, skipEmptyLines: true })); }
-        function parseXLSX(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => { try { const book = XLSX.read(e.target.result, { type: 'binary' }); resolve(structureParsedData(XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]], { header: 1 }))); } catch (err) { reject(err); } }; reader.onerror = reject; reader.readAsBinaryString(file); }); }
         function structureParsedData(data) { if (data.length < 2) return []; const headers = data[0]; return data.slice(1).map(row => headers.reduce((obj, h, i) => ({ ...obj, [h]: (row[i] || '').toString().trim() }), {})).filter(entry => Object.values(entry).some(val => val));}
 
         // --- AI DATA ANALYSIS ---
@@ -677,7 +673,8 @@
                 row.className = `${(dayColumnKey && DAY_CLASSES[entry[dayColumnKey]]) || ''} text-sm align-top`;
                 row.innerHTML = dataHeaders.map(header => {
                     const value = entry[header] || 'N/A';
-                    return isImageUrl(value) ? `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>` : `<td>${value}</td>`;
+                    const noWrapClass = /time|code|room|type|mode/i.test(header) ? 'whitespace-nowrap' : '';
+                    return isImageUrl(value) ? `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>` : `<td class="${noWrapClass}">${value}</td>`;
                 }).join('');
             });
             allDOMElements.dataTableWrapper.classList.remove('hidden');
@@ -739,7 +736,7 @@
         function createCaptureStylesheet(isDark) { 
             const style = document.createElement('style'); 
             style.id = 'temp-capture-style'; 
-            let css = `* { transition: none !important; animation: none !important; } td, p { word-break: break-word !important; white-space: normal !important; }`; 
+            let css = `* { transition: none !important; animation: none !important; } td, p { word-break: break-word !important; white-space: normal !important; } td.whitespace-nowrap { white-space: nowrap !important; }`; 
             if (isDark) { css += ` body { background-color: #1e293b !important; } #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e293b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
         
         function getActiveElementForCapture() { 
@@ -797,18 +794,6 @@
             } catch(error) {
                 console.error("CSV Export Error:", error);
                 showStatus("Failed to generate CSV.", "error");
-            }
-        }
-
-        function downloadAsXLSX() { 
-            try {
-                const ws = XLSX.utils.json_to_sheet(appData); 
-                const wb = XLSX.utils.book_new(); 
-                XLSX.utils.book_append_sheet(wb, ws, 'Data'); 
-                XLSX.writeFile(wb, 'time-space-export.xlsx'); 
-            } catch (error) {
-                console.error("XLSX Export Error:", error);
-                showStatus("Failed to generate XLSX.", "error");
             }
         }
     
