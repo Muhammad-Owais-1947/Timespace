@@ -23,7 +23,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
-    <!-- REFINEMENT 1: Dark Mode Flash Fix -->
+    <!-- REFINEMENT: Dark Mode Flash Fix -->
     <script>
         // This script runs immediately to prevent a flash of white on dark mode.
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -63,8 +63,9 @@
         .dark .class-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
         .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #data-table { width: 100%; border-collapse: collapse; }
-        #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        /* REFINEMENT: Make table adaptive by using 'auto' layout */
+        #data-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+        #data-table th, #data-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; word-wrap: break-word; }
         .dark #data-table th, .dark #data-table td { border-bottom-color: #374151; }
         #data-table th { background-color: #f9fafb; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563; }
         .dark #data-table th { background-color: #1f2d37; color: #9ca3af; }
@@ -630,23 +631,74 @@
             switchView(dayColumnKey ? defaultView : 'table');
         }
         
-        function renderCardView() { /* Unchanged */ }
-        function renderTableView() { /* Unchanged */ }
-        function switchView(view) { /* Unchanged */ }
+        function renderCardView() { 
+            const { dataContainer } = allDOMElements;
+            dataContainer.innerHTML = '';
+            const columns = dataHeaders.length;
+            let gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+            if (columns > 6) { gridClass = 'grid-cols-1 sm:grid-cols-2'; }
+            else if (columns > 4) { gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'; }
+
+            const container = document.createElement('div');
+            container.className = `grid ${gridClass} gap-4`;
+
+            appData.forEach(entry => {
+                let cardContent = '';
+                dataHeaders.forEach((header, i) => {
+                    const value = entry[header] || 'N/A';
+                    const displayValue = isImageUrl(value) ? `<img src="${value}" alt="User content" class="mt-1 w-full h-auto max-h-48 object-contain rounded-md">` : `<span class="break-words">${value}</span>`;
+                    cardContent += `<p class="${i < 2 ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 text-sm'} capitalize">${header}: ${displayValue}</p>`;
+                });
+                const dayClass = dayColumnKey ? (DAY_CLASSES[entry[dayColumnKey]] || '') : '';
+                container.innerHTML += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`;
+            });
+            dataContainer.appendChild(container);
+            dataContainer.classList.remove('hidden');
+        }
+
+        function renderTableView() { 
+            const { dataTable } = allDOMElements;
+            const thead = dataTable.querySelector('thead');
+            const tbody = dataTable.querySelector('tbody');
+            thead.innerHTML = ''; tbody.innerHTML = '';
+            thead.innerHTML = `<tr>${dataHeaders.map(h => `<th class="capitalize">${h}</th>`).join('')}</tr>`;
+            appData.forEach(entry => {
+                const row = tbody.insertRow();
+                row.className = `${(dayColumnKey && DAY_CLASSES[entry[dayColumnKey]]) || ''} text-sm align-top`;
+                row.innerHTML = dataHeaders.map(header => {
+                    const value = entry[header] || 'N/A';
+                    return isImageUrl(value) ? `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>` : `<td>${value}</td>`;
+                }).join('');
+            });
+            allDOMElements.dataTableWrapper.classList.remove('hidden');
+        }
         
-        // REFINEMENT 2: Improved PDF/PNG Capture Logic
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('#view-buttons button').forEach(btn => {
+                const isActive = btn.id === `view-${view}`;
+                btn.classList.toggle('bg-blue-600', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('text-slate-600', !isActive);
+                btn.classList.toggle('dark:text-slate-300', !isActive);
+            });
+            [allDOMElements.dataContainer, allDOMElements.dataTableWrapper].forEach(el => el.classList.add('hidden'));
+            if (view === 'card') renderCardView();
+            else if (view === 'table') renderTableView();
+        }
+
+        // --- DOWNLOAD & CAPTURE LOGIC ---
         async function captureFullElement(element) {
             if (!element) return null;
             
             const isDark = document.documentElement.classList.contains('dark');
             const tempStyleSheet = createCaptureStylesheet(isDark);
             
-            // Create a temporary clone to render the full content for capture
             const captureContainer = document.createElement('div');
             captureContainer.style.position = 'absolute';
-            captureContainer.style.left = '-9999px'; // Position off-screen
+            captureContainer.style.left = '-9999px';
             captureContainer.style.top = '0';
-            captureContainer.style.width = '1200px'; // A reasonable width for PDF/PNG
+            captureContainer.style.width = '1200px';
             captureContainer.style.height = 'auto';
             captureContainer.style.pointerEvents = 'none';
 
@@ -654,44 +706,101 @@
             captureContainer.appendChild(clone);
             document.body.appendChild(captureContainer);
             
-            // Allow time for images to load in the clone
             await new Promise(resolve => setTimeout(resolve, 500)); 
 
             let canvas;
             try {
                 canvas = await html2canvas(clone, {
-                    scale: 2, // High resolution
-                    backgroundColor: isDark ? '#1e293b' : '#f8fafc', // Match theme
+                    scale: 2,
+                    backgroundColor: isDark ? '#1e293b' : '#f8fafc',
                     useCORS: true,
                     scrollX: 0,
-                    scrollY: -window.scrollY // Ensure capture starts from the top
+                    scrollY: 0,
+                    windowWidth: captureContainer.scrollWidth,
+                    windowHeight: captureContainer.scrollHeight
                 });
             } finally {
-                // Clean up the temporary elements
                 document.body.removeChild(captureContainer);
                 document.head.removeChild(tempStyleSheet);
             }
             return canvas;
         }
 
-        function createCaptureStylesheet(isDark) { /* Unchanged */ }
-        function getActiveElementForCapture() { /* Unchanged */ }
-        async function downloadAsPDF() { /* Unchanged */ }
-        async function downloadAsPNG() { /* Unchanged */ }
-        function downloadAsCSV() { /* Unchanged */ }
-        function downloadAsXLSX() { /* Unchanged */ }
+        function createCaptureStylesheet(isDark) { 
+            const style = document.createElement('style'); 
+            style.id = 'temp-capture-style'; 
+            let css = `* { transition: none !important; animation: none !important; } td, p { word-break: break-word !important; white-space: normal !important; }`; 
+            if (isDark) { css += ` body { background-color: #1e293b !important; } #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e293b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
+        
+        function getActiveElementForCapture() { 
+            switch (currentView) { 
+                case 'card': return allDOMElements.dataContainer; 
+                case 'table': return allDOMElements.dataTableWrapper; 
+                default: return null; 
+            } 
+        }
+        
+        async function downloadAsPDF() { 
+            try {
+                const { jsPDF } = window.jspdf; 
+                const element = getActiveElementForCapture(); 
+                if (!element) return; 
+                showStatus('preparing_pdf', 'success'); 
+                const canvas = await captureFullElement(element); 
+                if (!canvas) throw new Error("Capture failed."); 
+                const imgData = canvas.toDataURL('image/png', 1.0); 
+                const { width, height } = canvas; 
+                const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); 
+                pdf.addImage(imgData, 'PNG', 0, 0, width, height); 
+                pdf.save('time-space-export.pdf'); 
+            } catch (error) {
+                console.error("PDF Export Error:", error); 
+                showStatus(error.message, 'error');
+            }
+        }
+        
+        async function downloadAsPNG() { 
+            try {
+                const element = getActiveElementForCapture(); 
+                if (!element) return; 
+                showStatus('preparing_png', 'success'); 
+                const canvas = await captureFullElement(element); 
+                if (!canvas) throw new Error("Capture failed."); 
+                const link = document.createElement('a'); 
+                link.download = 'time-space-export.png'; 
+                link.href = canvas.toDataURL('image/png'); 
+                link.click(); 
+            } catch (error) {
+                console.error("PNG Export Error:", error); 
+                showStatus(error.message, 'error');
+            }
+        }
 
-        // --- Helper functions for rendering and downloads ---
-        // (All the remaining functions are here, unchanged from your perfect version)
-        function renderCardView() { const { dataContainer } = allDOMElements; dataContainer.innerHTML = ''; const columns = dataHeaders.length; let gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'; if (columns > 6) { gridClass = 'grid-cols-1 sm:grid-cols-2'; } else if (columns > 4) { gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'; } const container = document.createElement('div'); container.className = `grid ${gridClass} gap-4`; appData.forEach(entry => { let cardContent = ''; dataHeaders.forEach((header, i) => { const value = entry[header] || 'N/A'; const displayValue = isImageUrl(value) ? `<img src="${value}" alt="User content" class="mt-1 w-full h-auto max-h-48 object-contain rounded-md">` : `<span class="break-words">${value}</span>`; cardContent += `<p class="${i < 2 ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 text-sm'} capitalize">${header}: ${displayValue}</p>`; }); const dayClass = dayColumnKey ? (DAY_CLASSES[entry[dayColumnKey]] || '') : ''; container.innerHTML += `<div class="class-card ${dayClass} p-4 rounded-lg"><div class="flex flex-col gap-1">${cardContent}</div></div>`; }); dataContainer.appendChild(container); dataContainer.classList.remove('hidden'); }
-        function renderTableView() { const { dataTable } = allDOMElements; const thead = dataTable.querySelector('thead'); const tbody = dataTable.querySelector('tbody'); thead.innerHTML = ''; tbody.innerHTML = ''; thead.innerHTML = `<tr>${dataHeaders.map(h => `<th class="capitalize">${h}</th>`).join('')}</tr>`; appData.forEach(entry => { const row = tbody.insertRow(); row.className = `${(dayColumnKey && DAY_CLASSES[entry[dayColumnKey]]) || ''} text-sm`; row.innerHTML = dataHeaders.map(header => { const value = entry[header] || 'N/A'; return isImageUrl(value) ? `<td><img src="${value}" alt="User content" class="w-16 h-16 object-cover rounded-md"></td>` : `<td class="whitespace-nowrap">${value}</td>`; }).join(''); }); allDOMElements.dataTableWrapper.classList.remove('hidden'); }
-        function switchView(view) { currentView = view; document.querySelectorAll('#view-buttons button').forEach(btn => { const isActive = btn.id === `view-${view}`; btn.classList.toggle('bg-blue-600', isActive); btn.classList.toggle('text-white', isActive); btn.classList.toggle('text-slate-600', !isActive); btn.classList.toggle('dark:text-slate-300', !isActive); }); [allDOMElements.dataContainer, allDOMElements.dataTableWrapper].forEach(el => el.classList.add('hidden')); if (view === 'card') renderCardView(); else if (view === 'table') renderTableView(); }
-        function createCaptureStylesheet(isDark) { const style = document.createElement('style'); style.id = 'temp-capture-style'; let css = `* { transition: none !important; animation: none !important; }`; if (isDark) { css += ` body { background-color: #1e293b !important; } #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3 { color: #1e293b !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .class-card.day-mon, li.day-mon, tr.day-mon { background-color: #f0fdf4 !important; } .class-card.day-tue, li.day-tue, tr.day-tue { background-color: #eff6ff !important; } .class-card.day-wed, li.day-wed, tr.day-wed { background-color: #fef2f2 !important; } .class-card.day-thu, li.day-thu, tr.day-thu { background-color: #ecfeff !important; } .class-card.day-fri, li.day-fri, tr.day-fri { background-color: #faf5ff !important; } .class-card.day-sat, li.day-sat, tr.day-sat { background-color: #fff7ed !important; } .class-card.day-sun, li.day-sun, tr.day-sun { background-color: #fdf4ff !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
-        function getActiveElementForCapture() { switch (currentView) { case 'card': return allDOMElements.dataContainer; case 'table': return allDOMElements.dataTableWrapper; default: return null; } }
-        async function downloadAsPDF() { const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_pdf', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const imgData = canvas.toDataURL('image/png', 1.0); const { width, height } = canvas; const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); } catch (error) { console.error("PDF Export Error:", error); showStatus(error.message, 'error'); } }
-        async function downloadAsPNG() { const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_png', 'success'); try { const canvas = await captureFullElement(element); if (!canvas) throw new Error("Capture failed."); const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); } catch (error) { console.error("PNG Export Error:", error); showStatus(error.message, 'error'); } }
-        function downloadAsCSV() { const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click(); }
-        function downloadAsXLSX() { const ws = XLSX.utils.json_to_sheet(appData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, 'time-space-export.xlsx'); }
+        function downloadAsCSV() { 
+            try {
+                const csv = Papa.unparse(appData); 
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); 
+                const link = document.createElement('a'); 
+                link.href = URL.createObjectURL(blob); 
+                link.download = 'time-space-export.csv'; 
+                link.click(); 
+            } catch(error) {
+                console.error("CSV Export Error:", error);
+                showStatus("Failed to generate CSV.", "error");
+            }
+        }
+
+        function downloadAsXLSX() { 
+            try {
+                const ws = XLSX.utils.json_to_sheet(appData); 
+                const wb = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(wb, ws, 'Data'); 
+                XLSX.writeFile(wb, 'time-space-export.xlsx'); 
+            } catch (error) {
+                console.error("XLSX Export Error:", error);
+                showStatus("Failed to generate XLSX.", "error");
+            }
+        }
     
         // Start the application
         initializeApp();
