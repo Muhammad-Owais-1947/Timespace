@@ -136,6 +136,14 @@
     </div>
 </div>
 
+<!-- NEW: Fallback Notification Modal -->
+<div id="fallback-modal" class="modal-overlay hidden">
+    <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-md m-4 p-6 rounded-2xl shadow-xl text-center">
+        <h2 class="text-xl font-bold text-yellow-500" data-translate-key="fallback_title">Heads Up!</h2>
+        <p class="mt-4 text-slate-600 dark:text-slate-300" data-translate-key="fallback_message">Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use 2 of your hourly credits.</p>
+    </div>
+</div>
+
 <!-- Header -->
 <header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 transition-transform duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -321,7 +329,7 @@
     // CONFIGURATION & GLOBAL STATE
     // ===================================================================================
     
-    // 1. Paste the URL you get from your Cloudflare Worker dashboard. It must start with https://
+    // 1. Paste the URL you get from your Cloudflare Worker dashboard.
     const SECURE_API_URL = "https://codesecurity.pubg89r3.workers.dev/";
 
     // 2. CUSTOMIZE THE AI's BEHAVIOR
@@ -329,8 +337,8 @@
         Your analysis must be meticulous. Follow these rules with precision:
         1.  **Infer Context and Structure:** Do not just transcribe. Understand the *purpose* of the data. Is it a class schedule, a contact list, a project plan, an inventory? Use this context to create logical, well-named headers (JSON keys).
         2.  **Identify Primary Fields:** Determine the most important field in each record (like a name, title, or main subject) and ensure it's a distinct key. This will likely be the main identifier for each object in the array.
-        3.  **Comprehensive Data Extraction:** Extract every single piece of relevant information. Do not miss any details, no matter how small. This includes names, dates, times, codes, locations, descriptions, and any other pertinent data.
-        4.  **Perfect Headers:** Create clear, descriptive, and correctly spelled headers for each data column. For example, instead of "C.Code", use "Course Code". Instead of "faculty", use "Faculty Name".
+        3.  **Comprehensive Data Extraction:** Extract every single piece of relevant information. Do not miss any details, no matter how small.
+        4.  **Perfect Headers:** Create clear, descriptive, and correctly spelled headers for each data column. For example, use "Course Code" not "C.Code".
         5.  **Well-Formatted Values:** Clean up the data you extract. Ensure consistent formatting, correct spelling, and proper capitalization.
         6.  **Image Analysis:** If an image is provided, analyze its content deeply. If it contains text or tabular data, extract it as if it were a document.
         7.  **Accuracy is Paramount:** Your final output must be an accurate and complete representation of the source material.
@@ -395,6 +403,7 @@
             welcome_message: "Welcome! The default timetable is loaded. Upload a file or paste text to see the magic.", 
             schedule_cleared: "Data cleared. Showing default timetable again.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...",
             lang_modal_title: "Choose Translation", lang_modal_desc: "What would you like to translate?", translate_interface: "Translate Interface", translate_content: "Translate Data Content (AI)",
+            fallback_title: "Heads Up!", fallback_message: "Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use 2 of your hourly credits.",
             // Creative Errors
             no_data: "The data dimension is empty. Try uploading a file!",
             unsupported_file_type: "Whoa there! That file type is a bit too exotic for me. Try a PDF, PNG, JPG, or CSV.",
@@ -457,6 +466,7 @@
                 translateInterfaceBtn: document.getElementById('translate-interface-btn'),
                 translateContentBtn: document.getElementById('translate-content-btn'),
                 cancelLangModalBtn: document.getElementById('cancel-lang-modal'),
+                fallbackModal: document.getElementById('fallback-modal'),
                 getInTouchBtn: document.getElementById('get-in-touch-btn'),
                 feedbackEmojis: document.getElementById('feedback-emojis'),
                 whyUsAccordion: document.getElementById('why-us-accordion'),
@@ -524,7 +534,7 @@
             allDOMElements.clearDataBtn.addEventListener('click', clearData);
             document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
             
-            // NEW FEATURE: Auto-resizing textarea with a max-height
+            // Auto-resizing textarea with a max-height
             allDOMElements.textInput.addEventListener('input', (e) => {
                 e.target.style.height = 'auto'; // Reset height
                 e.target.style.height = (e.target.scrollHeight) + 'px'; // Set to scroll height
@@ -581,7 +591,7 @@
                 if (el.placeholder) el.placeholder = getText(key); else el.textContent = getText(key);
             });
             localStorage.setItem('language', currentLang);
-            buildWhyUsAccordion(); // Rebuild accordion with new language
+            buildWhyUsAccordion();
         }
         
         function showStatus(messageKey, type, customMessage = null) {
@@ -707,8 +717,6 @@
             }
         }
         
-        // --- FIXED: UPLOAD COUNTER LOGIC ---
-        // This helper function ensures the timestamp list is always filtered.
         function getRecentUploads() {
             const now = new Date().getTime();
             const oneHourAgo = now - (UPLOAD_LIMIT_HOURS * 60 * 60 * 1000);
@@ -729,15 +737,14 @@
                 return;
             }
             allDOMElements.uploadCounterWrapper.classList.remove('hidden');
-            const recentUploads = getRecentUploads(); // Use the helper
+            const recentUploads = getRecentUploads();
             const remaining = USER_UPLOAD_LIMIT - recentUploads.length;
             allDOMElements.uploadCounter.textContent = Math.max(0, remaining);
         }
 
-        function recordUpload(cost = 1) { // Accept a 'cost' parameter
+        function recordUpload(cost = 1) {
             if (isAdmin) return;
             const uploads = getRecentUploads();
-            // Add a number of timestamps equal to the cost
             for (let i = 0; i < cost; i++) {
                 uploads.push(new Date().getTime());
             }
@@ -750,8 +757,7 @@
         // ===================================================================================
         
         async function processInput(mimeType, data, isTranslation = false) {
-            // Check limit before proceeding, but allow translations to bypass this check
-            if (!isTranslation && getRecentUploads().length >= USER_UPLOAD_LIMIT && !isAdmin) {
+            if (!isTranslation && !checkUploadLimit()) {
                 showStatus("upload_limit_reached", "error");
                 return;
             }
@@ -767,13 +773,18 @@
                 const { parsedData, apiKeyUsed } = await callSmartAI(mimeType, data, isTranslation);
                 appData = parsedData;
                 prepareAndRender();
+                
                 if (!isTranslation) {
-                    const cost = (apiKeyUsed === '2' || apiKeyUsed === '3') ? 2 : 1;
+                    const cost = API_KEY_COSTS[apiKeyUsed] || 1;
+                    if (cost > 1 && allDOMElements.fallbackModal) {
+                        allDOMElements.fallbackModal.classList.remove('hidden');
+                        setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
+                    }
                     recordUpload(cost);
                 }
+
             } catch (error) {
                 console.error('Processing error:', error);
-                // --- FIX: Add specific error handling for "overloaded" model errors ---
                 let messageKey = 'ai_error';
                 if (error.message && error.message.toLowerCase().includes('overloaded')) {
                     messageKey = 'ai_overloaded_error';
@@ -791,7 +802,7 @@
             if (file.size > MAX_FILE_SIZE) { return showStatus('file_too_large', 'error'); }
             const fileExt = file.name.split('.').pop().toLowerCase();
             const data = (fileExt === 'csv') ? await parseCSV(file) : await fileToBase64(file);
-            const mimeType = (fileExt === 'csv') ? 'application/json' : file.type; // Send CSVs as structured JSON
+            const mimeType = (fileExt === 'csv') ? 'application/json' : file.type;
             const dataForAI = (mimeType === 'application/json') ? JSON.stringify(data) : data;
             processInput(mimeType, dataForAI);
         }
@@ -803,8 +814,6 @@
                 return;
             }
             processInput('text/plain', text);
-
-            // NEW: Clear the textarea and reset its height after analysis starts
             allDOMElements.textInput.value = '';
             allDOMElements.textInput.style.height = 'auto';
         }
@@ -850,7 +859,6 @@
                 throw new Error(errorResult.error);
             }
             
-            // Get the API key used from the response header
             const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
             const parsedData = await response.json();
 
