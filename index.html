@@ -772,14 +772,15 @@
                 appData = parsedData;
                 prepareAndRender();
                 
-                if (cost > 1 && allDOMElements.fallbackModal && !isTranslation) {
-                    const fallbackMessage = allDOMElements.fallbackModal.querySelector('p');
-                    fallbackMessage.textContent = getText('fallback_message').replace('{cost}', cost);
-                    allDOMElements.fallbackModal.classList.remove('hidden');
-                    setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
+                if (!isTranslation) {
+                    if (cost > 1 && allDOMElements.fallbackModal) {
+                        const fallbackMessage = allDOMElements.fallbackModal.querySelector('p');
+                        fallbackMessage.textContent = getText('fallback_message').replace('{cost}', cost);
+                        allDOMElements.fallbackModal.classList.remove('hidden');
+                        setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
+                    }
+                    recordUpload(cost);
                 }
-                recordUpload(cost);
-
 
             } catch (error) {
                 console.error('Processing error:', error);
@@ -866,9 +867,19 @@
             
             const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
             const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
-            const parsedData = await response.json();
+            let parsedData = await response.json();
 
-            if (!Array.isArray(parsedData) || (parsedData.length === 0 && !isTranslation)) {
+            // --- FIX: Add robustness check to ensure response is an array ---
+            if (!Array.isArray(parsedData)) {
+                if (typeof parsedData === 'object' && parsedData !== null) {
+                    parsedData = [parsedData]; // Wrap the single object in an array
+                } else {
+                    // If it's not an object and not an array, it's invalid.
+                    throw new Error(getText("ai_error"));
+                }
+            }
+
+            if (parsedData.length === 0 && !isTranslation) {
                 throw new Error(getText("ai_error"));
             }
             return { parsedData, apiKeyUsed, cost };
