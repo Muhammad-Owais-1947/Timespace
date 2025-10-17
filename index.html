@@ -68,7 +68,6 @@
         .accordion-item.active .accordion-arrow { transform: rotate(180deg); }
         .accordion-arrow { transition: transform 0.3s ease; }
         #text-input { resize: none; max-height: 15rem; /* Limit height */ overflow-y: auto; /* Add scroll on overflow */ }
-        /* NEW: Class for the responsive card grid */
         .card-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
         .cat-color-1 { background-color: #dcfce7; color: #166534; } .dark .cat-color-1 { background-color: #14532d; color: #dcfce7; } .card-cat-color-1 { border-left-color: #4ade80; } .bg-cat-color-1 { background-color: #f0fdf4; } .dark .bg-cat-color-1 { background-color: #164e3233; }
         .cat-color-2 { background-color: #dbeafe; color: #1e40af; } .dark .cat-color-2 { background-color: #1e3a8a; color: #dbeafe; } .card-cat-color-2 { border-left-color: #60a5fa; } .bg-cat-color-2 { background-color: #eff6ff; } .dark .bg-cat-color-2 { background-color: #1e3a8a33; }
@@ -337,13 +336,15 @@
         Your analysis must be meticulous. Follow these rules with precision:
         1.  **Infer Context and Structure:** Do not just transcribe. Understand the *purpose* of the data. Is it a class schedule, a contact list, a project plan, an inventory? Use this context to create logical, well-named headers (JSON keys).
         2.  **Identify Primary Fields:** Determine the most important field in each record (like a name, title, or main subject) and ensure it's a distinct key. This will likely be the main identifier for each object in the array.
-        3.  **Comprehensive Data Extraction:** Extract every single piece of relevant information. Do not miss any details, no matter how small.
+        3.  **Comprehensive Data Extraction:** Extract every single piece of relevant information. Do not miss any details. If the input is a multi-page document (like a PDF), process all pages and consolidate the data into a single, cohesive JSON array.
         4.  **Perfect Headers:** Create clear, descriptive, and correctly spelled headers for each data column. For example, use "Course Code" not "C.Code".
         5.  **Well-Formatted Values:** Clean up the data you extract. Ensure consistent formatting, correct spelling, and proper capitalization.
-        6.  **Image Analysis:** If an image is provided, analyze its content deeply. If it contains text or tabular data, extract it as if it were a document.
-        7.  **Accuracy is Paramount:** Your final output must be an accurate and complete representation of the source material.
-        8.  **Output Format:** Your final output MUST be only the JSON array. Do not include any introductory text, markdown formatting like \`\`\`json, or any explanations.`;
+        6.  **Accuracy is Paramount:** Your final output must be an accurate and complete representation of the source material.
+        7.  **Output Format:** Your final output MUST be only the JSON array. Do not include any introductory text, markdown formatting like \`\`\`json, or any explanations.`;
     
+    // --- THIS OBJECT IS NO LONGER USED, COSTS ARE HANDLED ON THE SERVER ---
+    // const API_KEY_COSTS = { ... };
+
     // --- GLOBAL STATE & CONSTANTS ---
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const USER_UPLOAD_LIMIT = 5;
@@ -770,12 +771,11 @@
             }
 
             try {
-                const { parsedData, apiKeyUsed } = await callSmartAI(mimeType, data, isTranslation);
+                const { parsedData, apiKeyUsed, cost } = await callSmartAI(mimeType, data, isTranslation);
                 appData = parsedData;
                 prepareAndRender();
                 
                 if (!isTranslation) {
-                    const cost = API_KEY_COSTS[apiKeyUsed] || 1;
                     if (cost > 1 && allDOMElements.fallbackModal) {
                         allDOMElements.fallbackModal.classList.remove('hidden');
                         setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
@@ -860,12 +860,13 @@
             }
             
             const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
+            const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
             const parsedData = await response.json();
 
             if (!Array.isArray(parsedData) || (parsedData.length === 0 && !isTranslation)) {
                 throw new Error(getText("ai_error"));
             }
-            return { parsedData, apiKeyUsed };
+            return { parsedData, apiKeyUsed, cost };
         }
 
         // ===================================================================================
