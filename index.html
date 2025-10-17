@@ -881,9 +881,16 @@
             switchView(categoryColumnKey ? defaultView : 'table');
         }
         
+        // --- RENDER CARD VIEW ---
+        // NEW FEATURE: This function creates a single responsive grid.
+        // It adds full-width group headings directly to the grid,
+        // followed by the cards for that group. This ensures cards
+        // from all groups fill the available space efficiently.
         function renderCardView() { 
             const { dataContainer } = allDOMElements;
             dataContainer.innerHTML = '';
+            // The main container is now the grid, replacing the old `space-y-4`
+            dataContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4';
             
             const groupedData = appData.reduce((acc, item) => {
                 const key = categoryColumnKey ? (item[categoryColumnKey] || 'Uncategorized') : 'All Entries';
@@ -892,18 +899,18 @@
             }, {});
 
             Object.keys(groupedData).forEach(groupKey => {
-                const groupWrapper = document.createElement('div');
                 const colorInfo = categoryColorMap[groupKey] || { label: 'cat-color-0', cardBorder: 'card-cat-color-0', bg: 'bg-cat-color-0' };
+                
+                // Add group heading if there's a category
                 if (categoryColumnKey && groupKey !== 'All Entries') {
                     const heading = document.createElement('h3');
-                    heading.className = "text-xl font-bold mt-6 mb-2 flex items-center gap-2";
+                    // Make the heading span all columns
+                    heading.className = "text-xl font-bold mt-6 mb-2 flex items-center gap-2 col-span-full";
                     heading.innerHTML = `<span class="category-label ${colorInfo.label}">${groupKey}</span>`;
-                    groupWrapper.appendChild(heading);
+                    dataContainer.appendChild(heading);
                 }
 
-                const container = document.createElement('div');
-                container.className = `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4`;
-                
+                // Add cards for this group directly to the main grid container
                 groupedData[groupKey].forEach(entry => {
                     let cardContent = '';
                     let titleRendered = false;
@@ -920,13 +927,12 @@
                             cardContent += `<p class="text-sm"><strong class="font-semibold text-slate-700 dark:text-slate-300 capitalize">${header.replace(/_/g, ' ')}:</strong> <span class="break-words text-slate-500 dark:text-slate-400">${value}</span></p>`;
                         }
                     });
+
                     const cardDiv = document.createElement('div');
                     cardDiv.className = `class-card p-4 rounded-lg shadow-sm ${colorInfo.cardBorder} ${colorInfo.bg}`;
                     cardDiv.innerHTML = `<div class="flex flex-col gap-1">${cardContent}</div>`;
-                    container.appendChild(cardDiv);
+                    dataContainer.appendChild(cardDiv);
                 });
-                groupWrapper.appendChild(container);
-                dataContainer.appendChild(groupWrapper);
             });
 
             dataContainer.classList.remove('hidden');
@@ -970,6 +976,10 @@
                 btn.classList.toggle('dark:text-slate-300', !isActive);
             });
             [allDOMElements.dataContainer, allDOMElements.dataTableWrapper].forEach(el => el.classList.add('hidden'));
+            
+            // Clear any lingering layout classes from dataContainer
+            allDOMElements.dataContainer.className = '';
+
             if (view === 'card') renderCardView();
             else if (view === 'table') renderTableView();
         }
