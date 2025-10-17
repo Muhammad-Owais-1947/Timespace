@@ -67,7 +67,9 @@
         .accordion-item.active .accordion-content { max-height: 200px; /* Adjust as needed */ }
         .accordion-item.active .accordion-arrow { transform: rotate(180deg); }
         .accordion-arrow { transition: transform 0.3s ease; }
-        #text-input { resize: none; max-height: 15rem; /* NEW: Limit height */ overflow-y: auto; /* NEW: Add scroll on overflow */ }
+        #text-input { resize: none; max-height: 15rem; /* Limit height */ overflow-y: auto; /* Add scroll on overflow */ }
+        /* NEW: Class for the responsive card grid */
+        .card-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
         .cat-color-1 { background-color: #dcfce7; color: #166534; } .dark .cat-color-1 { background-color: #14532d; color: #dcfce7; } .card-cat-color-1 { border-left-color: #4ade80; } .bg-cat-color-1 { background-color: #f0fdf4; } .dark .bg-cat-color-1 { background-color: #164e3233; }
         .cat-color-2 { background-color: #dbeafe; color: #1e40af; } .dark .cat-color-2 { background-color: #1e3a8a; color: #dbeafe; } .card-cat-color-2 { border-left-color: #60a5fa; } .bg-cat-color-2 { background-color: #eff6ff; } .dark .bg-cat-color-2 { background-color: #1e3a8a33; }
         .cat-color-3 { background-color: #fee2e2; color: #991b1b; } .dark .cat-color-3 { background-color: #7f1d1d; color: #fee2e2; } .card-cat-color-3 { border-left-color: #f87171; } .bg-cat-color-3 { background-color: #fef2f2; } .dark .bg-cat-color-3 { background-color: #7f1d1d33; }
@@ -400,6 +402,7 @@
             upload_limit_reached: "You're on fire! You've hit the hourly analysis limit. Take a short break, or switch to Admin Mode for unlimited power.",
             api_not_configured: "Uh oh, a wire is loose on our end. The developer needs to configure the API endpoint.",
             ai_error: "Hmm, the AI gazed into your data but found... a mystery. Could you check if the file is empty or has a really unusual format?",
+            ai_overloaded_error: "The AI is currently experiencing high traffic. Please try again in a moment.",
             incorrect_password: "Incorrect password. The digital gates remain closed.",
             lockout_message: "Too many incorrect attempts. For security, you're locked out for a bit. Time for a coffee break?",
             empty_text_error: "Can't analyze thin air! Please paste some text before analyzing."
@@ -704,14 +707,20 @@
             }
         }
         
-        function checkUploadLimit() {
-            if (isAdmin) return true;
+        // --- FIXED: UPLOAD COUNTER LOGIC ---
+        // This helper function ensures the timestamp list is always filtered.
+        function getRecentUploads() {
             const now = new Date().getTime();
             const oneHourAgo = now - (UPLOAD_LIMIT_HOURS * 60 * 60 * 1000);
             const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
             const recentUploads = uploads.filter(timestamp => timestamp > oneHourAgo);
             localStorage.setItem('userUploads', JSON.stringify(recentUploads));
-            return recentUploads.length < USER_UPLOAD_LIMIT;
+            return recentUploads;
+        }
+
+        function checkUploadLimit() {
+            if (isAdmin) return true;
+            return getRecentUploads().length < USER_UPLOAD_LIMIT;
         }
 
         function updateUploadCounterUI() {
@@ -720,15 +729,18 @@
                 return;
             }
             allDOMElements.uploadCounterWrapper.classList.remove('hidden');
-            const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
-            const remaining = USER_UPLOAD_LIMIT - uploads.length;
+            const recentUploads = getRecentUploads(); // Use the helper
+            const remaining = USER_UPLOAD_LIMIT - recentUploads.length;
             allDOMElements.uploadCounter.textContent = Math.max(0, remaining);
         }
 
-        function recordUpload() {
+        function recordUpload(cost = 1) { // Accept a 'cost' parameter
             if (isAdmin) return;
-            const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
-            uploads.push(new Date().getTime());
+            const uploads = getRecentUploads();
+            // Add a number of timestamps equal to the cost
+            for (let i = 0; i < cost; i++) {
+                uploads.push(new Date().getTime());
+            }
             localStorage.setItem('userUploads', JSON.stringify(uploads));
             updateUploadCounterUI();
         }
@@ -738,10 +750,12 @@
         // ===================================================================================
         
         async function processInput(mimeType, data, isTranslation = false) {
-             if (!checkUploadLimit() && !isTranslation) {
+            // Check limit before proceeding, but allow translations to bypass this check
+            if (!isTranslation && getRecentUploads().length >= USER_UPLOAD_LIMIT && !isAdmin) {
                 showStatus("upload_limit_reached", "error");
                 return;
             }
+            
             allDOMElements.processingQuote.textContent = getText(isTranslation ? 'translating' : 'analyzing');
             allDOMElements.processingLoader.classList.remove('hidden');
             allDOMElements.statusMessage.classList.add('hidden');
@@ -750,11 +764,22 @@
             }
 
             try {
-                await callSmartAI(mimeType, data, isTranslation);
-                if (!isTranslation) recordUpload();
+                const { parsedData, apiKeyUsed } = await callSmartAI(mimeType, data, isTranslation);
+                appData = parsedData;
+                prepareAndRender();
+                if (!isTranslation) {
+                    const cost = (apiKeyUsed === '2' || apiKeyUsed === '3') ? 2 : 1;
+                    recordUpload(cost);
+                }
             } catch (error) {
                 console.error('Processing error:', error);
-                showStatus('ai_error', 'error', error.message.includes("API URL") ? error.message : getText('ai_error'));
+                // --- FIX: Add specific error handling for "overloaded" model errors ---
+                let messageKey = 'ai_error';
+                if (error.message && error.message.toLowerCase().includes('overloaded')) {
+                    messageKey = 'ai_overloaded_error';
+                }
+                const friendlyMessage = getText(messageKey);
+                showStatus(messageKey, 'error', friendlyMessage);
             } finally {
                 allDOMElements.processingLoader.classList.add('hidden');
             }
@@ -824,12 +849,15 @@
                 const errorResult = await response.json().catch(() => ({error: `API error: ${response.statusText}`}));
                 throw new Error(errorResult.error);
             }
+            
+            // Get the API key used from the response header
+            const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
             const parsedData = await response.json();
-            if (!Array.isArray(parsedData) || parsedData.length === 0) {
+
+            if (!Array.isArray(parsedData) || (parsedData.length === 0 && !isTranslation)) {
                 throw new Error(getText("ai_error"));
             }
-            appData = parsedData;
-            prepareAndRender();
+            return { parsedData, apiKeyUsed };
         }
 
         // ===================================================================================
@@ -881,16 +909,10 @@
             switchView(categoryColumnKey ? defaultView : 'table');
         }
         
-        // --- RENDER CARD VIEW ---
-        // NEW FEATURE: This function creates a single responsive grid.
-        // It adds full-width group headings directly to the grid,
-        // followed by the cards for that group. This ensures cards
-        // from all groups fill the available space efficiently.
         function renderCardView() { 
             const { dataContainer } = allDOMElements;
             dataContainer.innerHTML = '';
-            // The main container is now the grid, replacing the old `space-y-4`
-            dataContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4';
+            dataContainer.className = 'card-grid-container';
             
             const groupedData = appData.reduce((acc, item) => {
                 const key = categoryColumnKey ? (item[categoryColumnKey] || 'Uncategorized') : 'All Entries';
@@ -901,16 +923,13 @@
             Object.keys(groupedData).forEach(groupKey => {
                 const colorInfo = categoryColorMap[groupKey] || { label: 'cat-color-0', cardBorder: 'card-cat-color-0', bg: 'bg-cat-color-0' };
                 
-                // Add group heading if there's a category
                 if (categoryColumnKey && groupKey !== 'All Entries') {
                     const heading = document.createElement('h3');
-                    // Make the heading span all columns
                     heading.className = "text-xl font-bold mt-6 mb-2 flex items-center gap-2 col-span-full";
                     heading.innerHTML = `<span class="category-label ${colorInfo.label}">${groupKey}</span>`;
                     dataContainer.appendChild(heading);
                 }
 
-                // Add cards for this group directly to the main grid container
                 groupedData[groupKey].forEach(entry => {
                     let cardContent = '';
                     let titleRendered = false;
@@ -924,7 +943,7 @@
                             cardContent += `<h4 class="font-bold text-xl text-slate-800 dark:text-slate-100 mb-2">${value}</h4>`;
                             titleRendered = true;
                         } else {
-                            cardContent += `<p class="text-sm"><strong class="font-semibold text-slate-700 dark:text-slate-300 capitalize">${header.replace(/_/g, ' ')}:</strong> <span class="break-words text-slate-500 dark:text-slate-400">${value}</span></p>`;
+                            cardContent += `<p class="text-base"><strong class="font-semibold text-slate-700 dark:text-slate-300 capitalize">${header.replace(/_/g, ' ')}:</strong> <span class="break-words text-slate-500 dark:text-slate-400">${value}</span></p>`;
                         }
                     });
 
@@ -952,7 +971,6 @@
                 row.innerHTML = dataHeaders.map((header, index) => {
                     const value = entry[header] || 'N/A';
                     const noWrapClass = /time|code|room|type|mode|date/i.test(header) ? 'whitespace-nowrap' : '';
-                    // NEW FEATURE: Intelligently bold important columns
                     const isImportant = /name|title/i.test(header) || (index === 0 && header !== categoryColumnKey);
                     const cellClass = `${noWrapClass} ${isImportant ? 'font-semibold text-slate-800 dark:text-slate-200' : ''}`;
                     
@@ -975,13 +993,14 @@
                 btn.classList.toggle('text-slate-600', !isActive);
                 btn.classList.toggle('dark:text-slate-300', !isActive);
             });
-            [allDOMElements.dataContainer, allDOMElements.dataTableWrapper].forEach(el => el.classList.add('hidden'));
+            allDOMElements.dataContainer.classList.add('hidden');
+            allDOMElements.dataTableWrapper.classList.add('hidden');
             
-            // Clear any lingering layout classes from dataContainer
-            allDOMElements.dataContainer.className = '';
-
-            if (view === 'card') renderCardView();
-            else if (view === 'table') renderTableView();
+            if (view === 'card') {
+                renderCardView();
+            } else if (view === 'table') {
+                renderTableView();
+            }
         }
 
         // ===================================================================================
@@ -995,7 +1014,7 @@
             const tempStyleSheet = createCaptureStylesheet(isDark);
             
             const captureContainer = document.createElement('div');
-            Object.assign(captureContainer.style, { position: 'absolute', left: '-9999px', top: '0', width: '1200px', height: 'auto', pointerEvents: 'none' });
+            Object.assign(captureContainer.style, { position: 'absolute', left: '-9999px', top: '0', width: 'auto', display: 'inline-block', padding: '1.5rem'});
 
             const clone = element.cloneNode(true);
             captureContainer.appendChild(clone);
