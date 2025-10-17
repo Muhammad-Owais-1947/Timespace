@@ -342,9 +342,6 @@
         6.  **Accuracy is Paramount:** Your final output must be an accurate and complete representation of the source material.
         7.  **Output Format:** Your final output MUST be only the JSON array. Do not include any introductory text, markdown formatting like \`\`\`json, or any explanations.`;
     
-    // --- THIS OBJECT IS NO LONGER USED, COSTS ARE HANDLED ON THE SERVER ---
-    // const API_KEY_COSTS = { ... };
-
     // --- GLOBAL STATE & CONSTANTS ---
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const USER_UPLOAD_LIMIT = 5;
@@ -404,7 +401,7 @@
             welcome_message: "Welcome! The default timetable is loaded. Upload a file or paste text to see the magic.", 
             schedule_cleared: "Data cleared. Showing default timetable again.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...",
             lang_modal_title: "Choose Translation", lang_modal_desc: "What would you like to translate?", translate_interface: "Translate Interface", translate_content: "Translate Data Content (AI)",
-            fallback_title: "Heads Up!", fallback_message: "Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use 2 of your hourly credits.",
+            fallback_title: "Heads Up!", fallback_message: "Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use {cost} of your hourly credits.",
             // Creative Errors
             no_data: "The data dimension is empty. Try uploading a file!",
             unsupported_file_type: "Whoa there! That file type is a bit too exotic for me. Try a PDF, PNG, JPG, or CSV.",
@@ -775,19 +772,22 @@
                 appData = parsedData;
                 prepareAndRender();
                 
-                if (!isTranslation) {
-                    if (cost > 1 && allDOMElements.fallbackModal) {
-                        allDOMElements.fallbackModal.classList.remove('hidden');
-                        setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
-                    }
-                    recordUpload(cost);
+                if (cost > 1 && allDOMElements.fallbackModal && !isTranslation) {
+                    const fallbackMessage = allDOMElements.fallbackModal.querySelector('p');
+                    fallbackMessage.textContent = getText('fallback_message').replace('{cost}', cost);
+                    allDOMElements.fallbackModal.classList.remove('hidden');
+                    setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
                 }
+                recordUpload(cost);
+
 
             } catch (error) {
                 console.error('Processing error:', error);
                 let messageKey = 'ai_error';
                 if (error.message && error.message.toLowerCase().includes('overloaded')) {
                     messageKey = 'ai_overloaded_error';
+                } else if (error.message && error.message.toLowerCase().includes('timed out')) {
+                    messageKey = 'ai_overloaded_error'; // Treat timeout as overload
                 }
                 const friendlyMessage = getText(messageKey);
                 showStatus(messageKey, 'error', friendlyMessage);
@@ -855,8 +855,13 @@
             });
             
             if (!response.ok) {
-                const errorResult = await response.json().catch(() => ({error: `API error: ${response.statusText}`}));
-                throw new Error(errorResult.error);
+                let errorResult;
+                try {
+                    errorResult = await response.json();
+                } catch (e) {
+                    throw new Error("The request to the server failed or timed out. Please try again.");
+                }
+                throw new Error(errorResult.error || `API error: ${response.statusText}`);
             }
             
             const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
