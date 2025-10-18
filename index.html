@@ -546,13 +546,13 @@
             // --- Admin Modal Logic ---
             allDOMElements.adminButton.addEventListener('click', () => {
                  if (isAdmin) {
-                    isAdmin = false;
-                    adminPassword = ''; 
-                    updateAdminButtonUI();
-                    updateUploadCounterUI();
-                } else {
-                    allDOMElements.adminModal.classList.remove('hidden');
-                }
+                     isAdmin = false;
+                     adminPassword = ''; 
+                     updateAdminButtonUI();
+                     updateUploadCounterUI();
+                 } else {
+                     allDOMElements.adminModal.classList.remove('hidden');
+                 }
             });
             allDOMElements.cancelAdminLogin.addEventListener('click', () => {
                 allDOMElements.adminModal.classList.add('hidden');
@@ -783,15 +783,7 @@
                 }
 
             } catch (error) {
-                console.error('Processing error:', error);
-                let messageKey = 'ai_error';
-                if (error.message && error.message.toLowerCase().includes('overloaded')) {
-                    messageKey = 'ai_overloaded_error';
-                } else if (error.message && error.message.toLowerCase().includes('timed out')) {
-                    messageKey = 'ai_overloaded_error'; // Treat timeout as overload
-                }
-                const friendlyMessage = getText(messageKey);
-                showStatus(messageKey, 'error', friendlyMessage);
+                 // This block is now handled by callSmartAI's more specific error handling
             } finally {
                 allDOMElements.processingLoader.classList.add('hidden');
             }
@@ -849,40 +841,58 @@
 
             if (isAdmin && adminPassword) payload.adminPassword = adminPassword;
             
-            const response = await fetch(SECURE_API_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(payload) 
-            });
-            
-            if (!response.ok) {
-                let errorResult;
-                try {
-                    errorResult = await response.json();
-                } catch (e) {
-                    throw new Error("The request to the server failed or timed out. Please try again.");
+            try {
+                const response = await fetch(SECURE_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if (!response.ok) {
+                    let errorResult;
+                    try {
+                        errorResult = await response.json();
+                    } catch (e) {
+                        throw new Error("The request to the server failed or timed out. Please try again.");
+                    }
+                    throw new Error(errorResult.error || `API error: ${response.statusText}`);
                 }
-                throw new Error(errorResult.error || `API error: ${response.statusText}`);
-            }
-            
-            const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
-            const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
-            let parsedData = await response.json();
+                
+                const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
+                const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
+                let parsedData = await response.json();
 
-            // --- FIX: Add robustness check to ensure response is an array ---
-            if (!Array.isArray(parsedData)) {
-                if (typeof parsedData === 'object' && parsedData !== null) {
-                    parsedData = [parsedData]; // Wrap the single object in an array
-                } else {
-                    // If it's not an object and not an array, it's invalid.
+                // --- FIX: Add robustness check to ensure response is an array ---
+                if (!Array.isArray(parsedData)) {
+                    if (typeof parsedData === 'object' && parsedData !== null) {
+                        parsedData = [parsedData]; // Wrap the single object in an array
+                    } else {
+                        // If it's not an object and not an array, it's invalid.
+                        throw new Error(getText("ai_error"));
+                    }
+                }
+
+                if (parsedData.length === 0 && !isTranslation) {
                     throw new Error(getText("ai_error"));
                 }
-            }
+                return { parsedData, apiKeyUsed, cost };
+            } catch (error) {
+                console.error('Processing error:', error);
+                let messageKey = 'ai_error';
+                const errorText = error.message ? error.message.toLowerCase() : '';
 
-            if (parsedData.length === 0 && !isTranslation) {
-                throw new Error(getText("ai_error"));
+                if (errorText.includes('overloaded')) {
+                    messageKey = 'ai_overloaded_error';
+                } else if (errorText.includes('timed out') || errorText.includes('complex')) {
+                    // This catches our new, specific error from the worker
+                    showStatus(null, 'error', "Analysis Timed Out: The file is too complex to process in 30 seconds. Please try a smaller file.");
+                    return Promise.reject(error); // Reject the promise to stop `processInput`
+                }
+                
+                const friendlyMessage = getText(messageKey);
+                showStatus(messageKey, 'error', friendlyMessage);
+                return Promise.reject(error); // Reject the promise
             }
-            return { parsedData, apiKeyUsed, cost };
         }
 
         // ===================================================================================
@@ -1112,4 +1122,3 @@
 
 </body>
 </html>
-
