@@ -543,15 +543,18 @@
             allDOMElements.submitAdminLogin.addEventListener('click', handleAdminLogin);
             allDOMElements.adminPasswordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAdminLogin(); });
             
-            const baseMailLink = "https://mail.google.com/mail/?view=cm&fs=1&to=professional.OTS@Gmail.com";
+            // --- FIX: Use mailto: for robust email client integration ---
             allDOMElements.getInTouchBtn.addEventListener('click', () => {
-                window.open(`${baseMailLink}&su=Inquiry%20from%20Time%20Space%20User`, '_blank');
+                const subject = encodeURIComponent("Inquiry from Time Space User");
+                window.location.href = `mailto:professional.OTS@Gmail.com?subject=${subject}`;
             });
             allDOMElements.feedbackEmojis.querySelectorAll('.feedback-emoji').forEach(emoji => {
                 emoji.addEventListener('click', () => {
                     const rating = emoji.getAttribute('data-rating');
                     const title = emoji.getAttribute('title');
-                    window.open(`${baseMailLink}&su=Feedback:%20${rating}-Star%20(${title})`, '_blank');
+                    const subject = encodeURIComponent(`Feedback: ${rating}-Star (${title})`);
+                    const body = encodeURIComponent("Hi, I'm writing to provide the following feedback about my experience with Time Space:\n\n");
+                    window.location.href = `mailto:professional.OTS@Gmail.com?subject=${subject}&body=${body}`;
                 });
             });
         }
@@ -738,28 +741,28 @@
                     body: JSON.stringify(payload) 
                 });
                 
-                // FIX: Add a defensive check to ensure the response and its headers are valid
-                if (!response || !response.headers) {
-                    throw new Error("Received an invalid response from the server.");
-                }
-
-                const remaining = response.headers.get('X-RateLimit-Remaining');
-                if (remaining) {
-                    updateUploadCounterUI(parseInt(remaining, 10));
-                }
-
+                // *** CRITICAL FIX: Check if the response is OK before trying to read headers ***
                 if (!response.ok) {
                     let errorResult;
                     try {
+                        // Try to get a JSON error message from the server
                         errorResult = await response.json();
                     } catch (e) {
-                        throw new Error("The request to the server failed. Please try again.");
+                        // If the server sent a non-JSON error (like a 500 HTML page), create a generic error
+                        throw new Error(`The server returned an error: ${response.status} ${response.statusText}`);
                     }
-                    // Handle specific 429 "Too Many Requests" error
+                    // If the server sent a rate-limit error specifically
                     if (response.status === 429) {
                         throw new Error(getText("upload_limit_reached"));
                     }
+                    // Throw the specific error message from the server's JSON response
                     throw new Error(errorResult.error || `API error: ${response.statusText}`);
+                }
+                
+                // --- If response.ok is true, we can safely read headers ---
+                const remaining = response.headers.get('X-RateLimit-Remaining');
+                if (remaining) {
+                    updateUploadCounterUI(parseInt(remaining, 10));
                 }
                 
                 const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
@@ -772,7 +775,7 @@
                 }
                 if (parsedData.length === 0 && !isTranslation) throw new Error(getText("ai_error"));
 
-                return { parsedData, cost, failoverReason, remaining: parseInt(remaining, 10) };
+                return { parsedData, cost, failoverReason, remaining: parseInt(remaining, 10) || USER_UPLOAD_LIMIT };
             } catch (error) {
                 console.error('API Call Error:', error);
                 const errorText = error.message ? error.message.toLowerCase() : '';
@@ -783,9 +786,10 @@
                 } else if (errorText.includes('timed out') || errorText.includes('complex')) {
                     showStatus(null, 'error', "Analysis Timed Out: The file is too complex. Please try a smaller file.");
                     return Promise.reject(error);
-                }
-                // Handle the new defensive check error
-                else if (errorText.includes('invalid response')) {
+                } else if (errorText.includes('kv namespace') || errorText.includes('not bound')) {
+                     showStatus(null, 'error', "Server configuration error: The rate-limiting database is not connected. Please contact support.");
+                     return Promise.reject(error);
+                } else if (errorText.includes('server returned an error')) {
                     messageKey = 'ai_overloaded_error';
                 }
                 showStatus(messageKey, 'error', getText(messageKey));
@@ -969,5 +973,4 @@
 
 </body>
 </html>
-
 
