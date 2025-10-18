@@ -135,11 +135,12 @@
     </div>
 </div>
 
-<!-- NEW: Fallback Notification Modal -->
+<!-- MODIFIED: Fallback Notification Modal is now interactive -->
 <div id="fallback-modal" class="modal-overlay hidden">
     <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-md m-4 p-6 rounded-2xl shadow-xl text-center">
-        <h2 class="text-xl font-bold text-yellow-500" data-translate-key="fallback_title">Heads Up!</h2>
-        <p class="mt-4 text-slate-600 dark:text-slate-300" data-translate-key="fallback_message">Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use 2 of your hourly credits.</p>
+        <h2 id="fallback-title" class="text-xl font-bold text-yellow-500">Heads Up!</h2>
+        <p id="fallback-message" class="mt-4 text-slate-600 dark:text-slate-300"></p>
+        <button id="fallback-ok-btn" class="btn-animate mt-6 w-full px-6 py-2 text-base font-semibold bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Okay</button>
     </div>
 </div>
 
@@ -344,9 +345,7 @@
     
     // --- GLOBAL STATE & CONSTANTS ---
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
-    const USER_UPLOAD_LIMIT = 5;
-    const UPLOAD_LIMIT_HOURS = 1;
-    const ADMIN_ATTEMPT_LIMIT = 5;
+    // REMOVED: All client-side limit constants are now gone.
     let isAdmin = false;
     let adminPassword = ''; 
     let appData = [];
@@ -359,7 +358,6 @@
         { en: "Organizing chaos, one byte at a time...", ur: "Har byte ko tarteeb de rahe hain..." },
         { en: "Unlocking the stories in your files...", ur: "Aapki files ki kahaniyan khol rahe hain..." },
     ];
-    // New default data extracted from the provided image
     const defaultTimetableData = [
         { "Day of Week": "Monday", "Course Time": "03:30 PM - 04:45 PM", "Course Code": "IS230", "Course Name": "Emerging Technologies", "Faculty Name": "Nagesh-Kumar", "Lecture Type": "Theory", "Delivery Mode": "On-Campus", "Room Number": "SST-101" },
         { "Day of Week": "Monday", "Course Time": "02:00 PM - 03:15 PM", "Course Code": "IS240", "Course Name": "Management Information System", "Faculty Name": "Unconfirmed", "Lecture Type": "Theory", "Delivery Mode": "On-Campus", "Room Number": "2N-02" },
@@ -401,12 +399,14 @@
             welcome_message: "Welcome! The default timetable is loaded. Upload a file or paste text to see the magic.", 
             schedule_cleared: "Data cleared. Showing default timetable again.", file_uploaded: "File upload successful, processing...", preparing_pdf: "Generating PDF...", preparing_png: "Generating PNG...",
             lang_modal_title: "Choose Translation", lang_modal_desc: "What would you like to translate?", translate_interface: "Translate Interface", translate_content: "Translate Data Content (AI)",
-            fallback_title: "Heads Up!", fallback_message: "Due to high server traffic, we've switched to a premium lane to process your request. This analysis will use {cost} of your hourly credits.",
+            fallback_title: "Heads Up!", 
+            fallback_message_timeout: "This appears to be a complex file. To ensure the best quality analysis, we've used a premium processing lane. This analysis will cost {cost} of your hourly credits.",
+            fallback_message_failover: "Due to high demand, our standard processing is busy. We've automatically switched to a premium lane to complete your request. This analysis will cost {cost} of your hourly credits.",
             // Creative Errors
             no_data: "The data dimension is empty. Try uploading a file!",
             unsupported_file_type: "Whoa there! That file type is a bit too exotic for me. Try a PDF, PNG, JPG, or CSV.",
             file_too_large: "That's a hefty file! My circuits can only handle up to 10MB. Can you shrink it a bit?",
-            upload_limit_reached: "You're on fire! You've hit the hourly analysis limit. Take a short break, or switch to Admin Mode for unlimited power.",
+            upload_limit_reached: "You're on fire! You've hit the hourly analysis limit. Please try again later.",
             api_not_configured: "Uh oh, a wire is loose on our end. The developer needs to configure the API endpoint.",
             ai_error: "Hmm, the AI gazed into your data but found... a mystery. Could you check if the file is empty or has a really unusual format?",
             ai_overloaded_error: "The AI is currently experiencing high traffic. Please try again in a moment.",
@@ -422,15 +422,9 @@
     function getText(key, lang = currentLang) { return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key; }
 
 
-    // This runs once the entire HTML document is loaded and ready.
     document.addEventListener('DOMContentLoaded', () => {
         
-        // ===================================================================================
-        // INITIALIZATION & CORE SETUP
-        // ===================================================================================
-
         function initializeApp() {
-            // Select and store all necessary DOM elements for easy access
             allDOMElements = {
                 pageLoader: document.getElementById('page-loader'),
                 processingLoader: document.getElementById('processing-loader'),
@@ -465,6 +459,7 @@
                 translateContentBtn: document.getElementById('translate-content-btn'),
                 cancelLangModalBtn: document.getElementById('cancel-lang-modal'),
                 fallbackModal: document.getElementById('fallback-modal'),
+                fallbackOkBtn: document.getElementById('fallback-ok-btn'),
                 getInTouchBtn: document.getElementById('get-in-touch-btn'),
                 feedbackEmojis: document.getElementById('feedback-emojis'),
                 whyUsAccordion: document.getElementById('why-us-accordion'),
@@ -474,29 +469,20 @@
             setupEventListeners();
             const savedLang = localStorage.getItem('language') || 'en';
             setLanguage(savedLang, false);
-            
-            updateUploadCounterUI();
+            updateUploadCounterUI(5); // Initialize with a default value before first API call
 
-            // Hide the main page loader after a short delay
             setTimeout(() => { allDOMElements.pageLoader.classList.add('hidden'); }, 500);
             
-            // Show the "Welcome to v2.0" popup if it hasn't been shown before
             if (!localStorage.getItem('version2_popup_shown')) {
                 setTimeout(() => { if (allDOMElements.versionModal) allDOMElements.versionModal.classList.remove('hidden'); }, 5000);
             }
 
-            // Load the default data and render it on the screen
             appData = JSON.parse(JSON.stringify(defaultTimetableData));
             prepareAndRender();
             showStatus('welcome_message', 'success');
         }
 
-        // ===================================================================================
-        // EVENT LISTENERS
-        // ===================================================================================
-
         function setupEventListeners() {
-            // Hide header on scroll down, show on scroll up for better mobile experience
             let lastScrollTop = 0;
             window.addEventListener('scroll', () => {
                 let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -505,7 +491,6 @@
                 if(allDOMElements.scrollToTopBtn) allDOMElements.scrollToTopBtn.classList.toggle('show', window.pageYOffset > 300);
             });
 
-            // --- General UI Interactions ---
             allDOMElements.scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
             allDOMElements.themeToggle.addEventListener('click', () => {
                 document.documentElement.classList.toggle('dark');
@@ -517,39 +502,35 @@
                 allDOMElements.versionModal.classList.add('hidden');
                 localStorage.setItem('version2_popup_shown', 'true');
             });
+            allDOMElements.fallbackOkBtn.addEventListener('click', () => allDOMElements.fallbackModal.classList.add('hidden'));
 
-            // --- Translation Logic ---
             allDOMElements.translateInterfaceBtn.addEventListener('click', () => {
                 setLanguage(currentLang === 'en' ? 'ur' : 'en', true);
                 allDOMElements.langModal.classList.add('hidden');
             });
             allDOMElements.translateContentBtn.addEventListener('click', handleContentTranslation);
 
-            // --- Data Input & Control Logic ---
             allDOMElements.uploadButton.addEventListener('click', () => allDOMElements.fileUpload.click());
             allDOMElements.fileUpload.addEventListener('change', handleFileUpload);
             allDOMElements.analyzeTextButton.addEventListener('click', handleTextAnalysis);
             allDOMElements.clearDataBtn.addEventListener('click', clearData);
             document.querySelectorAll('#view-buttons button').forEach(btn => btn.addEventListener('click', () => switchView(btn.id.replace('view-', ''))));
             
-            // Auto-resizing textarea with a max-height
             allDOMElements.textInput.addEventListener('input', (e) => {
-                e.target.style.height = 'auto'; // Reset height
-                e.target.style.height = (e.target.scrollHeight) + 'px'; // Set to scroll height
+                e.target.style.height = 'auto';
+                e.target.style.height = (e.target.scrollHeight) + 'px';
             });
             
-            // --- Export Logic ---
             document.getElementById('download-pdf').addEventListener('click', () => downloadAsPDF());
             document.getElementById('download-png').addEventListener('click', () => downloadAsPNG());
             document.getElementById('download-csv').addEventListener('click', () => downloadAsCSV());
 
-            // --- Admin Modal Logic ---
             allDOMElements.adminButton.addEventListener('click', () => {
                  if (isAdmin) {
                      isAdmin = false;
                      adminPassword = ''; 
                      updateAdminButtonUI();
-                     updateUploadCounterUI();
+                     updateUploadCounterUI(null);
                  } else {
                      allDOMElements.adminModal.classList.remove('hidden');
                  }
@@ -562,7 +543,6 @@
             allDOMElements.submitAdminLogin.addEventListener('click', handleAdminLogin);
             allDOMElements.adminPasswordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAdminLogin(); });
             
-            // --- Footer Logic ---
             const baseMailLink = "https://mail.google.com/mail/?view=cm&fs=1&to=professional.OTS@Gmail.com";
             allDOMElements.getInTouchBtn.addEventListener('click', () => {
                 window.open(`${baseMailLink}&su=Inquiry%20from%20Time%20Space%20User`, '_blank');
@@ -575,10 +555,6 @@
                 });
             });
         }
-        
-        // ===================================================================================
-        // LANGUAGE & UI MANAGEMENT
-        // ===================================================================================
         
         function setLanguage(lang, toggle = true) {
             currentLang = lang;
@@ -606,7 +582,6 @@
             ];
             const accordionContainer = allDOMElements.whyUsAccordion;
             accordionContainer.innerHTML = '';
-
             items.forEach((item) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'accordion-item border border-slate-200 dark:border-slate-700 rounded-lg';
@@ -615,13 +590,8 @@
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white" data-translate-key="${item.titleKey}">${getText(item.titleKey)}</h3>
                         <svg class="accordion-arrow w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
-                    <div class="accordion-content">
-                        <div class="p-4 border-t border-slate-200 dark:border-slate-700">
-                            <p class="text-slate-600 dark:text-slate-400" data-translate-key="${item.descKey}">${getText(item.descKey)}</p>
-                        </div>
-                    </div>`;
+                    <div class="accordion-content"><div class="p-4 border-t border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400" data-translate-key="${item.descKey}">${getText(item.descKey)}</p></div></div>`;
                 accordionContainer.appendChild(itemEl);
-
                 itemEl.querySelector('.accordion-header').addEventListener('click', () => {
                     const isActive = itemEl.classList.contains('active');
                     accordionContainer.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('active'));
@@ -629,78 +599,36 @@
                 });
             });
         }
-
-        // ===================================================================================
-        // SECURITY & RATE LIMITING (Client-Side)
-        // ===================================================================================
-
-        function checkAdminLockout() {
-            const lockout = JSON.parse(localStorage.getItem('adminLockout'));
-            if (lockout && new Date().getTime() < lockout.until) {
-                const minutesLeft = Math.ceil((lockout.until - new Date().getTime()) / 60000);
-                return getText('lockout_message') + ` (${minutesLeft}m left)`;
-            }
-            return false;
-        }
-
-        function recordAdminFailure() {
-            let attempts = JSON.parse(localStorage.getItem('adminAttempts')) || [];
-            const now = new Date().getTime();
-            const oneHourAgo = now - (60 * 60 * 1000);
-            attempts = attempts.filter(ts => ts > oneHourAgo).concat(now);
-            if (attempts.length >= ADMIN_ATTEMPT_LIMIT) {
-                localStorage.setItem('adminLockout', JSON.stringify({ until: now + (60 * 60 * 1000) }));
-                attempts = [];
-            }
-            localStorage.setItem('adminAttempts', JSON.stringify(attempts));
-        }
-
+        
         async function handleAdminLogin() {
-            const lockoutMessage = checkAdminLockout();
-            if (lockoutMessage) {
-                showStatus(null, 'error', lockoutMessage);
-                return;
-            }
-
+            // This function is now simplified, as limits are server-side. It just logs in.
             const enteredPassword = allDOMElements.adminPasswordInput.value;
             allDOMElements.adminError.textContent = 'Verifying...';
             allDOMElements.submitAdminLogin.disabled = true;
 
             try {
-                if (SECURE_API_URL === "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE" || !SECURE_API_URL.startsWith('https://')) {
-                    throw new Error(getText("api_not_configured"));
-                }
                 const response = await fetch(SECURE_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'verifyAdmin', password: enteredPassword })
                 });
-
-                if (response.status === 401) throw new Error(getText("incorrect_password"));
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({ error: `Network error: ${response.statusText}` }));
-                    throw new Error(err.error);
-                }
-                
+                if (!response.ok) throw new Error('Verification failed.');
                 const result = await response.json();
                 if (result.success) {
                     isAdmin = true;
                     adminPassword = enteredPassword;
-                    localStorage.removeItem('adminAttempts');
-                    localStorage.removeItem('adminLockout');
                     allDOMElements.cancelAdminLogin.click();
                 } else {
-                     throw new Error(getText("incorrect_password"));
+                    throw new Error(getText("incorrect_password"));
                 }
             } catch (error) {
                 isAdmin = false;
                 adminPassword = '';
-                recordAdminFailure();
                 allDOMElements.adminError.textContent = error.message;
             } finally {
                 allDOMElements.submitAdminLogin.disabled = false;
                 updateAdminButtonUI();
-                updateUploadCounterUI();
+                updateUploadCounterUI(null); // Update UI to reflect admin status
             }
         }
 
@@ -715,51 +643,23 @@
             }
         }
         
-        function getRecentUploads() {
-            const now = new Date().getTime();
-            const oneHourAgo = now - (UPLOAD_LIMIT_HOURS * 60 * 60 * 1000);
-            const uploads = JSON.parse(localStorage.getItem('userUploads') || '[]');
-            const recentUploads = uploads.filter(timestamp => timestamp > oneHourAgo);
-            localStorage.setItem('userUploads', JSON.stringify(recentUploads));
-            return recentUploads;
-        }
-
-        function checkUploadLimit() {
-            if (isAdmin) return true;
-            return getRecentUploads().length < USER_UPLOAD_LIMIT;
-        }
-
-        function updateUploadCounterUI() {
+        // This function now just updates the text, it doesn't calculate anything.
+        function updateUploadCounterUI(remaining) {
             if (isAdmin) {
                 allDOMElements.uploadCounterWrapper.classList.add('hidden');
                 return;
             }
             allDOMElements.uploadCounterWrapper.classList.remove('hidden');
-            const recentUploads = getRecentUploads();
-            const remaining = USER_UPLOAD_LIMIT - recentUploads.length;
-            allDOMElements.uploadCounter.textContent = Math.max(0, remaining);
-        }
-
-        function recordUpload(cost = 1) {
-            if (isAdmin) return;
-            const uploads = getRecentUploads();
-            for (let i = 0; i < cost; i++) {
-                uploads.push(new Date().getTime());
+            if (remaining !== null) {
+                 allDOMElements.uploadCounter.textContent = Math.max(0, remaining);
             }
-            localStorage.setItem('userUploads', JSON.stringify(uploads));
-            updateUploadCounterUI();
         }
-
+        
         // ===================================================================================
         // DATA INPUT & PROCESSING
         // ===================================================================================
         
         async function processInput(mimeType, data, isTranslation = false) {
-            if (!isTranslation && !checkUploadLimit()) {
-                showStatus("upload_limit_reached", "error");
-                return;
-            }
-            
             allDOMElements.processingQuote.textContent = getText(isTranslation ? 'translating' : 'analyzing');
             allDOMElements.processingLoader.classList.remove('hidden');
             allDOMElements.statusMessage.classList.add('hidden');
@@ -768,22 +668,23 @@
             }
 
             try {
-                const { parsedData, apiKeyUsed, cost } = await callSmartAI(mimeType, data, isTranslation);
+                const { parsedData, cost, failoverReason, remaining } = await callSmartAI(mimeType, data, isTranslation);
                 appData = parsedData;
                 prepareAndRender();
+                updateUploadCounterUI(remaining);
                 
-                if (!isTranslation) {
-                    if (cost > 1 && allDOMElements.fallbackModal) {
-                        const fallbackMessage = allDOMElements.fallbackModal.querySelector('p');
-                        fallbackMessage.textContent = getText('fallback_message').replace('{cost}', cost);
-                        allDOMElements.fallbackModal.classList.remove('hidden');
-                        setTimeout(() => allDOMElements.fallbackModal.classList.add('hidden'), 4000);
-                    }
-                    recordUpload(cost);
-                }
+                if (!isTranslation && cost > 1) {
+                    const messageEl = document.getElementById('fallback-message');
+                    const modal = document.getElementById('fallback-modal');
 
+                    const messageKey = failoverReason === 'timeout' ? 'fallback_message_timeout' : 'fallback_message_failover';
+                    messageEl.textContent = getText(messageKey).replace('{cost}', cost);
+                    
+                    modal.classList.remove('hidden');
+                }
             } catch (error) {
-                 // This block is now handled by callSmartAI's more specific error handling
+                 // Errors are handled in callSmartAI now.
+                 console.error("Processing failed after all retries:", error);
             } finally {
                 allDOMElements.processingLoader.classList.add('hidden');
             }
@@ -802,19 +703,13 @@
 
         async function handleTextAnalysis() {
             const text = allDOMElements.textInput.value.trim();
-            if (!text) {
-                showStatus('empty_text_error', 'error');
-                return;
-            }
+            if (!text) { return showStatus('empty_text_error', 'error'); }
             processInput('text/plain', text);
             allDOMElements.textInput.value = '';
             allDOMElements.textInput.style.height = 'auto';
         }
 
-        /** Converts a file object to a Base64 encoded string for API processing. */
         function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
-        
-        /** Parses a CSV file into a structured array of objects. */
         function parseCSV(file) { return new Promise((resolve, reject) => Papa.parse(file, { header: true, complete: res => res.errors.length ? reject(res.errors[0]) : resolve(res.data), error: reject, skipEmptyLines: true })); }
         
         async function handleContentTranslation() {
@@ -828,17 +723,12 @@
         // ===================================================================================
 
         async function callSmartAI(mimeType, dataForAI, isTranslation = false) {
-            if (SECURE_API_URL === "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE" || !SECURE_API_URL.startsWith('https://')) {
-                throw new Error(getText("api_not_configured"));
-            }
-
             let payload;
             if (isTranslation) {
                 payload = { action: 'translateData', dataToTranslate: dataForAI, targetLanguage: currentLang === 'en' ? 'Roman Urdu' : 'English' };
             } else {
                  payload = { action: 'analyzeData', mimeType, dataForAI, systemPrompt: GEMINI_SYSTEM_PROMPT };
             }
-
             if (isAdmin && adminPassword) payload.adminPassword = adminPassword;
             
             try {
@@ -848,55 +738,63 @@
                     body: JSON.stringify(payload) 
                 });
                 
+                // FIX: Add a defensive check to ensure the response and its headers are valid
+                if (!response || !response.headers) {
+                    throw new Error("Received an invalid response from the server.");
+                }
+
+                const remaining = response.headers.get('X-RateLimit-Remaining');
+                if (remaining) {
+                    updateUploadCounterUI(parseInt(remaining, 10));
+                }
+
                 if (!response.ok) {
                     let errorResult;
                     try {
                         errorResult = await response.json();
                     } catch (e) {
-                        throw new Error("The request to the server failed or timed out. Please try again.");
+                        throw new Error("The request to the server failed. Please try again.");
+                    }
+                    // Handle specific 429 "Too Many Requests" error
+                    if (response.status === 429) {
+                        throw new Error(getText("upload_limit_reached"));
                     }
                     throw new Error(errorResult.error || `API error: ${response.statusText}`);
                 }
                 
-                const apiKeyUsed = response.headers.get('X-Api-Key-Used') || '1';
                 const cost = parseInt(response.headers.get('X-Api-Cost') || '1', 10);
+                const failoverReason = response.headers.get('X-Failover-Reason');
                 let parsedData = await response.json();
 
-                // --- FIX: Add robustness check to ensure response is an array ---
                 if (!Array.isArray(parsedData)) {
-                    if (typeof parsedData === 'object' && parsedData !== null) {
-                        parsedData = [parsedData]; // Wrap the single object in an array
-                    } else {
-                        // If it's not an object and not an array, it's invalid.
-                        throw new Error(getText("ai_error"));
-                    }
+                    if (typeof parsedData === 'object' && parsedData !== null) parsedData = [parsedData];
+                    else throw new Error(getText("ai_error"));
                 }
+                if (parsedData.length === 0 && !isTranslation) throw new Error(getText("ai_error"));
 
-                if (parsedData.length === 0 && !isTranslation) {
-                    throw new Error(getText("ai_error"));
-                }
-                return { parsedData, apiKeyUsed, cost };
+                return { parsedData, cost, failoverReason, remaining: parseInt(remaining, 10) };
             } catch (error) {
-                console.error('Processing error:', error);
-                let messageKey = 'ai_error';
+                console.error('API Call Error:', error);
                 const errorText = error.message ? error.message.toLowerCase() : '';
+                let messageKey = 'ai_error';
 
-                if (errorText.includes('overloaded')) {
-                    messageKey = 'ai_overloaded_error';
+                if (errorText.includes('limit reached')) {
+                    messageKey = 'upload_limit_reached';
                 } else if (errorText.includes('timed out') || errorText.includes('complex')) {
-                    // This catches our new, specific error from the worker
-                    showStatus(null, 'error', "Analysis Timed Out: The file is too complex to process in 30 seconds. Please try a smaller file.");
-                    return Promise.reject(error); // Reject the promise to stop `processInput`
+                    showStatus(null, 'error', "Analysis Timed Out: The file is too complex. Please try a smaller file.");
+                    return Promise.reject(error);
                 }
-                
-                const friendlyMessage = getText(messageKey);
-                showStatus(messageKey, 'error', friendlyMessage);
-                return Promise.reject(error); // Reject the promise
+                // Handle the new defensive check error
+                else if (errorText.includes('invalid response')) {
+                    messageKey = 'ai_overloaded_error';
+                }
+                showStatus(messageKey, 'error', getText(messageKey));
+                return Promise.reject(error);
             }
         }
 
         // ===================================================================================
-        // DYNAMIC UI RENDERING
+        // DYNAMIC UI RENDERING & EXPORT (No changes needed in this section)
         // ===================================================================================
         
         function findCategoryColumnKey(headers) {
@@ -912,11 +810,9 @@
             if (!appData || appData.length === 0) return;
             dataHeaders = Object.keys(appData[0]);
             categoryColumnKey = findCategoryColumnKey(dataHeaders);
-
             if (categoryColumnKey) {
                 const uniqueValues = [...new Set(appData.map(item => item[categoryColumnKey]))];
                 const colorClasses = ['cat-color-1', 'cat-color-2', 'cat-color-3', 'cat-color-4', 'cat-color-5', 'cat-color-6', 'cat-color-7'];
-                
                 categoryColorMap = uniqueValues.reduce((map, value, index) => {
                     const colorIndex = (index % colorClasses.length) + 1;
                     map[value] = {
@@ -948,67 +844,55 @@
             const { dataContainer } = allDOMElements;
             dataContainer.innerHTML = '';
             dataContainer.className = 'card-grid-container';
-            
             const groupedData = appData.reduce((acc, item) => {
                 const key = categoryColumnKey ? (item[categoryColumnKey] || 'Uncategorized') : 'All Entries';
                 (acc[key] = acc[key] || []).push(item);
                 return acc;
             }, {});
-
             Object.keys(groupedData).forEach(groupKey => {
                 const colorInfo = categoryColorMap[groupKey] || { label: 'cat-color-0', cardBorder: 'card-cat-color-0', bg: 'bg-cat-color-0' };
-                
                 if (categoryColumnKey && groupKey !== 'All Entries') {
                     const heading = document.createElement('h3');
                     heading.className = "text-xl font-bold mt-6 mb-2 flex items-center gap-2 col-span-full";
                     heading.innerHTML = `<span class="category-label ${colorInfo.label}">${groupKey}</span>`;
                     dataContainer.appendChild(heading);
                 }
-
                 groupedData[groupKey].forEach(entry => {
-                    let cardContent = '';
-                    let titleRendered = false;
-                    
+                    let cardContent = '', titleRendered = false;
                     dataHeaders.forEach((header, i) => {
-                         if (header === categoryColumnKey) return; 
+                        if (header === categoryColumnKey) return; 
                         const value = entry[header] || 'N/A';
                         const isTitleCandidate = header.toLowerCase().includes('name') || header.toLowerCase().includes('title');
-                        
-                        if (!titleRendered && (isTitleCandidate || i === (categoryColumnKey ? 1 : 0) )) {
+                        if (!titleRendered && (isTitleCandidate || i === (categoryColumnKey ? 1 : 0))) {
                             cardContent += `<h4 class="font-bold text-xl text-slate-800 dark:text-slate-100 mb-2">${value}</h4>`;
                             titleRendered = true;
                         } else {
                             cardContent += `<p class="text-base"><strong class="font-semibold text-slate-700 dark:text-slate-300 capitalize">${header.replace(/_/g, ' ')}:</strong> <span class="break-words text-slate-500 dark:text-slate-400">${value}</span></p>`;
                         }
                     });
-
                     const cardDiv = document.createElement('div');
                     cardDiv.className = `class-card p-4 rounded-lg shadow-sm ${colorInfo.cardBorder} ${colorInfo.bg}`;
                     cardDiv.innerHTML = `<div class="flex flex-col gap-1">${cardContent}</div>`;
                     dataContainer.appendChild(cardDiv);
                 });
             });
-
             dataContainer.classList.remove('hidden');
         }
 
         function renderTableView() { 
             const { dataTable, dataTableWrapper } = allDOMElements;
-            const thead = dataTable.querySelector('thead');
-            const tbody = dataTable.querySelector('tbody');
+            const thead = dataTable.querySelector('thead'), tbody = dataTable.querySelector('tbody');
             thead.innerHTML = ''; tbody.innerHTML = '';
             thead.innerHTML = `<tr>${dataHeaders.map(h => `<th class="capitalize">${h.replace(/_/g, ' ')}</th>`).join('')}</tr>`;
             appData.forEach(entry => {
                 const row = tbody.insertRow();
-                const categoryValue = entry[categoryColumnKey];
-                const colorInfo = categoryColorMap[categoryValue] || { bg: '' };
+                const categoryValue = entry[categoryColumnKey], colorInfo = categoryColorMap[categoryValue] || { bg: '' };
                 row.className = `text-sm align-top ${colorInfo.bg}`; 
                 row.innerHTML = dataHeaders.map((header, index) => {
                     const value = entry[header] || 'N/A';
                     const noWrapClass = /time|code|room|type|mode|date/i.test(header) ? 'whitespace-nowrap' : '';
                     const isImportant = /name|title/i.test(header) || (index === 0 && header !== categoryColumnKey);
                     const cellClass = `${noWrapClass} ${isImportant ? 'font-semibold text-slate-800 dark:text-slate-200' : ''}`;
-                    
                     if (header === categoryColumnKey) {
                         const labelColorClass = categoryColorMap[value]?.label || 'cat-color-0';
                         return `<td class="whitespace-nowrap"><span class="category-label ${labelColorClass}">${value}</span></td>`;
@@ -1030,39 +914,22 @@
             });
             allDOMElements.dataContainer.classList.add('hidden');
             allDOMElements.dataTableWrapper.classList.add('hidden');
-            
-            if (view === 'card') {
-                renderCardView();
-            } else if (view === 'table') {
-                renderTableView();
-            }
+            if (view === 'card') renderCardView(); else if (view === 'table') renderTableView();
         }
-
-        // ===================================================================================
-        // EXPORT & DOWNLOAD LOGIC
-        // ===================================================================================
 
         async function captureFullElement(element) {
             if (!element) return null;
-            
             const isDark = document.documentElement.classList.contains('dark');
             const tempStyleSheet = createCaptureStylesheet(isDark);
-            
             const captureContainer = document.createElement('div');
             Object.assign(captureContainer.style, { position: 'absolute', left: '-9999px', top: '0', width: 'auto', display: 'inline-block', padding: '1.5rem'});
-
             const clone = element.cloneNode(true);
             captureContainer.appendChild(clone);
             document.body.appendChild(captureContainer);
-            
             await new Promise(resolve => setTimeout(resolve, 500)); 
-
             let canvas;
             try {
-                canvas = await html2canvas(clone, {
-                    scale: 2, backgroundColor: isDark ? '#0f172a' : '#f8fafc', useCORS: true,
-                    scrollX: 0, scrollY: 0, windowWidth: captureContainer.scrollWidth, windowHeight: captureContainer.scrollHeight
-                });
+                canvas = await html2canvas(clone, { scale: 2, backgroundColor: isDark ? '#0f172a' : '#f8fafc', useCORS: true, scrollX: 0, scrollY: 0, windowWidth: captureContainer.scrollWidth, windowHeight: captureContainer.scrollHeight });
             } finally {
                 document.body.removeChild(captureContainer);
                 document.head.removeChild(tempStyleSheet);
@@ -1071,54 +938,36 @@
         }
 
         function createCaptureStylesheet(isDark) { 
-            const style = document.createElement('style'); 
-            style.id = 'temp-capture-style'; 
+            const style = document.createElement('style'); style.id = 'temp-capture-style'; 
             let css = `* { transition: none !important; animation: none !important; } td, p { word-break: break-word !important; white-space: normal !important; } td.whitespace-nowrap { white-space: nowrap !important; }`; 
             if (isDark) { css += ` body { background-color: #0f172a !important; } #data-container, #data-table-wrapper, #data-table, .class-card, li { background-color: #f8fafc !important; } .day-section h3, h3, .accordion-header h3 { color: #0f172a !important; } .class-card, li { border-color: #e5e7eb !important; } p, span, input, td, th, .accordion-content p { color: #334155 !important; } .font-semibold, .font-medium, .text-slate-900, .text-slate-800 { color: #1e293b !important; } .text-slate-500, .text-slate-600 { color: #64748b !important; } .cat-color-1 { background-color: #dcfce7 !important; color: #166534 !important; } .bg-cat-color-1, .card-cat-color-1 { background-color: #f0fdf4 !important; } .cat-color-2 { background-color: #dbeafe !important; color: #1e40af !important; } .bg-cat-color-2, .card-cat-color-2 { background-color: #eff6ff !important; } .cat-color-3 { background-color: #fee2e2 !important; color: #991b1b !important; } .bg-cat-color-3, .card-cat-color-3 { background-color: #fef2f2 !important; } .cat-color-4 { background-color: #cffafe !important; color: #0e7490 !important; } .bg-cat-color-4, .card-cat-color-4 { background-color: #ecfeff !important; } .cat-color-5 { background-color: #ede9fe !important; color: #5b21b6 !important; } .bg-cat-color-5, .card-cat-color-5 { background-color: #faf5ff !important; } .cat-color-6 { background-color: #ffedd5 !important; color: #9a3412 !important; } .bg-cat-color-6, .card-cat-color-6 { background-color: #fff7ed !important; } .cat-color-7 { background-color: #fce7f3 !important; color: #9d174d !important; } .bg-cat-color-7, .card-cat-color-7 { background-color: #fdf4ff !important; } .cat-color-0 { background-color: #f3f4f6 !important; color: #374151 !important; } .bg-cat-color-0, .card-cat-color-0 { background-color: #f9fafb !important; } #data-table th { background-color: #f9fafb !important; } #data-table th, #data-table td { border-bottom-color: #e5e7eb !important; } .category-label { border: 1px solid #e5e7eb !important; }`; } style.textContent = css; document.head.appendChild(style); return style; }
         
-        function getActiveElementForCapture() { 
-            return currentView === 'card' ? allDOMElements.dataContainer : allDOMElements.dataTableWrapper;
-        }
+        function getActiveElementForCapture() { return currentView === 'card' ? allDOMElements.dataContainer : allDOMElements.dataTableWrapper; }
         
         async function downloadAsPDF() { 
-            const { jsPDF } = window.jspdf; 
-            const element = getActiveElementForCapture(); 
-            if (!element) return; 
-            showStatus('preparing_pdf', 'success'); 
-            const canvas = await captureFullElement(element); 
-            if (!canvas) { return showStatus('PDF generation failed.', 'error'); }
-            const imgData = canvas.toDataURL('image/png', 1.0); 
-            const { width, height } = canvas; 
+            const { jsPDF } = window.jspdf; const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_pdf', 'success'); 
+            const canvas = await captureFullElement(element); if (!canvas) { return showStatus('PDF generation failed.', 'error'); }
+            const imgData = canvas.toDataURL('image/png', 1.0); const { width, height } = canvas; 
             const pdf = new jsPDF({ orientation: width > height ? 'l' : 'p', unit: 'px', format: [width, height] }); 
-            pdf.addImage(imgData, 'PNG', 0, 0, width, height); 
-            pdf.save('time-space-export.pdf'); 
+            pdf.addImage(imgData, 'PNG', 0, 0, width, height); pdf.save('time-space-export.pdf'); 
         }
         
         async function downloadAsPNG() { 
-            const element = getActiveElementForCapture(); 
-            if (!element) return; 
-            showStatus('preparing_png', 'success'); 
-            const canvas = await captureFullElement(element); 
-            if (!canvas) { return showStatus('PNG generation failed.', 'error'); }
-            const link = document.createElement('a'); 
-            link.download = 'time-space-export.png'; 
-            link.href = canvas.toDataURL('image/png'); 
-            link.click(); 
+            const element = getActiveElementForCapture(); if (!element) return; showStatus('preparing_png', 'success'); 
+            const canvas = await captureFullElement(element); if (!canvas) { return showStatus('PNG generation failed.', 'error'); }
+            const link = document.createElement('a'); link.download = 'time-space-export.png'; link.href = canvas.toDataURL('image/png'); link.click(); 
         }
 
         function downloadAsCSV() { 
-            const csv = Papa.unparse(appData); 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); 
-            const link = document.createElement('a'); 
-            link.href = URL.createObjectURL(blob); 
-            link.download = 'time-space-export.csv'; 
-            link.click(); 
+            const csv = Papa.unparse(appData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); 
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'time-space-export.csv'; link.click(); 
         }
     
-        // Start the application
         initializeApp();
     });
 </script>
 
 </body>
 </html>
+
+
